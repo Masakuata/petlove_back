@@ -1,0 +1,33 @@
+name: "🌎📰Publish API Spec"
+on:
+  push:
+    branches:
+      - main
+jobs:
+  spec_gen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout spec
+        uses: actions/checkout@v2
+
+      - name: Validate spec
+        uses: mpetrunic/swagger-cli-action@v1.0.0
+        with:
+          command: "validate api/sharedz.yaml"
+
+      - name: Build spec
+        uses: mpetrunic/swagger-cli-action@v1.0.0
+        with:
+          command: "bundle -o spec.yaml -r -t yaml api/sharedz.yaml"
+
+      - name: Publish spec
+        uses: Legion2/swagger-ui-action@v1
+        with:
+          output: specs
+          spec-file: spec.yaml
+
+      - name: Deploy to GH Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.EDSON_PERSONAL_TOKEN }}
+          publish_dir: specs

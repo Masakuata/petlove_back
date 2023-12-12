@@ -1,0 +1,169 @@
+openapi: 3.0.0
+info:
+  title: Sharedz service
+  version: 0.0.1
+servers:
+  - description: Desarrollo
+    url: https://neutral-kindly-wildcat.ngrok-free.app
+components:
+  schemas:
+    newMember:
+      type: object
+      title: Miembro para registrar
+      description: Informacion del miembro a registrar
+      required: [ username, email, password ]
+      properties:
+        username:
+          type: string
+          title: Nombre de usuario
+          description: Nombre de usuario del nuevo miembro
+        email:
+          type: string
+          title: Correo electronico
+          description: Correo electronico del nuevo miembro
+          maxLength: 320
+          minLength: 5
+          format: email
+          example: correo@dominio.com
+        password:
+          type: string
+          title: Contrasena
+          description: Contrasena del nuevo miembro
+          maxLength: 100
+          minLength: 8
+          example: password987
+    publicMember:
+      type: object
+      title: Informacion publica de miembro
+      description: Informacion publica de un miembro registrado
+      required: [ username, email ]
+      properties:
+        username:
+          type: string
+          title: Nombre de usuario
+          description: Nombre de usuario del miembro registrado
+        email:
+          type: string
+          title: Correo electronico
+          description: Correo electronico del miembro registrado
+          maxLength: 320
+          minLength: 5
+          format: email
+          example: correo@dominio.com
+    loginCredentials:
+      type: object
+      title: Credenciales de inicio de sesion
+      description: Correo electronico y contrasena de un miembro registrado
+      required: [ email, password ]
+      properties:
+        email:
+          type: string
+          title: Correo electronico
+          description: Correo electronico del miembro registrado
+          maxLength: 320
+          minLength: 5
+          format: email
+          example: correo@dominio.com
+        password:
+          type: string
+          title: Contrasena
+          description: Contrasena del nuevo miembro
+          maxLength: 100
+          minLength: 8
+          example: password987
+paths:
+  /miembro:
+    summary: Catalogo de miembros
+    description: Endpoint para realizar diversas operaciones respecto al catalogo de miembros del sistema
+    get:
+      summary: Obten los miembros registrados
+      description: Devuelve todos los miembros registrados
+      tags:
+        - Miembro
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+      responses:
+        200:
+          description: Se ha retornado por lo menos un miembro registrado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/publicMember'
+                    - $ref: '#/components/schemas/publicMember'
+                    - $ref: '#/components/schemas/publicMember'
+    post:
+      summary: Crea un nuevo miembro en el sistema
+      description: Crea un nuevo miembro en el sistema con la informacion provista
+      tags:
+        - Miembro
+      requestBody:
+        description: Informacion necesaria para registrar un nuevo miembro
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newMember'
+      responses:
+        201:
+          description: La solicitud fue exitosa y el nuevo miembro ha sido creado
+          headers:
+            Token:
+              description: Token de sesion creado para el usuario recien creado
+              schema:
+                type: string
+                example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publicMember'
+        400:
+          description: La solicitud esta incompleta o malformada
+        406:
+          description: La solicitud o su contenido no es aceptable y no puede ser procesada
+        409:
+          description: El nombre de usuario o correo ya han sido registrados
+        500:
+          description: Error interno del servidor
+  /miembro/login:
+    summary: Inica sesion con un miembro registrado
+    description: Obten un nuevo token con las credenciales de un miembro registrado
+    post:
+      summary: Inica sesion con un miembro registrado
+      description: Obten un nuevo token con las credenciales de un miembro registrado
+      tags:
+        - Miembro
+        - Sesion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginCredentials'
+      responses:
+        200:
+          description: Credenciales correctas y sesion iniciada
+          headers:
+            Token:
+              description: Token de sesion creado para el usuario recien creado
+              schema:
+                type: string
+                example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publicMember'
+        400:
+          description: La solicitud esta incompleta o malformada
+        404:
+          description: Las credenciales no coinciden con ningun miembro registrado
+        406:
+          description: La solicitud o su contenido no es aceptable y no puede ser procesada
+        500:
+          description: Error interno del servidor
