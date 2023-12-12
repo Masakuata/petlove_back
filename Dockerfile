@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8u392-b08-jre-jammy
+FROM openjdk:22-ea-17-jdk-slim
 
 COPY build/libs/* app.jar
 
