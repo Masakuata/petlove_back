@@ -1,4 +1,4 @@
-name: 🧪🤖Test Server
+name: "🧪🤖Test Server"
 
 on:
   pull_request:
