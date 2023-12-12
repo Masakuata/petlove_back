@@ -12,5 +12,6 @@ class SharedzApplicationTests {
     @Test
     void contextLoads() throws Exception {
         logger.info("-- Context Loading --");
+        assert (false);
     }
 }
