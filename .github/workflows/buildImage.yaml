@@ -49,6 +49,6 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           context: .
-          tags: ${{ secrets.DOCKERHUB_ID }}/sharedz_b:${{ github.event.inputs.tag }},${{ secrets.DOCKERHUB_ID }}/sharedz_b:latest
+          tags: ${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:${{ github.event.inputs.tag }},${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:latest
           platforms: linux/amd64,linux/arm64
           push: true
