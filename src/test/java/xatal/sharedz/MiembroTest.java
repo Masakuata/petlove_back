@@ -15,6 +15,7 @@ public class MiembroTest {
 
     @Test
     void contextLoads() {
+        logger.error("AAAAAAAAAAAAA");
         assert (controller != null);
     }
 }
