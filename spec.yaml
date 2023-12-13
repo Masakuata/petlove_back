@@ -242,6 +242,14 @@ paths:
       description: Elimina de forma permanente la informacion de miembro identificado por sus credenciales
       tags:
         - Miembro
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
       requestBody:
         content:
           application/json:
