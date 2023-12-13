@@ -237,6 +237,48 @@ paths:
           description: El nombre de usuario o correo ya han sido registrados
         '500':
           description: Error interno del servidor
+    delete:
+      summary: Elimina un miembro registrado
+      description: Elimina de forma permanente la informacion de miembro identificado por sus credenciales
+      tags:
+        - Miembro
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Credenciales de inicio de sesion
+              description: Correo electronico y contrasena de un miembro registrado
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  title: Correo electronico
+                  description: Correo electronico del miembro registrado
+                  maxLength: 320
+                  minLength: 5
+                  format: email
+                  example: correo@dominio.com
+                password:
+                  type: string
+                  title: Contrasena
+                  description: Contrasena del nuevo miembro
+                  maxLength: 100
+                  minLength: 8
+                  example: password987
+      responses:
+        '200':
+          description: La informacion del miembro ha sido eliminada.
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: No se ha encontrado ningun miembro con esas credenciales
+        '406':
+          description: El token provisto no coincide con las credenciales indicadas
+        '500':
+          description: Error interno del servidor
   /miembro/login:
     summary: Inica sesion con un miembro registrado
     description: Obten un nuevo token con las credenciales de un miembro registrado
