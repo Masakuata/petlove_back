@@ -47,11 +47,15 @@ public class TokenUtils {
 
     public static Claims getTokenClaims(String token) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .setSigningKey(ACCESS_TOKEN_SECRET.getBytes())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+            if (claims.getExpiration().before(new Date(System.currentTimeMillis()))) {
+                return null;
+            }
+            return claims;
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }

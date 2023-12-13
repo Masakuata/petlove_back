@@ -74,13 +74,12 @@ public class MiembroController {
     }
 
     @DeleteMapping()
-    public ResponseEntity delete(@RequestBody Login login, @RequestHeader("Token") String token) {
+    public ResponseEntity delete(@RequestHeader("Token") String token) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || !claims.getSubject().equals(login.email)) {
+        if (claims == null) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        Miembro miembro = Miembro.fromLogin(login);
-        if (!this.miembroService.deleteMiembro(miembro)) {
+        if (!this.miembroService.deleteMiembro(claims.getSubject())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok().build();

@@ -5,7 +5,6 @@ import xatal.sharedz.entities.Miembro;
 import xatal.sharedz.repositories.MiembroRepository;
 import xatal.sharedz.structures.PublicMiembro;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,10 +40,10 @@ public class MiembroService {
         return null;
     }
 
-    public boolean deleteMiembro(Miembro miembro) {
-        Miembro storedMiembro = this.login(miembro);
-        if (storedMiembro != null) {
-            this.miembros.delete(storedMiembro);
+    public boolean deleteMiembro(String email) {
+        Optional<Miembro> miembroOptional = this.miembros.findOneByEmail(email);
+        if (miembroOptional.isPresent()) {
+            this.miembros.deleteMiembroByEmail(email);
             return true;
         }
         return false;
