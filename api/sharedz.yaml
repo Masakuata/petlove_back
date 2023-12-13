@@ -145,11 +145,6 @@ paths:
             type: string
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/loginCredentials'
       responses:
         200:
           description: La informacion del miembro ha sido eliminada.
