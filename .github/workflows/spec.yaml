@@ -1,7 +1,9 @@
 name: "🌎📰Publish API Spec"
 on:
   workflow_dispatch:
-
+  push:
+    paths:
+      - api/**
 jobs:
   spec_gen:
     runs-on: ubuntu-latest
