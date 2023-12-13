@@ -573,8 +573,10 @@ paths:
           description: Error interno del servidor
   '/miembro/{username}/email':
     summary: Cambia el email de un miembro
-    description: Actualiza el email de un miembro identificado por su username actual
+    description: Actualiza el email de un miembro identificado por su username
     put:
+      summary: Cambia el email de un miembro
+      description: Actualiza el email de un miembro identificado por su username
       tags:
         - Actualizar miembro
       parameters:
@@ -722,10 +724,10 @@ paths:
           description: El token provisto no concuerda con el username provisto
         '500':
           description: Error interno del servidor
-  '/miembro/{username}/grupos/{nombreGrupo}':
-    summary: Endpoint para realizar operaciones sobre un grupo del cual el miembro forma parte
+  '/grupo/{nombreGrupo}/{username}':
     delete:
       summary: Elimina al miembro del grupo
+      description: Elimina al miembro identificado por su username del grupo indicado
       tags:
         - Grupo
       parameters:
@@ -758,8 +760,79 @@ paths:
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: El recurso buscado no se encuentra registrado
+          description: El miembro no formaba parte del grupo o no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o no coincide con el miembro a eliminar
+        '500':
+          description: Error interno del servidor
+  '/grupo/{nombreGrupo}':
+    post:
+      summary: Endpoint para crear un nuevo grupo
+      description: Crea un nuevo grupo y agrega al creador del grupo como primer miembro
+      tags:
+        - Grupo
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: nombreGrupo
+          description: Nombre del grupo
+          in: path
+          schema:
+            type: string
+            example: bandidos
+          required: true
+      responses:
+        '201':
+          description: Se ha creado el grupo
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Grupo de usuarios
+                description: Grupo de usuarios para compartir deudas rapidamente
+                required:
+                  - nombre
+                properties:
+                  nombre:
+                    type: string
+                    example: bandidos
+                  miembros:
+                    type: array
+                    items:
+                      type: object
+                      allOf:
+                        - type: object
+                          title: Informacion publica de miembro
+                          description: Informacion publica de un miembro registrado
+                          required:
+                            - username
+                            - email
+                          properties:
+                            username:
+                              allOf:
+                                - type: string
+                                  title: Username del miembro
+                                  example: juanito
+                            email:
+                              allOf:
+                                - type: string
+                                  title: Email del miembro
+                                  minLength: 5
+                                  maxLength: 320
+                                  example: correo@dominio.com
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El token proporcionado no coincide con ningun miembro registrado
         '406':
           description: La solicitud o su contenido no es aceptable y no puede ser procesada
+        '409':
+          description: El nombre de grupo ya se encuentra en uso
         '500':
           description: Error interno del servidor
