@@ -1,5 +1,6 @@
 package xatal.sharedz.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Miembro;
 import xatal.sharedz.repositories.MiembroRepository;
@@ -40,11 +41,11 @@ public class MiembroService {
         return null;
     }
 
+    @Transactional
     public boolean deleteMiembro(String email) {
         Optional<Miembro> miembroOptional = this.miembros.findOneByEmail(email);
         if (miembroOptional.isPresent()) {
-            this.miembros.deleteMiembroByEmail(email);
-            return true;
+            return this.miembros.deleteByEmail(email) == 1;
         }
         return false;
     }
