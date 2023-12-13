@@ -284,7 +284,7 @@ paths:
         '404':
           description: No se ha encontrado ningun miembro con esas credenciales
         '406':
-          description: El token provisto no coincide con las credenciales indicadas
+          description: El token provisto no coincide con las credenciales indicadas o ha expirado
         '500':
           description: Error interno del servidor
   /miembro/login:
