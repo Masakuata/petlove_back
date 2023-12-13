@@ -285,3 +285,4 @@ paths:
           description: El nuevo email ya se encuentra en uso por otro miembro
         500:
           $ref: '#/components/responses/500'
+
