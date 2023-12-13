@@ -61,4 +61,8 @@ public class MiembroService {
     public boolean isUsernameUsed(String username) {
         return this.miembros.countByUsername(username) > 0;
     }
+
+    public boolean areCredentialsUsed(String email, String username) {
+        return this.miembros.countByEmailAndUsername(email, username) > 0;
+    }
 }

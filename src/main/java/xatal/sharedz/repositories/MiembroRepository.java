@@ -30,4 +30,6 @@ public interface MiembroRepository extends CrudRepository<Miembro, Long> {
     Long countByEmail(String email);
 
     Long countByUsername(String username);
+
+    Long countByEmailAndUsername(String email, String username);
 }

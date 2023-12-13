@@ -43,7 +43,10 @@ public class MiembroController {
     @PostMapping()
     public ResponseEntity addMiembro(@RequestBody Miembro miembro) {
         if (!Miembro.isValid(miembro)) {
-            return new ResponseEntity<HttpStatus>(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+        }
+        if (this.miembroService.areCredentialsUsed(miembro.getEmail(), miembro.getUsername())) {
+            return new ResponseEntity(HttpStatus.CONFLICT);
         }
         miembro.encodePassword();
         miembro = this.miembroService.saveMiembro(miembro);
