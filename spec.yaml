@@ -250,32 +250,6 @@ paths:
             type: string
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              title: Credenciales de inicio de sesion
-              description: Correo electronico y contrasena de un miembro registrado
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  title: Correo electronico
-                  description: Correo electronico del miembro registrado
-                  maxLength: 320
-                  minLength: 5
-                  format: email
-                  example: correo@dominio.com
-                password:
-                  type: string
-                  title: Contrasena
-                  description: Contrasena del nuevo miembro
-                  maxLength: 100
-                  minLength: 8
-                  example: password987
       responses:
         '200':
           description: La informacion del miembro ha sido eliminada.
