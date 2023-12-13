@@ -41,6 +41,10 @@ public class MiembroService {
         return this.miembros.findOneByEmail(email).orElse(null);
     }
 
+    public Miembro getMiembroFromUsername(String username) {
+        return this.miembros.findMiembroByUsername(username).orElse(null);
+    }
+
     @Transactional
     public boolean deleteMiembro(String email) {
         Optional<Miembro> miembroOptional = this.miembros.findOneByEmail(email);

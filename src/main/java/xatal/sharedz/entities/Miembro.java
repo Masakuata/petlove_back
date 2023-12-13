@@ -2,12 +2,19 @@ package xatal.sharedz.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.structures.Login;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Miembro {
@@ -27,6 +34,14 @@ public class Miembro {
 
     @Column(name = "status", nullable = false, columnDefinition = "TINYINT")
     private boolean status = true;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "miembros_grupo",
+            joinColumns = @JoinColumn(name = "id_miembro", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_grupo", referencedColumnName = "id")
+    )
+    private Set<Grupo> groups = new HashSet<>();
 
     public void setId(Long id) {
         this.id = id;
@@ -66,6 +81,14 @@ public class Miembro {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public Set<Grupo> getGrupos() {
+        return groups;
+    }
+
+    public void setGrupos(Set<Grupo> groups) {
+        this.groups = groups;
     }
 
     public boolean validLogin() {

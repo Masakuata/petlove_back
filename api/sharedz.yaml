@@ -66,6 +66,29 @@ components:
         password:
           allOf:
             - $ref: '#/components/schemas/password'
+    grupo:
+      type: object
+      title: Grupo de usuarios
+      description: Grupo de usuarios para compartir deudas rapidamente
+      required: [ nombre ]
+      properties:
+        nombre:
+          type: string
+          example: bandidos
+        miembros:
+          type: array
+          items:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/publicMember'
+    array_grupo:
+      type: array
+      title: Lista de grupos de usuarios
+      description: Lista de grupos de usuarios
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/grupo'
   parameters:
     header_token:
       name: Token
@@ -80,6 +103,14 @@ components:
       in: path
       schema:
         $ref: '#/components/schemas/username'
+      required: true
+    path_groupname:
+      name: nombreGrupo
+      description: Nombre del grupo
+      in: path
+      schema:
+        type: string
+        example: bandidos
       required: true
   headers:
     Token:
@@ -285,4 +316,51 @@ paths:
           description: El nuevo email ya se encuentra en uso por otro miembro
         500:
           $ref: '#/components/responses/500'
-
+  /miembro/{username}/grupos:
+    summary: Lista los grupos a los cuales un miembro pertenece
+    description: Retorna una lista de los grupos de los cuales un miembro forma parte
+    get:
+      summary: Retorna los grupos de los cuales un miembro forma parte
+      tags:
+        - Grupo
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+        - $ref: '#/components/parameters/path_username'
+      responses:
+        200:
+          description: Lista de grupos de los cuales el miembro forma parte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/array_grupo'
+        204:
+          description: El miembro no forma parte de ningun grupo
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          description: El miembro no se encuentra registrado en el sistema
+        406:
+          description: El token provisto no concuerda con el username provisto
+        500:
+          $ref: '#/components/responses/500'
+  /miembro/{username}/grupos/{nombreGrupo}:
+    summary: Endpoint para realizar operaciones sobre un grupo del cual el miembro forma parte
+    delete:
+      summary: Elimina al miembro del grupo
+      tags:
+        - Grupo
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+        - $ref: '#/components/parameters/path_username'
+        - $ref: '#/components/parameters/path_groupname'
+      responses:
+        200:
+          description: El miembro ha sido eliminado del grupo
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        500:
+          $ref: '#/components/responses/500'
