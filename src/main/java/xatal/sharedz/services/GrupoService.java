@@ -44,6 +44,29 @@ public class GrupoService {
         return grupoOptional.isPresent();
     }
 
+    public boolean removeMiembro(String grupoName, Miembro miembro) {
+        boolean removed = false;
+        Optional<Grupo> grupoOptional = this.grupos.getGrupoByName(grupoName);
+        if (grupoOptional.isPresent()) {
+            Grupo grupo = grupoOptional.get();
+            if (grupo.getMembers().contains(miembro)) {
+                grupo.getMembers().remove(miembro);
+                miembro.getGrupos().remove(grupo);
+                this.miembros.saveMiembro(miembro);
+                removed = true;
+            }
+            if (grupo.getMembers().isEmpty()) {
+                this.deleteGrupo(grupo);
+            }
+        }
+        return removed;
+    }
+
+    public boolean isMemberIn(String grupoName, Miembro miembro) {
+        Optional<Grupo> grupoOptional = this.grupos.getGrupoByName(grupoName);
+        return grupoOptional.isPresent() && grupoOptional.get().getMembers().contains(miembro);
+    }
+
     public void deleteGrupo(Grupo grupo) {
         for (Miembro member : grupo.getMembers()) {
             member.getGrupos().remove(grupo);

@@ -283,8 +283,10 @@ paths:
           $ref: '#/components/responses/500'
   /miembro/{username}/email:
     summary: Cambia el email de un miembro
-    description: Actualiza el email de un miembro identificado por su username actual
+    description: Actualiza el email de un miembro identificado por su username
     put:
+      summary: Cambia el email de un miembro
+      description: Actualiza el email de un miembro identificado por su username
       tags:
         - Actualizar miembro
       parameters:
@@ -343,10 +345,10 @@ paths:
           description: El token provisto no concuerda con el username provisto
         500:
           $ref: '#/components/responses/500'
-  /miembro/{username}/grupos/{nombreGrupo}:
-    summary: Endpoint para realizar operaciones sobre un grupo del cual el miembro forma parte
+  /grupo/{nombreGrupo}/{username}:
     delete:
       summary: Elimina al miembro del grupo
+      description: Elimina al miembro identificado por su username del grupo indicado
       tags:
         - Grupo
       parameters:
@@ -359,8 +361,34 @@ paths:
         400:
           $ref: '#/components/responses/400'
         404:
-          $ref: '#/components/responses/404'
+          description: El miembro no formaba parte del grupo o no se encuentra registrado
+        406:
+          description: El token provisto es invalido o no coincide con el miembro a eliminar
+        500:
+          $ref: '#/components/responses/500'
+  /grupo/{nombreGrupo}:
+    post:
+      summary: Endpoint para crear un nuevo grupo
+      description: Crea un nuevo grupo y agrega al creador del grupo como primer miembro
+      tags:
+        - Grupo
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+        - $ref: '#/components/parameters/path_groupname'
+      responses:
+        201:
+          description: Se ha creado el grupo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/grupo'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          description: El token proporcionado no coincide con ningun miembro registrado
         406:
           $ref: '#/components/responses/406'
+        409:
+          description: El nombre de grupo ya se encuentra en uso
         500:
           $ref: '#/components/responses/500'
