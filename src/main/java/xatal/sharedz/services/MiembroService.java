@@ -29,16 +29,16 @@ public class MiembroService {
                 .collect(Collectors.toList());
     }
 
-    public Miembro addMiembro(Miembro miembro) {
+    public Miembro saveMiembro(Miembro miembro) {
         return this.miembros.save(miembro);
     }
 
     public Miembro login(Miembro miembro) {
-        Optional<Miembro> miembroOptional = this.miembros.login(miembro.getEmail(), miembro.getPassword());
-        if (miembroOptional.isPresent()) {
-            return miembro;
-        }
-        return null;
+        return this.miembros.login(miembro.getEmail(), miembro.getPassword()).orElse(null);
+    }
+
+    public Miembro getMiembroFromEmail(String email) {
+        return this.miembros.findOneByEmail(email).orElse(null);
     }
 
     @Transactional
@@ -48,5 +48,13 @@ public class MiembroService {
             return this.miembros.deleteByEmail(email) == 1;
         }
         return false;
+    }
+
+    public boolean isEmailUsed(String email) {
+        return this.miembros.countByEmail(email) > 0;
+    }
+
+    public boolean isUsernameUsed(String username) {
+        return this.miembros.countByUsername(username) > 0;
     }
 }

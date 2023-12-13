@@ -3,10 +3,30 @@ info:
   title: Sharedz service
   version: 0.0.1
 servers:
-  - description: Desarrollo
+  - description: Desarrollo HTTPS
     url: https://neutral-kindly-wildcat.ngrok-free.app
+  - description: Desarrollo HTTP
+    url: http://clayrite.ddns.net:8080
 components:
   schemas:
+    token:
+      type: string
+      title: Token identificador de la sesion de usuario
+      example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+    email:
+      type: string
+      title: Email del miembro
+      minLength: 5
+      maxLength: 320
+      example: correo@dominio.com
+    username:
+      type: string
+      title: Username del miembro
+      example: juanito
+    password:
+      type: string
+      title: Contrasena del miembro
+      example: password981
     newMember:
       type: object
       title: Miembro para registrar
@@ -14,24 +34,14 @@ components:
       required: [ username, email, password ]
       properties:
         username:
-          type: string
-          title: Nombre de usuario
-          description: Nombre de usuario del nuevo miembro
+          allOf:
+            - $ref: '#/components/schemas/username'
         email:
-          type: string
-          title: Correo electronico
-          description: Correo electronico del nuevo miembro
-          maxLength: 320
-          minLength: 5
-          format: email
-          example: correo@dominio.com
+          allOf:
+            - $ref: '#/components/schemas/email'
         password:
-          type: string
-          title: Contrasena
-          description: Contrasena del nuevo miembro
-          maxLength: 100
-          minLength: 8
-          example: password987
+          allOf:
+            - $ref: '#/components/schemas/password'
     publicMember:
       type: object
       title: Informacion publica de miembro
@@ -39,17 +49,11 @@ components:
       required: [ username, email ]
       properties:
         username:
-          type: string
-          title: Nombre de usuario
-          description: Nombre de usuario del miembro registrado
+          allOf:
+            - $ref: '#/components/schemas/username'
         email:
-          type: string
-          title: Correo electronico
-          description: Correo electronico del miembro registrado
-          maxLength: 320
-          minLength: 5
-          format: email
-          example: correo@dominio.com
+          allOf:
+            - $ref: '#/components/schemas/email'
     loginCredentials:
       type: object
       title: Credenciales de inicio de sesion
@@ -57,20 +61,53 @@ components:
       required: [ email, password ]
       properties:
         email:
-          type: string
-          title: Correo electronico
-          description: Correo electronico del miembro registrado
-          maxLength: 320
-          minLength: 5
-          format: email
-          example: correo@dominio.com
+          allOf:
+            - $ref: '#/components/schemas/email'
         password:
-          type: string
-          title: Contrasena
-          description: Contrasena del nuevo miembro
-          maxLength: 100
-          minLength: 8
-          example: password987
+          allOf:
+            - $ref: '#/components/schemas/password'
+  parameters:
+    header_token:
+      name: Token
+      description: Token identificador de la sesion de usuario
+      in: header
+      schema:
+        $ref: '#/components/schemas/token'
+      required: true
+    path_username:
+      name: username
+      description: Username del miembro
+      in: path
+      schema:
+        $ref: '#/components/schemas/username'
+      required: true
+  headers:
+    Token:
+      schema:
+        $ref: '#/components/schemas/token'
+  responses:
+    response_token:
+      description: Token identificador de la sesion de usuario
+      headers:
+        Token:
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+    response_publicMember:
+      description: .
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/publicMember'
+    400:
+      description: La solicitud esta incompleta o malformada
+    404:
+      description: El recurso buscado no se encuentra registrado
+    406:
+      description: La solicitud o su contenido no es aceptable y no puede ser procesada
+    500:
+      description: Error interno del servidor
 paths:
   /miembro:
     summary: Catalogo de miembros
@@ -81,13 +118,7 @@ paths:
       tags:
         - Miembro
       parameters:
-        - name: Token
-          description: Token identificador de la sesion de usuario
-          in: header
-          schema:
-            type: string
-            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-          required: true
+        - $ref: '#/components/parameters/header_token'
       responses:
         200:
           description: Se ha retornado por lo menos un miembro registrado
@@ -100,6 +131,10 @@ paths:
                     - $ref: '#/components/schemas/publicMember'
                     - $ref: '#/components/schemas/publicMember'
                     - $ref: '#/components/schemas/publicMember'
+        204:
+          description: No hay ningun miembro registrado
+        500:
+          $ref: '#/components/responses/500'
     post:
       summary: Crea un nuevo miembro en el sistema
       description: Crea un nuevo miembro en el sistema con la informacion provista
@@ -114,48 +149,40 @@ paths:
       responses:
         201:
           description: La solicitud fue exitosa y el nuevo miembro ha sido creado
-          headers:
-            Token:
-              description: Token de sesion creado para el usuario recien creado
-              schema:
-                type: string
-                example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/publicMember'
+          headers:
+            Token:
+              schema:
+                $ref: '#/components/schemas/token'
         400:
-          description: La solicitud esta incompleta o malformada
+          $ref: '#/components/responses/400'
         406:
-          description: La solicitud o su contenido no es aceptable y no puede ser procesada
+          $ref: '#/components/responses/406'
         409:
-          description: El nombre de usuario o correo ya han sido registrados
+          description: El username o correo ya han sido registrados
         500:
-          description: Error interno del servidor
+          $ref: '#/components/responses/500'
     delete:
       summary: Elimina un miembro registrado
       description: Elimina de forma permanente la informacion de miembro identificado por sus credenciales
       tags:
         - Miembro
       parameters:
-        - name: Token
-          description: Token identificador de la sesion de usuario
-          in: header
-          schema:
-            type: string
-            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-          required: true
+        - $ref: '#/components/parameters/header_token'
       responses:
         200:
           description: La informacion del miembro ha sido eliminada.
         400:
-          description: La solicitud esta incompleta o malformada
+          $ref: '#/components/responses/400'
         404:
           description: No se ha encontrado ningun miembro con esas credenciales
         406:
           description: El token provisto no coincide con las credenciales indicadas o ha expirado
         500:
-          description: Error interno del servidor
+          $ref: '#/components/responses/500'
   /miembro/login:
     summary: Inica sesion con un miembro registrado
     description: Obten un nuevo token con las credenciales de un miembro registrado
@@ -173,21 +200,88 @@ paths:
       responses:
         200:
           description: Credenciales correctas y sesion iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/publicMember'
           headers:
             Token:
-              description: Token de sesion creado para el usuario recien creado
               schema:
-                type: string
-                example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+                $ref: '#/components/schemas/token'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          description: Las credenciales no coinciden con ningun miembro registrado
+        406:
+          $ref: '#/components/responses/406'
+        500:
+          $ref: '#/components/responses/500'
+  /miembro/{username}/username:
+    summary: Cambia el username de un miembro
+    description: Actualiza el username de un miembro identificado por su username actual
+    put:
+      summary: Cambia el username de un miembro
+      description: Actualiza el username de un miembro identificado por su username actual
+      tags:
+        - Actualizar miembro
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+        - $ref: '#/components/parameters/path_username'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ username ]
+              properties:
+                username:
+                  $ref: '#/components/schemas/username'
+      responses:
+        200:
+          $ref: '#/components/responses/response_publicMember'
+          description: Se ha actualizado el username del miembro
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          description: Las credenciales no coinciden con ningun miembro registrado
+        406:
+          $ref: '#/components/responses/406'
+        409:
+          description: El nuevo username ya se encuentra en uso por otro miembro
+        500:
+          $ref: '#/components/responses/500'
+  /miembro/{username}/email:
+    summary: Cambia el email de un miembro
+    description: Actualiza el email de un miembro identificado por su username actual
+    put:
+      tags:
+        - Actualizar miembro
+      parameters:
+        - $ref: '#/components/parameters/path_username'
+        - $ref: '#/components/parameters/header_token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ email ]
+              properties:
+                email:
+                  $ref: '#/components/schemas/email'
+      responses:
+        200:
+          description: Se ha actualizado el email del miembro
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/publicMember'
         400:
-          description: La solicitud esta incompleta o malformada
+          $ref: '#/components/responses/400'
         404:
           description: Las credenciales no coinciden con ningun miembro registrado
         406:
-          description: La solicitud o su contenido no es aceptable y no puede ser procesada
+          $ref: '#/components/responses/406'
+        409:
+          description: El nuevo email ya se encuentra en uso por otro miembro
         500:
-          description: Error interno del servidor
+          $ref: '#/components/responses/500'

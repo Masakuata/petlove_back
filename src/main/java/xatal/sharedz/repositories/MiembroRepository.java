@@ -22,4 +22,8 @@ public interface MiembroRepository extends CrudRepository<Miembro, Long> {
     Optional<Miembro> findOneByEmail(String email);
 
     Long deleteByEmail(String email);
+
+    Long countByEmail(String email);
+
+    Long countByUsername(String username);
 }
