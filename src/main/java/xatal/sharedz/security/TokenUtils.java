@@ -45,4 +45,15 @@ public class TokenUtils {
                 Collections.emptyList());
     }
 
+    public static Claims getTokenClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(ACCESS_TOKEN_SECRET.getBytes())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
 }

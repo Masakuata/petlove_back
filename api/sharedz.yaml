@@ -132,6 +132,27 @@ paths:
           description: El nombre de usuario o correo ya han sido registrados
         500:
           description: Error interno del servidor
+    delete:
+      summary: Elimina un miembro registrado
+      description: Elimina de forma permanente la informacion de miembro identificado por sus credenciales
+      tags:
+        - Miembro
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/loginCredentials'
+      responses:
+        200:
+          description: La informacion del miembro ha sido eliminada.
+        400:
+          description: La solicitud esta incompleta o malformada
+        404:
+          description: No se ha encontrado ningun miembro con esas credenciales
+        406:
+          description: El token provisto no coincide con las credenciales indicadas
+        500:
+          description: Error interno del servidor
   /miembro/login:
     summary: Inica sesion con un miembro registrado
     description: Obten un nuevo token con las credenciales de un miembro registrado

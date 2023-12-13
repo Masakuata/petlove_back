@@ -15,7 +15,7 @@ public interface MiembroRepository extends CrudRepository<Miembro, Long> {
 
     @Query(value = "SELECT * FROM Sharedz.miembro WHERE email = :email AND password = :password",
             nativeQuery = true)
-    Miembro login(
+    Optional<Miembro> login(
             @Param("email") String email,
             @Param("password") String password);
 

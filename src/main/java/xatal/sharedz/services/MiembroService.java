@@ -7,6 +7,7 @@ import xatal.sharedz.structures.PublicMiembro;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,19 @@ public class MiembroService {
     }
 
     public Miembro login(Miembro miembro) {
-        return this.miembros.login(miembro.getEmail(), miembro.getPassword());
+        Optional<Miembro> miembroOptional = this.miembros.login(miembro.getEmail(), miembro.getPassword());
+        if (miembroOptional.isPresent()) {
+            return miembro;
+        }
+        return null;
+    }
+
+    public boolean deleteMiembro(Miembro miembro) {
+        Miembro storedMiembro = this.login(miembro);
+        if (storedMiembro != null) {
+            this.miembros.delete(storedMiembro);
+            return true;
+        }
+        return false;
     }
 }
