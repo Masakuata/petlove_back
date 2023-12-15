@@ -1,9 +1,9 @@
 package xatal.sharedz.controllers;
 
 import io.jsonwebtoken.Claims;
-import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +18,7 @@ import xatal.sharedz.services.MiembroService;
 import xatal.sharedz.structures.PublicGrupo;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/grupo")
 public class GrupoController {
     private final GrupoService grupoService;
