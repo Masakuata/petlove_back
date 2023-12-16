@@ -66,4 +66,7 @@ jobs:
     needs: build_image
     if: ${{ github.event.inputs.deploy == true }}
     uses: ./.github/workflows/deploy.yaml
+    with:
+      external_port: ${{ github.event.inputs.external_port }}
+      tag: ${{ github.event.inputs.tag }}
     secrets: inherit
