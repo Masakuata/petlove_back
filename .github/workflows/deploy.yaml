@@ -37,7 +37,7 @@ env:
 
 jobs:
   deploy:
-    if: ${{ inputs.deploy == 'true' }}
+    if: inputs.deploy == 'true'
     runs-on:
       ubuntu-latest
     steps:
