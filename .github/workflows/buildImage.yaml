@@ -64,7 +64,7 @@ jobs:
           push: true
   deploy:
     needs: build_image
-    if: ${{ (inputs.deploy == 'true') }}
+    if: ${{ fromJSON(inputs.deploy) }}
     uses: ./.github/workflows/deploy.yaml
     with:
       external_port: ${{ inputs.external_port }}
