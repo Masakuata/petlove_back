@@ -11,7 +11,7 @@ on:
         type: number
         description: Puerto para exponer el servicio
         required: false
-        default: 81
+        default: 110
 env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   DB_URL: ${{ secrets.DB_URL }}
