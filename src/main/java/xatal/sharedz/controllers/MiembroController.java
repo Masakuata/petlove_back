@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/miembro")
 public class MiembroController {
     private final MiembroService miembroService;
@@ -55,6 +53,10 @@ public class MiembroController {
         if (miembro != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Token", miembro.getToken());
+//            headers.add("Access-Control-Allow-Origin", "*");
+//            headers.add("Access-Control-Allow-Origin", "*");
+//            headers.add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+//            headers.add("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range");
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .headers(headers)
