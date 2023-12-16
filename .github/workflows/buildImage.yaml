@@ -7,7 +7,6 @@ on:
         description: Version o tag de la imagen
         required: true
         default: latest
-    inputs:
       external_port:
         type: number
         description: Puerto para exponer el servicio
