@@ -41,5 +41,5 @@ jobs:
           url: http://clayrite.ddns.net:42000/sharedz_backend?image=w3edd/sharedz_b&tag=${{ github.event.inputs.tag }}&iport=8080&eport=${{ github.event.inputs.external_port }}&privileged=0
           method: 'POST'
           timeout: 20000
-          data: '{"DB_URL": "$DB_PASSWORD",  "DB_USERNAME": "$DB_USERNAME", "DB_PASSWORD": "$DB_PASSWORD", "TOKEN_SECRET": "$TOKEN_SECRET"}'
+          data: "{\"DB_URL\": $DB_PASSWORD,  \"DB_USERNAME\": $DB_USERNAME, \"DB_PASSWORD\": $DB_PASSWORD, \"TOKEN_SECRET\": $TOKEN_SECRET}"
 
