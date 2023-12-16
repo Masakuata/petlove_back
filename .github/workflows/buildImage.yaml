@@ -52,3 +52,14 @@ jobs:
           tags: ${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:${{ github.event.inputs.tag }},${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:latest
           platforms: linux/amd64,linux/arm64
           push: true
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_image
+    steps:
+      - name: Deploy on server
+        uses: fjogeleit/http-request-action@v1.14.2
+        with:
+          url: http://clayrite.ddns.net:42000/sharedz_backend?image=w3edd/sharedz_b&tag=${{ github.event.inputs.tag }}&iport=8080&eport=${{ github.event.inputs.external_port }}&privileged=0
+          method: 'POST'
+          timeout: 20000
+          data: '{"DB_URL": $DB_PASSWORD,  "DB_USERNAME": $DB_USERNAME, "DB_PASSWORD": $DB_PASSWORD, "TOKEN_SECRET": $TOKEN_SECRET}'

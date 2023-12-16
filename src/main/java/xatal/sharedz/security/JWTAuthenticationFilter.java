@@ -16,7 +16,8 @@ import java.util.Collections;
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(
-            HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+            HttpServletRequest request, HttpServletResponse response
+    ) throws AuthenticationException {
         AuthCredentials credentials = new AuthCredentials();
         try {
             credentials = new ObjectMapper().readValue(request.getReader(), AuthCredentials.class);
