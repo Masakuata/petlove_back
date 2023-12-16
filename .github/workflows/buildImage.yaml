@@ -67,6 +67,6 @@ jobs:
     if: ${{ fromJSON(inputs.deploy) }}
     uses: ./.github/workflows/deploy.yaml
     with:
-      external_port: ${{ inputs.external_port }}
-      tag: ${{ github.event.inputs.tag }}
+      external_port: "${{ inputs.external_port }}"
+      tag: "${{ github.event.inputs.tag }}"
     secrets: inherit
