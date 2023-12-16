@@ -37,7 +37,7 @@ env:
 
 jobs:
   deploy:
-    if: inputs.deploy == 'true'
+    if: ${{ fromJSON(inputs.deploy) }}
     runs-on:
       ubuntu-latest
     steps:
