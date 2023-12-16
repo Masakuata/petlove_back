@@ -6,7 +6,7 @@ servers:
   - description: Desarrollo HTTPS
     url: 'https://neutral-kindly-wildcat.ngrok-free.app'
   - description: Desarrollo HTTP
-    url: 'http://clayrite.ddns.net:8080'
+    url: 'http://clayrite.ddns.net:110'
 components:
   schemas:
     token:
