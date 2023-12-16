@@ -24,6 +24,11 @@ on:
         description: Puerto para exponer el servicio
         required: true
         default: 110
+      deploy:
+        type: boolean
+        required: true
+        description: d
+        default: false
 env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   DB_URL: ${{ secrets.DB_URL }}
@@ -32,6 +37,7 @@ env:
 
 jobs:
   deploy:
+    if: ${{ inputs.deploy == 'true' }}
     runs-on:
       ubuntu-latest
     steps:
