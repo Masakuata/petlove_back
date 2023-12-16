@@ -59,14 +59,14 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           context: .
-          tags: ${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:${{ github.event.inputs.tag }},${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:latest
+          tags: ${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:${{ inputs.tag }},${{ secrets.EDSON_DOCKERHUB_ID }}/sharedz_b:latest
           platforms: linux/amd64,linux/arm64
           push: true
   deploy:
     needs: build_image
-    if: ${{ github.event.inputs.deploy == 'true' }}
+    if: ${{ inputs.deploy == 'true' }}
     uses: ./.github/workflows/deploy.yaml
     with:
-      external_port: ${{ github.event.inputs.external_port }}
+      external_port: ${{ inputs.external_port }}
       tag: ${{ github.event.inputs.tag }}
     secrets: inherit
