@@ -11,7 +11,7 @@ on:
         type: number
         description: Puerto para exponer el servicio
         required: true
-        default: 110
+        default: 81
   workflow_dispatch:
     inputs:
       tag:

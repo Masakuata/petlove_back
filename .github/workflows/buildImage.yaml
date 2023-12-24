@@ -11,7 +11,7 @@ on:
         type: number
         description: Puerto para exponer el servicio
         required: false
-        default: 110
+        default: 81
       deploy:
         type: boolean
         description: Desplegar al finalizar construccion de imagen
