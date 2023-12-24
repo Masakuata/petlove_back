@@ -72,12 +72,13 @@ public class MiembroController {
         if (miembro != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Token", miembro.getToken());
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(new PublicMiembro(miembro));
+            return new ResponseEntity(new PublicMiembro(miembro), headers, HttpStatus.OK);
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
+
+//    @PostMapping("/token")
+//    public ResponseEntity checkToken()
 
     @DeleteMapping()
     public ResponseEntity delete(@RequestHeader("Token") String token) {

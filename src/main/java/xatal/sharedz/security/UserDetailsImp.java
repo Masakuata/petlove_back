@@ -14,6 +14,10 @@ public class UserDetailsImp implements UserDetails {
         this.miembro = miembro;
     }
 
+    public Miembro getMiembro() {
+        return this.miembro;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.emptyList();

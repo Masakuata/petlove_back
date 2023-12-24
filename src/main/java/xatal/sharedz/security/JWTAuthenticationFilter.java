@@ -40,6 +40,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserDetailsImp details = (UserDetailsImp) authResult.getPrincipal();
         String token = TokenUtils.createToken(details.getName(), details.getUsername());
         response.addHeader("Token", token);
+        response.getWriter().print("{\"email\":\"");
+        response.getWriter().print(details.getMiembro().getEmail());
+        response.getWriter().print("\", \"username\":\"");
+        response.getWriter().print(details.getMiembro().getUsername());
+        response.getWriter().print("\"}");
         response.getWriter().flush();
         super.successfulAuthentication(request, response, chain, authResult);
     }
