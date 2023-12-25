@@ -28,6 +28,16 @@ public class TokenUtils {
                 .compact();
     }
 
+    public static String createToken(Claims claims) {
+        Date expirationDate = new Date(System.currentTimeMillis() + TOKEN_LIFETIME_MILLS);
+        return Jwts.builder()
+                .subject(claims.getSubject())
+                .expiration(expirationDate)
+                .claims(claims)
+                .signWith(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
+                .compact();
+    }
+
     public static UsernamePasswordAuthenticationToken getAuth(String token) {
         Claims claims;
         try {
@@ -59,5 +69,16 @@ public class TokenUtils {
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
+    }
+
+    public static boolean isExpired(String token) {
+        return TokenUtils.isExpired(getTokenClaims(token));
+    }
+
+    public static boolean isExpired(Claims claims) {
+        if (claims == null) {
+            return true;
+        }
+        return claims.getExpiration().after(new Date(System.currentTimeMillis()));
     }
 }

@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,8 +78,23 @@ public class MiembroController {
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
-//    @PostMapping("/token")
-//    public ResponseEntity checkToken()
+    @GetMapping("/token")
+    public ResponseEntity checkToken(@RequestHeader("Token") String token) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims)) {
+            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+        }
+        if (!this.miembroService.areCredentialsUsed(claims.getSubject(), claims.get("username").toString())) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        PublicMiembro miembro = new PublicMiembro();
+        miembro.email = claims.getSubject();
+        miembro.username = claims.get("username").toString();
+        String newToken = TokenUtils.createToken(claims);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Token", newToken);
+        return new ResponseEntity(miembro, headers, HttpStatus.OK);
+    }
 
     @DeleteMapping()
     public ResponseEntity delete(@RequestHeader("Token") String token) {

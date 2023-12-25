@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
   title: Sharedz service
-  version: 0.0.1
+  version: 0.4.2
 servers:
   - description: Desarrollo HTTPS
     url: https://neutral-kindly-wildcat.ngrok-free.app
   - description: Desarrollo HTTP
-    url: http://clayrite.ddns.net:110
+    url: http://clayrite.ddns.net:81
 components:
   schemas:
     token:
@@ -247,6 +247,30 @@ paths:
           $ref: '#/components/responses/406'
         500:
           $ref: '#/components/responses/500'
+  /miembro/token:
+      get:
+        summary: Obten la informacion de un miembro a partir de su token
+        description: Comprueba la validez de un token y retorna la informacion asociada al token
+        tags:
+          - Miembro
+          - Sesion
+        parameters:
+          - $ref: '#/components/parameters/header_token'
+        responses:
+          200:
+            description: El token es valido
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/publicMember'
+          400:
+            $ref: '#/components/responses/400'
+          404:
+            description: No existen registros de un miembro asociado al token
+          406:
+            description: El token es invalido o ya ha expirado
+          500:
+            $ref: '#/components/responses/500'
   /miembro/{username}/username:
     summary: Cambia el username de un miembro
     description: Actualiza el username de un miembro identificado por su username actual
