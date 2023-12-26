@@ -98,7 +98,7 @@ public class UsuarioController {
     @DeleteMapping()
     public ResponseEntity delete(@RequestHeader("Token") String token) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null) {
+        if (claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         if (!this.usuarioService.deleteUsuario(claims.getSubject())) {
@@ -114,7 +114,7 @@ public class UsuarioController {
             @RequestBody Map<String, String> payload) {
 
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || !claims.get("username").equals(username)) {
+        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         if (!this.usuarioService.isUsernameUsed(payload.get("username"))) {
@@ -138,7 +138,7 @@ public class UsuarioController {
             @PathVariable("username") String username,
             @RequestBody Map<String, String> payload) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || !claims.get("username").equals(username)) {
+        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         if (!this.usuarioService.isEmailUsed(payload.get("email"))) {

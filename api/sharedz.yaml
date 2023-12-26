@@ -69,6 +69,37 @@ components:
         password:
           allOf:
             - $ref: '#/components/schemas/password'
+    newProducto:
+      type: object
+      title: Producto de venta
+      required: [ nombre, presentacion, raza, precio ]
+      properties:
+        nombre:
+          type: string
+        presentacion:
+          type: string
+        tipoMascota:
+          type: string
+        raza:
+          type: string
+        precio:
+          type: number
+          format: decimal
+    producto:
+      type: object
+      required: [ id ]
+      allOf:
+        - $ref: '#/components/schemas/newProducto'
+      properties:
+        id:
+          type: number
+          format: integer
+    producto_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/producto'
   parameters:
     header_token:
       name: Token
@@ -103,6 +134,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/publicUsuario'
+    invalid_token:
+      description: El token provisto es invalido o ha expirado
     400:
       description: La solicitud esta incompleta o malformada
     404:
@@ -308,5 +341,55 @@ paths:
           $ref: '#/components/responses/406'
         409:
           description: El nuevo email ya se encuentra en uso por otro usuario
+        500:
+          $ref: '#/components/responses/500'
+  /producto:
+    summary: Catalogo de productos
+    description: Endpoint para realizar operaciones sobre el catalogo de productos
+    get:
+      summary: Retorna los productos registrados
+      description: Retorna los productos registrados
+      tags:
+        - Producto
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+      responses:
+        200:
+          description: Se ha retornado la informacion de los productos registrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/producto_array'
+        204:
+          description: No hay productos registrados
+        400:
+          $ref: '#/components/responses/400'
+        406:
+          $ref: '#/components/responses/invalid_token'
+        500:
+          $ref: '#/components/responses/500'
+    post:
+      summary: Registra un nuevo producto
+      description: Registra un nuevo producto
+      tags:
+        - Producto
+      parameters:
+        - $ref: '#/components/parameters/header_token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newProducto'
+      responses:
+        201:
+          description: Se ha registrado el producto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/producto'
+        400:
+          $ref: '#/components/responses/400'
+        406:
+          $ref: '#/components/responses/invalid_token'
         500:
           $ref: '#/components/responses/500'
