@@ -54,6 +54,9 @@ components:
         email:
           allOf:
             - $ref: '#/components/schemas/email'
+        token:
+          allOf:
+            - $ref: '#/components/schemas/token'
     loginCredentials:
       type: object
       title: Credenciales de inicio de sesion
@@ -204,10 +207,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/publicUsuario'
-          headers:
-            Token:
-              schema:
-                $ref: '#/components/schemas/token'
         400:
           $ref: '#/components/responses/400'
         404:
