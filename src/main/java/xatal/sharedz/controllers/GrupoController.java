@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Grupo;
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.GrupoService;
-import xatal.sharedz.services.MiembroService;
+import xatal.sharedz.services.UsuarioService;
 import xatal.sharedz.structures.PublicGrupo;
 
 @RestController
@@ -22,9 +22,9 @@ import xatal.sharedz.structures.PublicGrupo;
 @RequestMapping("/grupo")
 public class GrupoController {
     private final GrupoService grupoService;
-    private final MiembroService miembroService;
+    private final UsuarioService miembroService;
 
-    public GrupoController(GrupoService grupoService, MiembroService miembroService) {
+    public GrupoController(GrupoService grupoService, UsuarioService miembroService) {
         this.grupoService = grupoService;
         this.miembroService = miembroService;
     }
@@ -43,7 +43,7 @@ public class GrupoController {
         }
         Grupo newGrupo = this.grupoService.newGrupo(
                 grupoName,
-                this.miembroService.getMiembroFromEmail(claims.getSubject()));
+                this.miembroService.getUsuarioFromEmail(claims.getSubject()));
         if (newGrupo != null) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
@@ -62,7 +62,7 @@ public class GrupoController {
         if (claims == null || !claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        Miembro miembro = this.miembroService.getMiembroFromEmail(claims.getSubject());
+        Usuario miembro = this.miembroService.getUsuarioFromEmail(claims.getSubject());
         if (miembro == null || !this.grupoService.isMemberIn(grupoName, miembro)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

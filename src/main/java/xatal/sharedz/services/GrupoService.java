@@ -1,31 +1,29 @@
 package xatal.sharedz.services;
 
-import jakarta.persistence.PreRemove;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Grupo;
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 import xatal.sharedz.repositories.GrupoRepository;
-import xatal.sharedz.repositories.MiembroRepository;
 
 import java.util.Optional;
 
 @Service
 public class GrupoService {
     private final GrupoRepository grupos;
-    private final MiembroService miembros;
+    private final UsuarioService miembros;
 
-    public GrupoService(GrupoRepository grupos, MiembroService miembros) {
+    public GrupoService(GrupoRepository grupos, UsuarioService miembros) {
         this.grupos = grupos;
         this.miembros = miembros;
     }
 
-    public Grupo newGrupo(String grupoName, Miembro creador) {
+    public Grupo newGrupo(String grupoName, Usuario creador) {
         Grupo grupo = new Grupo();
         grupo.setName(grupoName);
         grupo.getMembers().add(creador);
         creador.getGrupos().add(grupo);
         grupo = this.grupos.save(grupo);
-        this.miembros.saveMiembro(creador);
+        this.miembros.saveUsuario(creador);
         return grupo;
     }
 
@@ -33,18 +31,18 @@ public class GrupoService {
         return this.grupos.save(grupo);
     }
 
-    public boolean addMiembro(String grupoName, Miembro miembro) {
+    public boolean addMiembro(String grupoName, Usuario miembro) {
         Optional<Grupo> grupoOptional = this.grupos.getGrupoByName(grupoName);
         if (grupoOptional.isPresent()) {
             Grupo grupo = grupoOptional.get();
             grupo.getMembers().add(miembro);
             miembro.getGrupos().add(this.grupos.save(grupo));
-            this.miembros.saveMiembro(miembro);
+            this.miembros.saveUsuario(miembro);
         }
         return grupoOptional.isPresent();
     }
 
-    public boolean removeMiembro(String grupoName, Miembro miembro) {
+    public boolean removeMiembro(String grupoName, Usuario miembro) {
         boolean removed = false;
         Optional<Grupo> grupoOptional = this.grupos.getGrupoByName(grupoName);
         if (grupoOptional.isPresent()) {
@@ -52,7 +50,7 @@ public class GrupoService {
             if (grupo.getMembers().contains(miembro)) {
                 grupo.getMembers().remove(miembro);
                 miembro.getGrupos().remove(grupo);
-                this.miembros.saveMiembro(miembro);
+                this.miembros.saveUsuario(miembro);
                 removed = true;
             }
             if (grupo.getMembers().isEmpty()) {
@@ -62,16 +60,16 @@ public class GrupoService {
         return removed;
     }
 
-    public boolean isMemberIn(String grupoName, Miembro miembro) {
+    public boolean isMemberIn(String grupoName, Usuario miembro) {
         Optional<Grupo> grupoOptional = this.grupos.getGrupoByName(grupoName);
         return grupoOptional.isPresent() && grupoOptional.get().getMembers().contains(miembro);
     }
 
     public void deleteGrupo(Grupo grupo) {
-        for (Miembro member : grupo.getMembers()) {
+        for (Usuario member : grupo.getMembers()) {
             member.getGrupos().remove(grupo);
             grupo.getMembers().remove(member);
-            this.miembros.saveMiembro(member);
+            this.miembros.saveUsuario(member);
         }
         this.grupos.delete(grupo);
     }

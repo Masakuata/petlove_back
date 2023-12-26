@@ -2,19 +2,19 @@ package xatal.sharedz.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 
 import java.util.Collection;
 import java.util.Collections;
 
 public class UserDetailsImp implements UserDetails {
-    private final Miembro miembro;
+    private final Usuario miembro;
 
-    public UserDetailsImp(Miembro miembro) {
+    public UserDetailsImp(Usuario miembro) {
         this.miembro = miembro;
     }
 
-    public Miembro getMiembro() {
+    public Usuario getMiembro() {
         return this.miembro;
     }
 

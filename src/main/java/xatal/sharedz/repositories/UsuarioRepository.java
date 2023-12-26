@@ -4,26 +4,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MiembroRepository extends CrudRepository<Miembro, Long> {
-    @Query(value = "SELECT * FROM Sharedz.miembro WHERE status = true",
+public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
+    @Query(value = "SELECT * FROM Sharedz.usuario WHERE status = true",
             nativeQuery = true)
-    List<Miembro> getAll();
+    List<Usuario> getAll();
 
-    @Query(value = "SELECT * FROM Sharedz.miembro WHERE email = :email AND password = :password",
+    @Query(value = "SELECT * FROM Sharedz.usuario WHERE email = :email AND password = :password",
             nativeQuery = true)
-    Optional<Miembro> login(
+    Optional<Usuario> login(
             @Param("email") String email,
             @Param("password") String password);
 
-    Optional<Miembro> findOneByEmail(String email);
+    Optional<Usuario> getUsuarioByEmailAndPassword(String email, String password);
 
-    Optional<Miembro> findMiembroByUsername(String username);
+    Optional<Usuario> findOneByEmail(String email);
+
+    Optional<Usuario> findUsuarioByUsername(String username);
 
     Long deleteByEmail(String email);
 

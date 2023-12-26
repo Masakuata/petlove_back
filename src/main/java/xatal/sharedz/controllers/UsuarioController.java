@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,66 +13,66 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 import xatal.sharedz.security.TokenUtils;
-import xatal.sharedz.services.MiembroService;
+import xatal.sharedz.services.UsuarioService;
 import xatal.sharedz.structures.Login;
-import xatal.sharedz.structures.PublicMiembro;
+import xatal.sharedz.structures.PublicUsuario;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/miembro")
-public class MiembroController {
-    private final MiembroService miembroService;
+@RequestMapping("/usuario")
+public class UsuarioController {
+    private final UsuarioService usuarioService;
 
-    public MiembroController(MiembroService miembroService) {
-        this.miembroService = miembroService;
+    public UsuarioController(UsuarioService miembroService) {
+        this.usuarioService = miembroService;
     }
 
     @GetMapping()
-    public ResponseEntity getMiembros() {
-        List<PublicMiembro> miembros = this.miembroService.getAllPublic();
-        if (miembros.isEmpty()) {
+    public ResponseEntity getUsuarios() {
+        List<PublicUsuario> usuarios = this.usuarioService.getAllPublic();
+        if (usuarios.isEmpty()) {
             return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
         }
-        return ResponseEntity.ok(miembros);
+        return ResponseEntity.ok(usuarios);
     }
 
     @PostMapping()
-    public ResponseEntity addMiembro(@RequestBody Miembro miembro) {
-        if (!Miembro.isValid(miembro)) {
+    public ResponseEntity addUsuario(@RequestBody Usuario usuario) {
+        if (!Usuario.isValid(usuario)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (this.miembroService.areCredentialsUsed(miembro.getEmail(), miembro.getUsername())) {
+        if (this.usuarioService.areCredentialsUsed(usuario.getEmail(), usuario.getUsername())) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
-        miembro.encodePassword();
-        miembro = this.miembroService.saveMiembro(miembro);
-        if (miembro != null) {
+        usuario.encodePassword();
+        usuario = this.usuarioService.saveUsuario(usuario);
+        if (usuario != null) {
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Token", miembro.getToken());
+            headers.add("Token", usuario.getToken());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .headers(headers)
-                    .body(new PublicMiembro(miembro));
+                    .body(new PublicUsuario(usuario));
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody Login login) {
-        Miembro miembro = Miembro.fromLogin(login);
+        Usuario miembro = Usuario.fromLogin(login);
         if (!miembro.validLogin()) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         miembro.encodePassword();
-        miembro = this.miembroService.login(miembro);
+        miembro = this.usuarioService.login(miembro);
         if (miembro != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Token", miembro.getToken());
-            return new ResponseEntity(new PublicMiembro(miembro), headers, HttpStatus.OK);
+            return new ResponseEntity(new PublicUsuario(miembro), headers, HttpStatus.OK);
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
@@ -84,10 +83,10 @@ public class MiembroController {
         if (claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (!this.miembroService.areCredentialsUsed(claims.getSubject(), claims.get("username").toString())) {
+        if (!this.usuarioService.areCredentialsUsed(claims.getSubject(), claims.get("username").toString())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-        PublicMiembro miembro = new PublicMiembro();
+        PublicUsuario miembro = new PublicUsuario();
         miembro.email = claims.getSubject();
         miembro.username = claims.get("username").toString();
         String newToken = TokenUtils.createToken(claims);
@@ -102,7 +101,7 @@ public class MiembroController {
         if (claims == null) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (!this.miembroService.deleteMiembro(claims.getSubject())) {
+        if (!this.usuarioService.deleteUsuario(claims.getSubject())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok().build();
@@ -118,17 +117,17 @@ public class MiembroController {
         if (claims == null || !claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (!this.miembroService.isUsernameUsed(payload.get("username"))) {
-            Miembro miembro = this.miembroService.getMiembroFromEmail(claims.getSubject());
+        if (!this.usuarioService.isUsernameUsed(payload.get("username"))) {
+            Usuario miembro = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
             if (miembro == null) {
                 return new ResponseEntity(HttpStatus.NOT_FOUND);
             }
             miembro.setUsername(payload.get("username"));
-            miembro = this.miembroService.saveMiembro(miembro);
+            miembro = this.usuarioService.saveUsuario(miembro);
             if (miembro == null) {
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return ResponseEntity.ok(new PublicMiembro(miembro));
+            return ResponseEntity.ok(new PublicUsuario(miembro));
         }
         return new ResponseEntity(HttpStatus.CONFLICT);
     }
@@ -142,17 +141,17 @@ public class MiembroController {
         if (claims == null || !claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (!this.miembroService.isEmailUsed(payload.get("email"))) {
-            Miembro miembro = this.miembroService.getMiembroFromEmail(claims.getSubject());
+        if (!this.usuarioService.isEmailUsed(payload.get("email"))) {
+            Usuario miembro = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
             if (miembro == null) {
                 return new ResponseEntity(HttpStatus.NOT_FOUND);
             }
             miembro.setEmail(payload.get("email"));
-            miembro = this.miembroService.saveMiembro(miembro);
+            miembro = this.usuarioService.saveUsuario(miembro);
             if (miembro == null) {
                 return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return ResponseEntity.ok(new PublicMiembro(miembro));
+            return ResponseEntity.ok(new PublicUsuario(miembro));
         }
         return new ResponseEntity(HttpStatus.CONFLICT);
     }

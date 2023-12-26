@@ -1,15 +1,15 @@
 package xatal.sharedz.structures;
 
-import xatal.sharedz.entities.Miembro;
+import xatal.sharedz.entities.Usuario;
 
-public class PublicMiembro {
+public class PublicUsuario {
     public String username;
     public String email;
 
-    public PublicMiembro() {
+    public PublicUsuario() {
     }
 
-    public PublicMiembro(Miembro miembro) {
+    public PublicUsuario(Usuario miembro) {
         this.username = miembro.getUsername();
         this.email = miembro.getEmail();
     }

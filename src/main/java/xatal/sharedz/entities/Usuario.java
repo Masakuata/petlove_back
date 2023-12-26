@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class Miembro {
+public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -104,14 +104,14 @@ public class Miembro {
         return TokenUtils.createToken(this.username, this.email);
     }
 
-    public static boolean isValid(Miembro miembro) {
+    public static boolean isValid(Usuario miembro) {
         return miembro.username != null && !miembro.username.isEmpty()
                 && miembro.email != null && !miembro.email.isEmpty()
                 && miembro.password != null && !miembro.password.isEmpty();
     }
 
-    public static Miembro fromLogin(Login login) {
-        Miembro miembro = new Miembro();
+    public static Usuario fromLogin(Login login) {
+        Usuario miembro = new Usuario();
         miembro.email = login.email;
         miembro.password = login.password;
         return miembro;

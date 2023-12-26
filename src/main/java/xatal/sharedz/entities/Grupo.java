@@ -22,7 +22,7 @@ public class Grupo {
     private String name;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
-    private Set<Miembro> members = new HashSet<>();
+    private Set<Usuario> members = new HashSet<>();
 
     public void setId(Long id) {
         this.id = id;
@@ -40,11 +40,11 @@ public class Grupo {
         this.name = name;
     }
 
-    public Set<Miembro> getMembers() {
+    public Set<Usuario> getMembers() {
         return members;
     }
 
-    public void setMembers(Set<Miembro> members) {
+    public void setMembers(Set<Usuario> members) {
         this.members = members;
     }
 }
