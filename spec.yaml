@@ -15,22 +15,22 @@ components:
       example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
     email:
       type: string
-      title: Email del miembro
+      title: Email del usuario
       minLength: 5
       maxLength: 320
       example: correo@dominio.com
     username:
       type: string
-      title: Username del miembro
+      title: Username del usuario
       example: juanito
     password:
       type: string
-      title: Contrasena del miembro
+      title: Contrasena del usuario
       example: password981
-    newMember:
+    newUsuario:
       type: object
-      title: Miembro para registrar
-      description: Informacion del miembro a registrar
+      title: Usuario para registrar
+      description: Informacion del usuario a registrar
       required:
         - username
         - email
@@ -39,24 +39,24 @@ components:
         username:
           allOf:
             - type: string
-              title: Username del miembro
+              title: Username del usuario
               example: juanito
         email:
           allOf:
             - type: string
-              title: Email del miembro
+              title: Email del usuario
               minLength: 5
               maxLength: 320
               example: correo@dominio.com
         password:
           allOf:
             - type: string
-              title: Contrasena del miembro
+              title: Contrasena del usuario
               example: password981
-    publicMember:
+    publicUsuario:
       type: object
-      title: Informacion publica de miembro
-      description: Informacion publica de un miembro registrado
+      title: Informacion publica de usuario
+      description: Informacion publica de un usuario registrado
       required:
         - username
         - email
@@ -64,19 +64,19 @@ components:
         username:
           allOf:
             - type: string
-              title: Username del miembro
+              title: Username del usuario
               example: juanito
         email:
           allOf:
             - type: string
-              title: Email del miembro
+              title: Email del usuario
               minLength: 5
               maxLength: 320
               example: correo@dominio.com
     loginCredentials:
       type: object
       title: Credenciales de inicio de sesion
-      description: Correo electronico y contrasena de un miembro registrado
+      description: Correo electronico y contrasena de un usuario registrado
       required:
         - email
         - password
@@ -84,89 +84,15 @@ components:
         email:
           allOf:
             - type: string
-              title: Email del miembro
+              title: Email del usuario
               minLength: 5
               maxLength: 320
               example: correo@dominio.com
         password:
           allOf:
             - type: string
-              title: Contrasena del miembro
+              title: Contrasena del usuario
               example: password981
-    grupo:
-      type: object
-      title: Grupo de usuarios
-      description: Grupo de usuarios para compartir deudas rapidamente
-      required:
-        - nombre
-      properties:
-        nombre:
-          type: string
-          example: bandidos
-        miembros:
-          type: array
-          items:
-            type: object
-            allOf:
-              - type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
-                required:
-                  - username
-                  - email
-                properties:
-                  username:
-                    allOf:
-                      - type: string
-                        title: Username del miembro
-                        example: juanito
-                  email:
-                    allOf:
-                      - type: string
-                        title: Email del miembro
-                        minLength: 5
-                        maxLength: 320
-                        example: correo@dominio.com
-    array_grupo:
-      type: array
-      title: Lista de grupos de usuarios
-      description: Lista de grupos de usuarios
-      items:
-        type: object
-        allOf:
-          - type: object
-            title: Grupo de usuarios
-            description: Grupo de usuarios para compartir deudas rapidamente
-            required:
-              - nombre
-            properties:
-              nombre:
-                type: string
-                example: bandidos
-              miembros:
-                type: array
-                items:
-                  type: object
-                  allOf:
-                    - type: object
-                      title: Informacion publica de miembro
-                      description: Informacion publica de un miembro registrado
-                      required:
-                        - username
-                        - email
-                      properties:
-                        username:
-                          allOf:
-                            - type: string
-                              title: Username del miembro
-                              example: juanito
-                        email:
-                          allOf:
-                            - type: string
-                              title: Email del miembro
-                              minLength: 5
-                              maxLength: 320
-                              example: correo@dominio.com
   parameters:
     header_token:
       name: Token
@@ -179,20 +105,12 @@ components:
       required: true
     path_username:
       name: username
-      description: Username del miembro
+      description: Username del usuario
       in: path
       schema:
         type: string
-        title: Username del miembro
+        title: Username del usuario
         example: juanito
-      required: true
-    path_groupname:
-      name: nombreGrupo
-      description: Nombre del grupo
-      in: path
-      schema:
-        type: string
-        example: bandidos
       required: true
   headers:
     Token:
@@ -217,14 +135,14 @@ components:
             type: string
             title: Token identificador de la sesion de usuario
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-    response_publicMember:
+    response_publicUsuario:
       description: .
       content:
         application/json:
           schema:
             type: object
-            title: Informacion publica de miembro
-            description: Informacion publica de un miembro registrado
+            title: Informacion publica de usuario
+            description: Informacion publica de un usuario registrado
             required:
               - username
               - email
@@ -232,24 +150,24 @@ components:
               username:
                 allOf:
                   - type: string
-                    title: Username del miembro
+                    title: Username del usuario
                     example: juanito
               email:
                 allOf:
                   - type: string
-                    title: Email del miembro
+                    title: Email del usuario
                     minLength: 5
                     maxLength: 320
                     example: correo@dominio.com
 paths:
-  /miembro:
-    summary: Catalogo de miembros
-    description: Endpoint para realizar diversas operaciones respecto al catalogo de miembros del sistema
+  /usuario:
+    summary: Catalogo de usuarios
+    description: Endpoint para realizar diversas operaciones respecto al catalogo de usuarios del sistema
     get:
-      summary: Obten los miembros registrados
-      description: Devuelve todos los miembros registrados
+      summary: Obten los usuarios registrados
+      description: Devuelve todos los usuarios registrados
       tags:
-        - Miembro
+        - Usuario
       parameters:
         - name: Token
           description: Token identificador de la sesion de usuario
@@ -261,7 +179,7 @@ paths:
           required: true
       responses:
         '200':
-          description: Se ha retornado por lo menos un miembro registrado
+          description: Se ha retornado por lo menos un usuario registrado
           content:
             application/json:
               schema:
@@ -269,8 +187,8 @@ paths:
                 items:
                   anyOf:
                     - type: object
-                      title: Informacion publica de miembro
-                      description: Informacion publica de un miembro registrado
+                      title: Informacion publica de usuario
+                      description: Informacion publica de un usuario registrado
                       required:
                         - username
                         - email
@@ -278,18 +196,18 @@ paths:
                         username:
                           allOf:
                             - type: string
-                              title: Username del miembro
+                              title: Username del usuario
                               example: juanito
                         email:
                           allOf:
                             - type: string
-                              title: Email del miembro
+                              title: Email del usuario
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
                     - type: object
-                      title: Informacion publica de miembro
-                      description: Informacion publica de un miembro registrado
+                      title: Informacion publica de usuario
+                      description: Informacion publica de un usuario registrado
                       required:
                         - username
                         - email
@@ -297,18 +215,18 @@ paths:
                         username:
                           allOf:
                             - type: string
-                              title: Username del miembro
+                              title: Username del usuario
                               example: juanito
                         email:
                           allOf:
                             - type: string
-                              title: Email del miembro
+                              title: Email del usuario
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
                     - type: object
-                      title: Informacion publica de miembro
-                      description: Informacion publica de un miembro registrado
+                      title: Informacion publica de usuario
+                      description: Informacion publica de un usuario registrado
                       required:
                         - username
                         - email
@@ -316,32 +234,32 @@ paths:
                         username:
                           allOf:
                             - type: string
-                              title: Username del miembro
+                              title: Username del usuario
                               example: juanito
                         email:
                           allOf:
                             - type: string
-                              title: Email del miembro
+                              title: Email del usuario
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
         '204':
-          description: No hay ningun miembro registrado
+          description: No hay ningun usuario registrado
         '500':
           description: Error interno del servidor
     post:
-      summary: Crea un nuevo miembro en el sistema
-      description: Crea un nuevo miembro en el sistema con la informacion provista
+      summary: Crea un nuevo usuario en el sistema
+      description: Crea un nuevo usuario en el sistema con la informacion provista
       tags:
-        - Miembro
+        - Usuario
       requestBody:
-        description: Informacion necesaria para registrar un nuevo miembro
+        description: Informacion necesaria para registrar un nuevo usuario
         content:
           application/json:
             schema:
               type: object
-              title: Miembro para registrar
-              description: Informacion del miembro a registrar
+              title: Usuario para registrar
+              description: Informacion del usuario a registrar
               required:
                 - username
                 - email
@@ -350,29 +268,29 @@ paths:
                 username:
                   allOf:
                     - type: string
-                      title: Username del miembro
+                      title: Username del usuario
                       example: juanito
                 email:
                   allOf:
                     - type: string
-                      title: Email del miembro
+                      title: Email del usuario
                       minLength: 5
                       maxLength: 320
                       example: correo@dominio.com
                 password:
                   allOf:
                     - type: string
-                      title: Contrasena del miembro
+                      title: Contrasena del usuario
                       example: password981
       responses:
         '201':
-          description: La solicitud fue exitosa y el nuevo miembro ha sido creado
+          description: La solicitud fue exitosa y el nuevo usuario ha sido creado
           content:
             application/json:
               schema:
                 type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
+                title: Informacion publica de usuario
+                description: Informacion publica de un usuario registrado
                 required:
                   - username
                   - email
@@ -380,12 +298,12 @@ paths:
                   username:
                     allOf:
                       - type: string
-                        title: Username del miembro
+                        title: Username del usuario
                         example: juanito
                   email:
                     allOf:
                       - type: string
-                        title: Email del miembro
+                        title: Email del usuario
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
@@ -404,10 +322,10 @@ paths:
         '500':
           description: Error interno del servidor
     delete:
-      summary: Elimina un miembro registrado
-      description: Elimina de forma permanente la informacion de miembro identificado por sus credenciales
+      summary: Elimina un usuario registrado
+      description: Elimina de forma permanente la informacion de usuario identificado por sus credenciales
       tags:
-        - Miembro
+        - Usuario
       parameters:
         - name: Token
           description: Token identificador de la sesion de usuario
@@ -419,23 +337,23 @@ paths:
           required: true
       responses:
         '200':
-          description: La informacion del miembro ha sido eliminada.
+          description: La informacion del usuario ha sido eliminada.
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: No se ha encontrado ningun miembro con esas credenciales
+          description: No se ha encontrado ningun usuario con esas credenciales
         '406':
           description: El token provisto no coincide con las credenciales indicadas o ha expirado
         '500':
           description: Error interno del servidor
-  /miembro/login:
-    summary: Inica sesion con un miembro registrado
-    description: Obten un nuevo token con las credenciales de un miembro registrado
+  /usuario/login:
+    summary: Inica sesion con un usuario registrado
+    description: Obten un nuevo token con las credenciales de un usuario registrado
     post:
-      summary: Inica sesion con un miembro registrado
-      description: Obten un nuevo token con las credenciales de un miembro registrado
+      summary: Inica sesion con un usuario registrado
+      description: Obten un nuevo token con las credenciales de un usuario registrado
       tags:
-        - Miembro
+        - Usuario
         - Sesion
       requestBody:
         content:
@@ -443,7 +361,7 @@ paths:
             schema:
               type: object
               title: Credenciales de inicio de sesion
-              description: Correo electronico y contrasena de un miembro registrado
+              description: Correo electronico y contrasena de un usuario registrado
               required:
                 - email
                 - password
@@ -451,14 +369,14 @@ paths:
                 email:
                   allOf:
                     - type: string
-                      title: Email del miembro
+                      title: Email del usuario
                       minLength: 5
                       maxLength: 320
                       example: correo@dominio.com
                 password:
                   allOf:
                     - type: string
-                      title: Contrasena del miembro
+                      title: Contrasena del usuario
                       example: password981
       responses:
         '200':
@@ -467,8 +385,8 @@ paths:
             application/json:
               schema:
                 type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
+                title: Informacion publica de usuario
+                description: Informacion publica de un usuario registrado
                 required:
                   - username
                   - email
@@ -476,12 +394,12 @@ paths:
                   username:
                     allOf:
                       - type: string
-                        title: Username del miembro
+                        title: Username del usuario
                         example: juanito
                   email:
                     allOf:
                       - type: string
-                        title: Email del miembro
+                        title: Email del usuario
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
@@ -494,17 +412,17 @@ paths:
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: Las credenciales no coinciden con ningun miembro registrado
+          description: Las credenciales no coinciden con ningun usuario registrado
         '406':
           description: La solicitud o su contenido no es aceptable y no puede ser procesada
         '500':
           description: Error interno del servidor
-  /miembro/token:
+  /usuario/token:
     get:
-      summary: Obten la informacion de un miembro a partir de su token
+      summary: Obten la informacion de un usuario a partir de su token
       description: Comprueba la validez de un token y retorna la informacion asociada al token
       tags:
-        - Miembro
+        - Usuario
         - Sesion
       parameters:
         - name: Token
@@ -522,8 +440,8 @@ paths:
             application/json:
               schema:
                 type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
+                title: Informacion publica de usuario
+                description: Informacion publica de un usuario registrado
                 required:
                   - username
                   - email
@@ -531,31 +449,31 @@ paths:
                   username:
                     allOf:
                       - type: string
-                        title: Username del miembro
+                        title: Username del usuario
                         example: juanito
                   email:
                     allOf:
                       - type: string
-                        title: Email del miembro
+                        title: Email del usuario
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: No existen registros de un miembro asociado al token
+          description: No existen registros de un usuario asociado al token
         '406':
           description: El token es invalido o ya ha expirado
         '500':
           description: Error interno del servidor
-  '/miembro/{username}/username':
-    summary: Cambia el username de un miembro
-    description: Actualiza el username de un miembro identificado por su username actual
+  '/usuario/{username}/username':
+    summary: Cambia el username de un usuario
+    description: Actualiza el username de un usuario identificado por su username actual
     put:
-      summary: Cambia el username de un miembro
-      description: Actualiza el username de un miembro identificado por su username actual
+      summary: Cambia el username de un usuario
+      description: Actualiza el username de un usuario identificado por su username actual
       tags:
-        - Actualizar miembro
+        - Actualizar usuario
       parameters:
         - name: Token
           description: Token identificador de la sesion de usuario
@@ -566,11 +484,11 @@ paths:
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
         - name: username
-          description: Username del miembro
+          description: Username del usuario
           in: path
           schema:
             type: string
-            title: Username del miembro
+            title: Username del usuario
             example: juanito
           required: true
       requestBody:
@@ -583,17 +501,17 @@ paths:
               properties:
                 username:
                   type: string
-                  title: Username del miembro
+                  title: Username del usuario
                   example: juanito
       responses:
         '200':
-          description: Se ha actualizado el username del miembro
+          description: Se ha actualizado el username del usuario
           content:
             application/json:
               schema:
                 type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
+                title: Informacion publica de usuario
+                description: Informacion publica de un usuario registrado
                 required:
                   - username
                   - email
@@ -601,40 +519,40 @@ paths:
                   username:
                     allOf:
                       - type: string
-                        title: Username del miembro
+                        title: Username del usuario
                         example: juanito
                   email:
                     allOf:
                       - type: string
-                        title: Email del miembro
+                        title: Email del usuario
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: Las credenciales no coinciden con ningun miembro registrado
+          description: Las credenciales no coinciden con ningun usuario registrado
         '406':
           description: La solicitud o su contenido no es aceptable y no puede ser procesada
         '409':
-          description: El nuevo username ya se encuentra en uso por otro miembro
+          description: El nuevo username ya se encuentra en uso por otro usuario
         '500':
           description: Error interno del servidor
-  '/miembro/{username}/email':
-    summary: Cambia el email de un miembro
-    description: Actualiza el email de un miembro identificado por su username
+  '/usuario/{username}/email':
+    summary: Cambia el email de un usuario
+    description: Actualiza el email de un usuario identificado por su username
     put:
-      summary: Cambia el email de un miembro
-      description: Actualiza el email de un miembro identificado por su username
+      summary: Cambia el email de un usuario
+      description: Actualiza el email de un usuario identificado por su username
       tags:
-        - Actualizar miembro
+        - Actualizar usuario
       parameters:
         - name: username
-          description: Username del miembro
+          description: Username del usuario
           in: path
           schema:
             type: string
-            title: Username del miembro
+            title: Username del usuario
             example: juanito
           required: true
         - name: Token
@@ -655,19 +573,19 @@ paths:
               properties:
                 email:
                   type: string
-                  title: Email del miembro
+                  title: Email del usuario
                   minLength: 5
                   maxLength: 320
                   example: correo@dominio.com
       responses:
         '200':
-          description: Se ha actualizado el email del miembro
+          description: Se ha actualizado el email del usuario
           content:
             application/json:
               schema:
                 type: object
-                title: Informacion publica de miembro
-                description: Informacion publica de un miembro registrado
+                title: Informacion publica de usuario
+                description: Informacion publica de un usuario registrado
                 required:
                   - username
                   - email
@@ -675,213 +593,22 @@ paths:
                   username:
                     allOf:
                       - type: string
-                        title: Username del miembro
+                        title: Username del usuario
                         example: juanito
                   email:
                     allOf:
                       - type: string
-                        title: Email del miembro
+                        title: Email del usuario
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
-          description: Las credenciales no coinciden con ningun miembro registrado
+          description: Las credenciales no coinciden con ningun usuario registrado
         '406':
           description: La solicitud o su contenido no es aceptable y no puede ser procesada
         '409':
-          description: El nuevo email ya se encuentra en uso por otro miembro
-        '500':
-          description: Error interno del servidor
-  '/miembro/{username}/grupos':
-    summary: Lista los grupos a los cuales un miembro pertenece
-    description: Retorna una lista de los grupos de los cuales un miembro forma parte
-    get:
-      summary: Retorna los grupos de los cuales un miembro forma parte
-      tags:
-        - Grupo
-      parameters:
-        - name: Token
-          description: Token identificador de la sesion de usuario
-          in: header
-          schema:
-            type: string
-            title: Token identificador de la sesion de usuario
-            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-          required: true
-        - name: username
-          description: Username del miembro
-          in: path
-          schema:
-            type: string
-            title: Username del miembro
-            example: juanito
-          required: true
-      responses:
-        '200':
-          description: Lista de grupos de los cuales el miembro forma parte
-          content:
-            application/json:
-              schema:
-                type: array
-                title: Lista de grupos de usuarios
-                description: Lista de grupos de usuarios
-                items:
-                  type: object
-                  allOf:
-                    - type: object
-                      title: Grupo de usuarios
-                      description: Grupo de usuarios para compartir deudas rapidamente
-                      required:
-                        - nombre
-                      properties:
-                        nombre:
-                          type: string
-                          example: bandidos
-                        miembros:
-                          type: array
-                          items:
-                            type: object
-                            allOf:
-                              - type: object
-                                title: Informacion publica de miembro
-                                description: Informacion publica de un miembro registrado
-                                required:
-                                  - username
-                                  - email
-                                properties:
-                                  username:
-                                    allOf:
-                                      - type: string
-                                        title: Username del miembro
-                                        example: juanito
-                                  email:
-                                    allOf:
-                                      - type: string
-                                        title: Email del miembro
-                                        minLength: 5
-                                        maxLength: 320
-                                        example: correo@dominio.com
-        '204':
-          description: El miembro no forma parte de ningun grupo
-        '400':
-          description: La solicitud esta incompleta o malformada
-        '404':
-          description: El miembro no se encuentra registrado en el sistema
-        '406':
-          description: El token provisto no concuerda con el username provisto
-        '500':
-          description: Error interno del servidor
-  '/grupo/{nombreGrupo}/{username}':
-    delete:
-      summary: Elimina al miembro del grupo
-      description: Elimina al miembro identificado por su username del grupo indicado
-      tags:
-        - Grupo
-      parameters:
-        - name: Token
-          description: Token identificador de la sesion de usuario
-          in: header
-          schema:
-            type: string
-            title: Token identificador de la sesion de usuario
-            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-          required: true
-        - name: username
-          description: Username del miembro
-          in: path
-          schema:
-            type: string
-            title: Username del miembro
-            example: juanito
-          required: true
-        - name: nombreGrupo
-          description: Nombre del grupo
-          in: path
-          schema:
-            type: string
-            example: bandidos
-          required: true
-      responses:
-        '200':
-          description: El miembro ha sido eliminado del grupo
-        '400':
-          description: La solicitud esta incompleta o malformada
-        '404':
-          description: El miembro no formaba parte del grupo o no se encuentra registrado
-        '406':
-          description: El token provisto es invalido o no coincide con el miembro a eliminar
-        '500':
-          description: Error interno del servidor
-  '/grupo/{nombreGrupo}':
-    post:
-      summary: Endpoint para crear un nuevo grupo
-      description: Crea un nuevo grupo y agrega al creador del grupo como primer miembro
-      tags:
-        - Grupo
-      parameters:
-        - name: Token
-          description: Token identificador de la sesion de usuario
-          in: header
-          schema:
-            type: string
-            title: Token identificador de la sesion de usuario
-            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
-          required: true
-        - name: nombreGrupo
-          description: Nombre del grupo
-          in: path
-          schema:
-            type: string
-            example: bandidos
-          required: true
-      responses:
-        '201':
-          description: Se ha creado el grupo
-          content:
-            application/json:
-              schema:
-                type: object
-                title: Grupo de usuarios
-                description: Grupo de usuarios para compartir deudas rapidamente
-                required:
-                  - nombre
-                properties:
-                  nombre:
-                    type: string
-                    example: bandidos
-                  miembros:
-                    type: array
-                    items:
-                      type: object
-                      allOf:
-                        - type: object
-                          title: Informacion publica de miembro
-                          description: Informacion publica de un miembro registrado
-                          required:
-                            - username
-                            - email
-                          properties:
-                            username:
-                              allOf:
-                                - type: string
-                                  title: Username del miembro
-                                  example: juanito
-                            email:
-                              allOf:
-                                - type: string
-                                  title: Email del miembro
-                                  minLength: 5
-                                  maxLength: 320
-                                  example: correo@dominio.com
-        '400':
-          description: La solicitud esta incompleta o malformada
-        '404':
-          description: El token proporcionado no coincide con ningun miembro registrado
-        '406':
-          description: La solicitud o su contenido no es aceptable y no puede ser procesada
-        '409':
-          description: El nombre de grupo ya se encuentra en uso
+          description: El nuevo email ya se encuentra en uso por otro usuario
         '500':
           description: Error interno del servidor
