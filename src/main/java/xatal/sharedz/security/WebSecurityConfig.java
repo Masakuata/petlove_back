@@ -30,12 +30,12 @@ public class WebSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity security, AuthenticationManager manager) throws Exception {
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter();
         jwtAuthenticationFilter.setAuthenticationManager(manager);
-        jwtAuthenticationFilter.setFilterProcessesUrl("/miembro/login");
+        jwtAuthenticationFilter.setFilterProcessesUrl("/usuario/login");
         return security
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .requestMatchers(HttpMethod.POST, "/miembro", "/miembro/login")
+                .requestMatchers(HttpMethod.POST, "/usuario", "/usuario/login")
                 .permitAll()
                 .and()
                 .authorizeRequests()

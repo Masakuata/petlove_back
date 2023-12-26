@@ -1,5 +1,6 @@
 package xatal.sharedz.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.repositories.ProductoRepository;
@@ -27,6 +28,7 @@ public class ProductoService {
         return this.productos.countById(idProducto) > 0;
     }
 
+    @Transactional
     public boolean deleteById(int idProducto) {
         this.productos.deleteById(idProducto);
         return true;

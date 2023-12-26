@@ -29,16 +29,16 @@ public class Producto {
     @Column(name = "precio", nullable = false)
     private float precio;
 
-    public Producto() {
-
-    }
-
     public Producto(NewProducto newProducto) {
         this.nombre = newProducto.nombre;
         this.presentacion = newProducto.presentacion;
         this.tipoMascota = newProducto.tipoMascota;
         this.raza = newProducto.raza;
         this.precio = newProducto.precio;
+    }
+
+    public Producto() {
+
     }
 
     public void setId(Long id) {

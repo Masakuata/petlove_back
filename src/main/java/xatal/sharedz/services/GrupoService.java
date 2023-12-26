@@ -1,5 +1,6 @@
 package xatal.sharedz.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Grupo;
 import xatal.sharedz.entities.Usuario;
@@ -65,6 +66,7 @@ public class GrupoService {
         return grupoOptional.isPresent() && grupoOptional.get().getMembers().contains(miembro);
     }
 
+    @Transactional
     public void deleteGrupo(Grupo grupo) {
         for (Usuario member : grupo.getMembers()) {
             member.getGrupos().remove(grupo);

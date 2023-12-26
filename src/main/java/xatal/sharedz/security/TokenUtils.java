@@ -79,6 +79,6 @@ public class TokenUtils {
         if (claims == null) {
             return true;
         }
-        return claims.getExpiration().after(new Date(System.currentTimeMillis()));
+        return claims.getExpiration().before(new Date(System.currentTimeMillis()));
     }
 }

@@ -46,6 +46,8 @@ public class ProductoController {
             @RequestHeader("Token") String token,
             @RequestBody NewProducto newProducto) {
         Claims claims = TokenUtils.getTokenClaims(token);
+        System.out.println(newProducto.isValid());
+        System.out.println(TokenUtils.isExpired(claims));
         if (!newProducto.isValid() || claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
