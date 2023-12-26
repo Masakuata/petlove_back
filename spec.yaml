@@ -73,6 +73,11 @@ components:
               minLength: 5
               maxLength: 320
               example: correo@dominio.com
+        token:
+          allOf:
+            - type: string
+              title: Token identificador de la sesion de usuario
+              example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
     loginCredentials:
       type: object
       title: Credenciales de inicio de sesion
@@ -159,6 +164,11 @@ components:
                     minLength: 5
                     maxLength: 320
                     example: correo@dominio.com
+              token:
+                allOf:
+                  - type: string
+                    title: Token identificador de la sesion de usuario
+                    example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
 paths:
   /usuario:
     summary: Catalogo de usuarios
@@ -205,6 +215,11 @@ paths:
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
+                        token:
+                          allOf:
+                            - type: string
+                              title: Token identificador de la sesion de usuario
+                              example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
                     - type: object
                       title: Informacion publica de usuario
                       description: Informacion publica de un usuario registrado
@@ -224,6 +239,11 @@ paths:
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
+                        token:
+                          allOf:
+                            - type: string
+                              title: Token identificador de la sesion de usuario
+                              example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
                     - type: object
                       title: Informacion publica de usuario
                       description: Informacion publica de un usuario registrado
@@ -243,6 +263,11 @@ paths:
                               minLength: 5
                               maxLength: 320
                               example: correo@dominio.com
+                        token:
+                          allOf:
+                            - type: string
+                              title: Token identificador de la sesion de usuario
+                              example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
         '204':
           description: No hay ningun usuario registrado
         '500':
@@ -307,6 +332,11 @@ paths:
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
+                  token:
+                    allOf:
+                      - type: string
+                        title: Token identificador de la sesion de usuario
+                        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           headers:
             Token:
               schema:
@@ -403,12 +433,11 @@ paths:
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
-          headers:
-            Token:
-              schema:
-                type: string
-                title: Token identificador de la sesion de usuario
-                example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+                  token:
+                    allOf:
+                      - type: string
+                        title: Token identificador de la sesion de usuario
+                        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
@@ -458,6 +487,11 @@ paths:
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
+                  token:
+                    allOf:
+                      - type: string
+                        title: Token identificador de la sesion de usuario
+                        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
@@ -528,6 +562,11 @@ paths:
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
+                  token:
+                    allOf:
+                      - type: string
+                        title: Token identificador de la sesion de usuario
+                        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
@@ -602,6 +641,11 @@ paths:
                         minLength: 5
                         maxLength: 320
                         example: correo@dominio.com
+                  token:
+                    allOf:
+                      - type: string
+                        title: Token identificador de la sesion de usuario
+                        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
         '400':
           description: La solicitud esta incompleta o malformada
         '404':
