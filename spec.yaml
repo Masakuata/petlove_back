@@ -118,6 +118,9 @@ components:
         precio:
           type: number
           format: decimal
+        cantidad:
+          type: number
+          format: integer
     producto:
       type: object
       required:
@@ -142,6 +145,9 @@ components:
             precio:
               type: number
               format: decimal
+            cantidad:
+              type: number
+              format: integer
       properties:
         id:
           type: number
@@ -174,6 +180,9 @@ components:
                   precio:
                     type: number
                     format: decimal
+                  cantidad:
+                    type: number
+                    format: integer
             properties:
               id:
                 type: number
@@ -788,6 +797,9 @@ paths:
                             precio:
                               type: number
                               format: decimal
+                            cantidad:
+                              type: number
+                              format: integer
                       properties:
                         id:
                           type: number
@@ -837,6 +849,9 @@ paths:
                 precio:
                   type: number
                   format: decimal
+                cantidad:
+                  type: number
+                  format: integer
       responses:
         '201':
           description: Se ha registrado el producto
@@ -866,6 +881,9 @@ paths:
                       precio:
                         type: number
                         format: decimal
+                      cantidad:
+                        type: number
+                        format: integer
                 properties:
                   id:
                     type: number
