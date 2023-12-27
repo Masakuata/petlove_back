@@ -85,6 +85,9 @@ components:
         precio:
           type: number
           format: decimal
+        cantidad:
+          type: number
+          format: integer
     producto:
       type: object
       required: [ id ]

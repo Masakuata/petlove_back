@@ -9,6 +9,8 @@ public class NewProducto {
     public String raza;
     public float precio;
 
+    public int cantidad;
+
     public NewProducto() {
     }
 
@@ -18,6 +20,7 @@ public class NewProducto {
         this.tipoMascota = producto.getTipoMascota();
         this.raza = producto.getRaza();
         this.precio = producto.getPrecio();
+        this.cantidad = producto.getCantidad();
     }
 
     public boolean isValid() {
