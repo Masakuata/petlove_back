@@ -184,7 +184,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/newUsuario'
+              type: object
+              allOf:
+                - $ref: '#/components/schemas/newUsuario'
+              properties:
+                token:
+                  type: string
       responses:
         201:
           description: La solicitud fue exitosa y el nuevo usuario ha sido creado

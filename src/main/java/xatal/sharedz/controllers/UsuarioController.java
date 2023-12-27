@@ -19,6 +19,7 @@ import xatal.sharedz.services.UsuarioService;
 import xatal.sharedz.structures.Login;
 import xatal.sharedz.structures.PublicUsuario;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,12 +52,13 @@ public class UsuarioController {
         usuario.encodePassword();
         usuario = this.usuarioService.saveUsuario(usuario);
         if (usuario != null) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Token", usuario.getToken());
+            HashMap<String, String> response = new HashMap<>();
+            response.put("email", usuario.getEmail());
+            response.put("username", usuario.getUsername());
+            response.put("token", usuario.getToken());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .headers(headers)
-                    .body(new PublicUsuario(usuario));
+                    .body(response);
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
