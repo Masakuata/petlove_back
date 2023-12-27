@@ -374,30 +374,35 @@ paths:
           application/json:
             schema:
               type: object
-              title: Usuario para registrar
-              description: Informacion del usuario a registrar
-              required:
-                - username
-                - email
-                - password
+              allOf:
+                - type: object
+                  title: Usuario para registrar
+                  description: Informacion del usuario a registrar
+                  required:
+                    - username
+                    - email
+                    - password
+                  properties:
+                    username:
+                      allOf:
+                        - type: string
+                          title: Username del usuario
+                          example: juanito
+                    email:
+                      allOf:
+                        - type: string
+                          title: Email del usuario
+                          minLength: 5
+                          maxLength: 320
+                          example: correo@dominio.com
+                    password:
+                      allOf:
+                        - type: string
+                          title: Contrasena del usuario
+                          example: password981
               properties:
-                username:
-                  allOf:
-                    - type: string
-                      title: Username del usuario
-                      example: juanito
-                email:
-                  allOf:
-                    - type: string
-                      title: Email del usuario
-                      minLength: 5
-                      maxLength: 320
-                      example: correo@dominio.com
-                password:
-                  allOf:
-                    - type: string
-                      title: Contrasena del usuario
-                      example: password981
+                token:
+                  type: string
       responses:
         '201':
           description: La solicitud fue exitosa y el nuevo usuario ha sido creado
