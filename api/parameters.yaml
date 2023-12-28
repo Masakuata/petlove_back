@@ -14,6 +14,13 @@ components:
       schema:
         $ref: 'schemas.yaml#/components/schemas/username'
       required: true
+    query_cliente_nombre:
+      name: nombre
+      description: Cadena para buscar cliente por nombre
+      in: query
+      schema:
+        $ref: 'schemas.yaml#/components/schemas/username'
+      required: false
     path_cliente_id:
       name: id_cliente
       description: Id del cliente

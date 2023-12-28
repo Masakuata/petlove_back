@@ -6,6 +6,7 @@ import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.repositories.ClienteRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ClienteService {
@@ -21,6 +22,17 @@ public class ClienteService {
             this.clientesCache = this.clientes.getAll();
         }
         return this.clientesCache;
+    }
+
+    public List<Cliente> searchByName(String nombre) {
+        if (this.clientesCache == null) {
+            this.clientesCache = this.clientes.getAll();
+        }
+        return this.clientesCache
+                .stream()
+                .filter(cliente ->
+                        cliente.getNombre().toLowerCase().contains(nombre.toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public Cliente saveCliente(Cliente cliente) {

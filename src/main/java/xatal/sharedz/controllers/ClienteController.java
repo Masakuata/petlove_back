@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.security.TokenUtils;
@@ -28,12 +29,20 @@ public class ClienteController {
     }
 
     @GetMapping()
-    public ResponseEntity getClientes(@RequestHeader("Token") String token) {
+    public ResponseEntity getClientes(
+            @RequestHeader("Token") String token,
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery
+    ) {
         Claims claims = TokenUtils.getTokenClaims(token);
         if (claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        List<Cliente> clientes = this.clienteService.getAll();
+        List<Cliente> clientes;
+        if (nombreQuery != null && !nombreQuery.isEmpty()) {
+            clientes = this.clienteService.searchByName(nombreQuery);
+        } else {
+            clientes = this.clienteService.getAll();
+        }
         if (clientes.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
