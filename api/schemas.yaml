@@ -1,0 +1,132 @@
+components:
+  schemas:
+    record:
+      type: object
+      required: [ id ]
+      properties:
+        id:
+          type: number
+          format: integer
+    token:
+      type: string
+      title: Token identificador de la sesion de usuario
+      example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+    email:
+      type: string
+      title: Email del usuario
+      minLength: 5
+      maxLength: 320
+      example: correo@dominio.com
+    username:
+      type: string
+      title: Username del usuario
+      example: juanito
+    password:
+      type: string
+      title: Contrasena del usuario
+      example: password981
+    newUsuario:
+      type: object
+      title: Usuario para registrar
+      description: Informacion del usuario a registrar
+      required: [ username, email, password ]
+      properties:
+        username:
+          allOf:
+            - $ref: '#/components/schemas/username'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+        password:
+          allOf:
+            - $ref: '#/components/schemas/password'
+    publicUsuario:
+      type: object
+      title: Informacion publica de usuario
+      description: Informacion publica de un usuario registrado
+      required: [ username, email ]
+      properties:
+        username:
+          allOf:
+            - $ref: '#/components/schemas/username'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+        token:
+          allOf:
+            - $ref: '#/components/schemas/token'
+    loginCredentials:
+      type: object
+      title: Credenciales de inicio de sesion
+      description: Correo electronico y contrasena de un usuario registrado
+      required: [ email, password ]
+      properties:
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+        password:
+          allOf:
+            - $ref: '#/components/schemas/password'
+    newProducto:
+      type: object
+      title: Producto de venta
+      required: [ nombre, presentacion, raza, precio ]
+      properties:
+        nombre:
+          type: string
+        presentacion:
+          type: string
+        tipoMascota:
+          type: string
+        raza:
+          type: string
+        precio:
+          type: number
+          format: decimal
+        cantidad:
+          type: number
+          format: integer
+    producto:
+      type: object
+      required: [ id ]
+      allOf:
+        - $ref: '#/components/schemas/newProducto'
+      properties:
+        id:
+          type: number
+          format: integer
+    producto_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/producto'
+    cliente:
+      type: object
+      properties:
+        tipoCliente:
+          type: number
+          format: integer
+        nombre:
+          type: string
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+        RFC:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+    cliente_record:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/cliente'
+        - $ref: '#/components/schemas/record'
+    cliente_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/cliente_record'
+      
