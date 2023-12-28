@@ -337,6 +337,7 @@ paths:
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/header_token'
         - $ref: 'parameters.yaml#/components/parameters/query_cliente_nombre'
+        - $ref: 'parameters.yaml#/components/parameters/cantidad_clientes'
       responses:
         200:
           description: Se han retornado los clientes registrados

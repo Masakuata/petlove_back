@@ -24,7 +24,7 @@ public class ClienteService {
         return this.clientesCache;
     }
 
-    public List<Cliente> searchByName(String nombre) {
+    public List<Cliente> searchByName(String nombre, int size) {
         if (this.clientesCache == null) {
             this.clientesCache = this.clientes.getAll();
         }
@@ -32,6 +32,7 @@ public class ClienteService {
                 .stream()
                 .filter(cliente ->
                         cliente.getNombre().toLowerCase().contains(nombre.toLowerCase()))
+                .limit(size)
                 .collect(Collectors.toList());
     }
 

@@ -31,7 +31,8 @@ public class ClienteController {
     @GetMapping()
     public ResponseEntity getClientes(
             @RequestHeader("Token") String token,
-            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
+            @RequestParam(name = "cant", required = false, defaultValue = "10") int size
     ) {
         Claims claims = TokenUtils.getTokenClaims(token);
         if (claims == null || TokenUtils.isExpired(claims)) {
@@ -39,7 +40,7 @@ public class ClienteController {
         }
         List<Cliente> clientes;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            clientes = this.clienteService.searchByName(nombreQuery);
+            clientes = this.clienteService.searchByName(nombreQuery, size);
         } else {
             clientes = this.clienteService.getAll();
         }
