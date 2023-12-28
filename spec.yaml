@@ -801,6 +801,14 @@ paths:
             title: Username del usuario
             example: juanito
           required: false
+        - name: cant
+          description: Cantidad de clientes a retornar
+          in: query
+          schema:
+            type: number
+            format: integer
+            default: 10
+          required: false
       responses:
         '200':
           description: Se han retornado los clientes registrados
