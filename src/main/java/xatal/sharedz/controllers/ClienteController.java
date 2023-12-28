@@ -55,7 +55,7 @@ public class ClienteController {
         if (cliente == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.ok(cliente);
+        return new ResponseEntity(cliente, HttpStatus.CREATED);
     }
 
     @PutMapping("/{cliente_id}")
