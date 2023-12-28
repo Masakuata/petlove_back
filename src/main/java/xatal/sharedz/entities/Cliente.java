@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Cliente {
@@ -15,9 +13,8 @@ public class Cliente {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_cliente", nullable = false)
-    private TipoCliente tipoCliente;
+    @Column(name = "tipo_cliente", nullable = false)
+    private Integer tipoCliente;
 
     @Column(name = "nombre", nullable = false)
     private String nombre;
@@ -37,6 +34,13 @@ public class Cliente {
     public Cliente() {
     }
 
+//    public Cliente(PublicCliente publicCliente) {
+//        this.nombre = publicCliente.nombre;
+//        this.direccion = publicCliente.direccion;
+//        this.tipoCliente = publicCliente.tipoCliente;
+//        this
+//    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -45,11 +49,11 @@ public class Cliente {
         return id;
     }
 
-    public TipoCliente getTipoCliente() {
+    public int getTipoCliente() {
         return tipoCliente;
     }
 
-    public void setTipoCliente(TipoCliente tipoCliente) {
+    public void setTipoCliente(int tipoCliente) {
         this.tipoCliente = tipoCliente;
     }
 
