@@ -33,7 +33,11 @@ public class UsuarioController {
     }
 
     @GetMapping()
-    public ResponseEntity getUsuarios() {
+    public ResponseEntity getUsuarios(@RequestHeader("Token") String token) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims)) {
+            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+        }
         List<PublicUsuario> usuarios = this.usuarioService.getAllPublic();
         if (usuarios.isEmpty()) {
             return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
@@ -156,5 +160,24 @@ public class UsuarioController {
             return ResponseEntity.ok(new PublicUsuario(miembro));
         }
         return new ResponseEntity(HttpStatus.CONFLICT);
+    }
+
+    @PutMapping("/{username}/password")
+    public ResponseEntity changePassword(
+            @RequestHeader("Token") String token,
+            @PathVariable("username") String username,
+            @RequestBody Map<String, String> payload) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
+            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+        }
+        Usuario usuario = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
+        if (usuario == null) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        usuario.setPassword(payload.get("password"));
+        usuario.encodePassword();
+        usuario = this.usuarioService.saveUsuario(usuario);
+        return ResponseEntity.ok(new PublicUsuario(usuario));
     }
 }
