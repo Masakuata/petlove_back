@@ -793,6 +793,14 @@ paths:
             title: Token identificador de la sesion de usuario
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
+        - name: nombre
+          description: Cadena para buscar cliente por nombre
+          in: query
+          schema:
+            type: string
+            title: Username del usuario
+            example: juanito
+          required: false
       responses:
         '200':
           description: Se han retornado los clientes registrados
