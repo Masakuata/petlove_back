@@ -10,21 +10,27 @@ import java.util.List;
 @Service
 public class ClienteService {
     private final ClienteRepository clientes;
+    private List<Cliente> clientesCache = null;
 
     public ClienteService(ClienteRepository clientes) {
         this.clientes = clientes;
     }
 
     public List<Cliente> getAll() {
-        return this.clientes.getAll();
+        if (this.clientesCache == null) {
+            this.clientesCache = this.clientes.getAll();
+        }
+        return this.clientesCache;
     }
 
     public Cliente saveCliente(Cliente cliente) {
+        this.clientesCache = null;
         return this.clientes.save(cliente);
     }
 
     @Transactional
     public void removeById(int id) {
+        this.clientesCache = null;
         this.clientes.deleteById((long) id);
     }
 
