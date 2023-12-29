@@ -2,19 +2,19 @@ package xatal.sharedz.structures;
 
 import xatal.sharedz.entities.Producto;
 
-public class NewProducto {
-    public String nombre;
-    public String presentacion;
-    public String tipoMascota;
-    public String raza;
-    public float precio;
+public class PublicProducto {
+    public String nombre = "";
+    public String presentacion = "";
+    public String tipoMascota = "";
+    public String raza = "";
+    public float precio = -1;
 
-    public int cantidad;
+    public int cantidad = 0;
 
-    public NewProducto() {
+    public PublicProducto() {
     }
 
-    public NewProducto(Producto producto) {
+    public PublicProducto(Producto producto) {
         this.nombre = producto.getNombre();
         this.presentacion = producto.getPresentacion();
         this.tipoMascota = producto.getTipoMascota();

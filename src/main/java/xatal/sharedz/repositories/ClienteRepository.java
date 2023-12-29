@@ -6,12 +6,15 @@ import org.springframework.stereotype.Repository;
 import xatal.sharedz.entities.Cliente;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends CrudRepository<Cliente, Long> {
     @Query(value = "SELECT * FROM Sharedz.cliente",
             nativeQuery = true)
     List<Cliente> getAll();
+
+    Optional<Cliente> getById(Long id);
 
     Long countByEmail(String email);
 

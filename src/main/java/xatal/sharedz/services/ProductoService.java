@@ -4,7 +4,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.repositories.ProductoRepository;
-import xatal.sharedz.structures.NewProducto;
+import xatal.sharedz.structures.PublicProducto;
+import xatal.sharedz.util.Util;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,11 +34,11 @@ public class ProductoService {
         return this.productosCache
                 .stream()
                 .filter(producto ->
-                        producto.getNombre().toLowerCase().contains(nombre.toLowerCase()))
+                        Util.containsAnyCase(producto.getNombre(), nombre))
                 .collect(Collectors.toList());
     }
 
-    public Producto newProducto(NewProducto newProducto) {
+    public Producto newProducto(PublicProducto newProducto) {
         this.productosCache = null;
         return this.productos.save(new Producto(newProducto));
     }

@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import xatal.sharedz.structures.NewProducto;
+import xatal.sharedz.structures.PublicProducto;
 
 @Entity
 public class Producto {
@@ -32,7 +32,7 @@ public class Producto {
     @Column(name = "cantidad", nullable = false)
     private int cantidad = 0;
 
-    public Producto(NewProducto newProducto) {
+    public Producto(PublicProducto newProducto) {
         this.nombre = newProducto.nombre;
         this.presentacion = newProducto.presentacion;
         this.tipoMascota = newProducto.tipoMascota;

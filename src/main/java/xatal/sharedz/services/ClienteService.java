@@ -41,6 +41,10 @@ public class ClienteService {
         return this.clientes.save(cliente);
     }
 
+    public Cliente getById(int id) {
+        return this.clientes.getById((long) id).orElse(null);
+    }
+
     @Transactional
     public void removeById(int id) {
         this.clientesCache = null;

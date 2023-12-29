@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.ProductoService;
-import xatal.sharedz.structures.NewProducto;
+import xatal.sharedz.structures.PublicProducto;
 
 import java.util.List;
 
@@ -52,10 +52,8 @@ public class ProductoController {
     @PostMapping()
     public ResponseEntity registerProducto(
             @RequestHeader("Token") String token,
-            @RequestBody NewProducto newProducto) {
+            @RequestBody PublicProducto newProducto) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        System.out.println(newProducto.isValid());
-        System.out.println(TokenUtils.isExpired(claims));
         if (!newProducto.isValid() || claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
