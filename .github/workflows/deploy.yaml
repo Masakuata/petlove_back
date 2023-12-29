@@ -36,7 +36,7 @@ on:
         type: number
         description: Puerto para exponer el servicio
         required: true
-        default: 110
+        default: 81
       internal_port:
         type: number
         description: Puerto interno donde corre el servicio
@@ -81,9 +81,10 @@ jobs:
           token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
           images: '[{
                     "name": "petloveback",
-                    "image":{
-                    "registry_type": "DOCKER_HUB",
-                    "registry": "w3edd",
-                    "repository": "sharedz_b",
-                    "tag": "${{ inputs.tag }}"
+                    "image": {
+                      "registry_type": "DOCKER_HUB",
+                      "registry": "w3edd",
+                      "repository": "sharedz_b",
+                      "tag": "${{ inputs.tag }}"
+                      }
                     }]'
