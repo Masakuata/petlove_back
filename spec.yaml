@@ -646,6 +646,12 @@ paths:
             title: Token identificador de la sesion de usuario
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
+        - name: nombre
+          description: Cadena para buscar producto por nombre
+          in: query
+          schema:
+            type: string
+          required: false
       responses:
         '200':
           description: Se ha retornado la informacion de los productos registrados
