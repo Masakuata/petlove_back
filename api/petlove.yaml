@@ -286,6 +286,7 @@ paths:
         - Producto
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/header_token'
+        - $ref: 'parameters.yaml#/components/parameters/query_producto_nombre'
       responses:
         200:
           description: Se ha retornado la informacion de los productos registrados

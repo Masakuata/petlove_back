@@ -14,12 +14,12 @@ jobs:
       - name: Validate spec
         uses: mpetrunic/swagger-cli-action@v1.0.0
         with:
-          command: "validate api/sharedz.yaml"
+          command: "validate api/petlove.yaml"
 
       - name: Build spec
         uses: mpetrunic/swagger-cli-action@v1.0.0
         with:
-          command: "bundle -o spec.yaml -r -t yaml api/sharedz.yaml"
+          command: "bundle -o spec.yaml -r -t yaml api/petlove.yaml"
 
       - name: Publish spec
         uses: Legion2/swagger-ui-action@v1

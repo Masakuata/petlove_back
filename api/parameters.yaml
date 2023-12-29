@@ -38,3 +38,10 @@ components:
         type: number
         format: integer
       required: true
+    query_producto_nombre:
+      name: nombre
+      description: Cadena para buscar producto por nombre
+      in: query
+      schema:
+        type: string
+      required: false

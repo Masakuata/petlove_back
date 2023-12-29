@@ -1,6 +1,5 @@
 package xatal.sharedz.controllers;
 
-import com.fasterxml.jackson.databind.ser.std.ToEmptyObjectSerializer;
 import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.security.TokenUtils;
@@ -29,12 +29,20 @@ public class ProductoController {
     }
 
     @GetMapping()
-    public ResponseEntity getProductos(@RequestHeader("Token") String token) {
+    public ResponseEntity getProductos(
+            @RequestHeader("Token") String token,
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery
+    ) {
         Claims claims = TokenUtils.getTokenClaims(token);
         if (claims == null || TokenUtils.isExpired(claims)) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        List<Producto> productos = this.productoService.getAll();
+        List<Producto> productos;
+        if (nombreQuery != null && !nombreQuery.isEmpty()) {
+            productos = this.productoService.searchByName(nombreQuery);
+        } else {
+            productos = this.productoService.getAll();
+        }
         if (productos.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
