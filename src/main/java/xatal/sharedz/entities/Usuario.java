@@ -9,10 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.structures.Login;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -97,7 +100,12 @@ public class Usuario {
     }
 
     public void encodePassword() {
-        this.password = new BCryptPasswordEncoder().encode(this.password);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            this.password = Base64.getEncoder().encodeToString(digest.digest(this.password.getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getToken() {

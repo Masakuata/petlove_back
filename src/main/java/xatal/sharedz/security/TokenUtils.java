@@ -4,9 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -36,23 +34,6 @@ public class TokenUtils {
                 .claims(claims)
                 .signWith(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
                 .compact();
-    }
-
-    public static UsernamePasswordAuthenticationToken getAuth(String token) {
-        Claims claims;
-        try {
-            claims = Jwts.parser()
-                    .setSigningKey(ACCESS_TOKEN_SECRET.getBytes())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (JwtException | IllegalArgumentException e) {
-            return null;
-        }
-        return new UsernamePasswordAuthenticationToken(
-                claims.getSubject(),
-                null,
-                Collections.emptyList());
     }
 
     public static Claims getTokenClaims(String token) {
