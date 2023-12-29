@@ -80,7 +80,7 @@ jobs:
           app_name: petloveback
           token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
           images: '[{
-                    "name": "petloveback",
+                    "name": "w-3-edd-sharedz-b",
                     "image": {
                       "registry_type": "DOCKER_HUB",
                       "registry": "w3edd",
