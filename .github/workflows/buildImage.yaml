@@ -12,9 +12,19 @@ on:
         description: Puerto para exponer el servicio
         required: false
         default: 81
-      deploy:
+      internal_port:
+        type: number
+        description: Puerto interno donde corre el servicio
+        required: false
+        default: 8080
+      deploy_on_anton:
         type: boolean
-        description: Desplegar al finalizar construccion de imagen
+        description: Desplegar en anton
+        required: true
+        default: false
+      deploy_digital_ocean:
+        type: boolean
+        description: Desplegar en Digital Ocean
         required: true
         default: false
 env:
@@ -64,9 +74,12 @@ jobs:
           push: true
   deploy:
     needs: build_image
-    if: ${{ fromJSON(inputs.deploy) }}
+    if: ${{ fromJSON(inputs.deploy_on_anton) || fromJSON(inputs.deploy_digital_ocean) }}
     uses: ./.github/workflows/deploy.yaml
     with:
       external_port: ${{ fromJSON(inputs.external_port) }}
+      internal_port: $ {{ fromJSON(inputs.internal_port) }}
       tag: ${{ github.event.inputs.tag }}
+      deploy_on_anton: ${{ fromJSON(inputs.deploy_on_anton) }}
+      deploy_digital_ocean: ${{ fromJSON(inputs.deploy_digital_ocean) }}
     secrets: inherit
