@@ -1122,8 +1122,37 @@ paths:
                                 - fecha
                               properties:
                                 cliente:
-                                  type: number
-                                  format: integer
+                                  type: object
+                                  allOf:
+                                    - type: object
+                                      allOf:
+                                        - type: object
+                                          properties:
+                                            tipoCliente:
+                                              type: number
+                                              format: integer
+                                            nombre:
+                                              type: string
+                                            email:
+                                              allOf:
+                                                - type: string
+                                                  title: Email del usuario
+                                                  minLength: 5
+                                                  maxLength: 320
+                                                  example: correo@dominio.com
+                                            RFC:
+                                              type: string
+                                            direccion:
+                                              type: string
+                                            telefono:
+                                              type: string
+                                        - type: object
+                                          required:
+                                            - id
+                                          properties:
+                                            id:
+                                              type: number
+                                              format: integer
                                 pagado:
                                   type: boolean
                                 fecha:
@@ -1208,8 +1237,37 @@ paths:
                     - fecha
                   properties:
                     cliente:
-                      type: number
-                      format: integer
+                      type: object
+                      allOf:
+                        - type: object
+                          allOf:
+                            - type: object
+                              properties:
+                                tipoCliente:
+                                  type: number
+                                  format: integer
+                                nombre:
+                                  type: string
+                                email:
+                                  allOf:
+                                    - type: string
+                                      title: Email del usuario
+                                      minLength: 5
+                                      maxLength: 320
+                                      example: correo@dominio.com
+                                RFC:
+                                  type: string
+                                direccion:
+                                  type: string
+                                telefono:
+                                  type: string
+                            - type: object
+                              required:
+                                - id
+                              properties:
+                                id:
+                                  type: number
+                                  format: integer
                     pagado:
                       type: boolean
                     fecha:
@@ -1269,8 +1327,37 @@ paths:
                           - fecha
                         properties:
                           cliente:
-                            type: number
-                            format: integer
+                            type: object
+                            allOf:
+                              - type: object
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      tipoCliente:
+                                        type: number
+                                        format: integer
+                                      nombre:
+                                        type: string
+                                      email:
+                                        allOf:
+                                          - type: string
+                                            title: Email del usuario
+                                            minLength: 5
+                                            maxLength: 320
+                                            example: correo@dominio.com
+                                      RFC:
+                                        type: string
+                                      direccion:
+                                        type: string
+                                      telefono:
+                                        type: string
+                                  - type: object
+                                    required:
+                                      - id
+                                    properties:
+                                      id:
+                                        type: number
+                                        format: integer
                           pagado:
                             type: boolean
                           fecha:
@@ -1367,8 +1454,37 @@ paths:
                           - fecha
                         properties:
                           cliente:
-                            type: number
-                            format: integer
+                            type: object
+                            allOf:
+                              - type: object
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      tipoCliente:
+                                        type: number
+                                        format: integer
+                                      nombre:
+                                        type: string
+                                      email:
+                                        allOf:
+                                          - type: string
+                                            title: Email del usuario
+                                            minLength: 5
+                                            maxLength: 320
+                                            example: correo@dominio.com
+                                      RFC:
+                                        type: string
+                                      direccion:
+                                        type: string
+                                      telefono:
+                                        type: string
+                                  - type: object
+                                    required:
+                                      - id
+                                    properties:
+                                      id:
+                                        type: number
+                                        format: integer
                           pagado:
                             type: boolean
                           fecha:
@@ -1456,8 +1572,37 @@ paths:
                 - fecha
               properties:
                 cliente:
-                  type: number
-                  format: integer
+                  type: object
+                  allOf:
+                    - type: object
+                      allOf:
+                        - type: object
+                          properties:
+                            tipoCliente:
+                              type: number
+                              format: integer
+                            nombre:
+                              type: string
+                            email:
+                              allOf:
+                                - type: string
+                                  title: Email del usuario
+                                  minLength: 5
+                                  maxLength: 320
+                                  example: correo@dominio.com
+                            RFC:
+                              type: string
+                            direccion:
+                              type: string
+                            telefono:
+                              type: string
+                        - type: object
+                          required:
+                            - id
+                          properties:
+                            id:
+                              type: number
+                              format: integer
                 pagado:
                   type: boolean
                 fecha:
@@ -1485,8 +1630,37 @@ paths:
                           - fecha
                         properties:
                           cliente:
-                            type: number
-                            format: integer
+                            type: object
+                            allOf:
+                              - type: object
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      tipoCliente:
+                                        type: number
+                                        format: integer
+                                      nombre:
+                                        type: string
+                                      email:
+                                        allOf:
+                                          - type: string
+                                            title: Email del usuario
+                                            minLength: 5
+                                            maxLength: 320
+                                            example: correo@dominio.com
+                                      RFC:
+                                        type: string
+                                      direccion:
+                                        type: string
+                                      telefono:
+                                        type: string
+                                  - type: object
+                                    required:
+                                      - id
+                                    properties:
+                                      id:
+                                        type: number
+                                        format: integer
                           pagado:
                             type: boolean
                           fecha:
