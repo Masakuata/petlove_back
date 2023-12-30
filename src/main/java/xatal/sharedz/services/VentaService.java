@@ -10,12 +10,12 @@ import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class VentaService {
@@ -37,17 +37,17 @@ public class VentaService {
     }
 
     public List<Venta> searchVentas(String nombreCliente, Date fechaVenta) {
-        Stream<Venta> ventas = this.ventaRepository.getAll().stream();
-        Predicate<Venta> filtros = venta -> true;
+        List<Predicate<Venta>> predicates = new ArrayList<>();
         if (nombreCliente != null && !nombreCliente.isEmpty()) {
-            filtros = filtros.and(venta ->
-                    Util.containsAnyCase(venta.getCliente().getNombre(), nombreCliente));
+            predicates.add(venta -> Util.containsAnyCase(venta.getCliente().getNombre(), nombreCliente));
         }
         if (fechaVenta != null) {
-            filtros = filtros.and(venta -> Util.compareDates(venta.getFecha(), fechaVenta));
+            predicates.add(venta -> Util.compareDates(venta.getFecha(), fechaVenta));
         }
-        return ventas
-                .filter(filtros)
+        return this.ventaRepository
+                .getAll()
+                .parallelStream()
+                .filter(predicates.stream().reduce(x -> true, Predicate::and))
                 .collect(Collectors.toList());
     }
 
