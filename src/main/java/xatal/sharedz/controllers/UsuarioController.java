@@ -35,11 +35,7 @@ public class UsuarioController {
     }
 
     @GetMapping()
-    public ResponseEntity getUsuarios(@RequestHeader("Token") String token) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
+    public ResponseEntity getUsuarios() {
         List<PublicUsuario> usuarios = this.usuarioService.getAllPublic();
         if (usuarios.isEmpty()) {
             return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
@@ -90,9 +86,6 @@ public class UsuarioController {
     @GetMapping("/token")
     public ResponseEntity checkToken(@RequestHeader("Token") String token) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         if (!this.usuarioService.areCredentialsUsed(claims.getSubject(), claims.get("username").toString())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
@@ -108,9 +101,6 @@ public class UsuarioController {
     @DeleteMapping()
     public ResponseEntity delete(@RequestHeader("Token") String token) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         if (!this.usuarioService.deleteUsuario(claims.getSubject())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
@@ -121,10 +111,10 @@ public class UsuarioController {
     public ResponseEntity changeUsername(
             @RequestHeader("Token") String token,
             @PathVariable("username") String username,
-            @RequestBody Map<String, String> payload) {
-
+            @RequestBody Map<String, String> payload
+    ) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
+        if (!claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         if (!this.usuarioService.isUsernameUsed(payload.get("username"))) {
@@ -148,7 +138,7 @@ public class UsuarioController {
             @PathVariable("username") String username,
             @RequestBody Map<String, String> payload) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
+        if (!claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         if (!this.usuarioService.isEmailUsed(payload.get("email"))) {
@@ -172,7 +162,7 @@ public class UsuarioController {
             @PathVariable("username") String username,
             @RequestBody Map<String, String> payload) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims) || !claims.get("username").equals(username)) {
+        if (!claims.get("username").equals(username)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
         Usuario usuario = this.usuarioService.getUsuarioFromEmail(claims.getSubject());

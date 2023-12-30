@@ -1,6 +1,5 @@
 package xatal.sharedz.controllers;
 
-import io.jsonwebtoken.Claims;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Venta;
-import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.VentaService;
 import xatal.sharedz.structures.PublicVenta;
 
@@ -36,14 +33,9 @@ public class VentaController {
 
     @GetMapping
     public ResponseEntity getVentas(
-            @RequestHeader("Token") String token,
             @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
             @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Optional<Date> fecha
     ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
         List<Venta> ventas = this.ventaService.searchVentas(
                 clienteNombre.orElse(null),
                 fecha.orElse(null));
@@ -54,14 +46,7 @@ public class VentaController {
     }
 
     @PostMapping
-    public ResponseEntity newVenta(
-            @RequestHeader("Token") String token,
-            @RequestBody PublicVenta venta
-    ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity newVenta(@RequestBody PublicVenta venta) {
         Venta savedVenta = this.ventaService.newVenta(venta);
         if (savedVenta == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -70,14 +55,7 @@ public class VentaController {
     }
 
     @GetMapping("/{id_venta}")
-    public ResponseEntity getVenta(
-            @RequestHeader("Token") String token,
-            @PathVariable("id_venta") int ventaId
-    ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity getVenta(@PathVariable("id_venta") int ventaId) {
         Venta venta = this.ventaService.getById(ventaId);
         if (venta == null) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -87,14 +65,10 @@ public class VentaController {
 
     @PutMapping("/{id_venta}")
     public ResponseEntity updateVenta(
-            @RequestHeader("Token") String token,
             @PathVariable("id_venta") int ventaId,
             @RequestBody PublicVenta venta
     ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+        venta.id = ventaId;
         Venta updatedVenta = this.ventaService.updateVenta(venta);
         if (updatedVenta == null) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -103,14 +77,7 @@ public class VentaController {
     }
 
     @DeleteMapping("/{id_venta}")
-    public ResponseEntity deleteVenta(
-            @RequestHeader("Token") String token,
-            @PathVariable("id_venta") int ventaId
-    ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity deleteVenta(@PathVariable("id_venta") int ventaId) {
         if (!this.ventaService.isIdRegistered(ventaId)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

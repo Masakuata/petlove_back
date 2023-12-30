@@ -32,13 +32,7 @@ public class ProductoController {
 
     @GetMapping()
     public ResponseEntity getProductos(
-            @RequestHeader("Token") String token,
-            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery
-    ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery) {
         List<Producto> productos;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
             productos = this.productoService.searchByName(nombreQuery);
@@ -52,13 +46,7 @@ public class ProductoController {
     }
 
     @PostMapping()
-    public ResponseEntity registerProducto(
-            @RequestHeader("Token") String token,
-            @RequestBody PublicProducto newProducto) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (!newProducto.isValid() || claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
+    public ResponseEntity registerProducto(@RequestBody PublicProducto newProducto) {
         Producto savedProducto = this.productoService.newProducto(newProducto);
         if (savedProducto != null) {
             return new ResponseEntity(savedProducto, HttpStatus.CREATED);
@@ -67,13 +55,7 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id_producto}")
-    public ResponseEntity deleteProducto(
-            @RequestHeader("Token") String token,
-            @PathVariable("id_producto") int idProducto) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null || TokenUtils.isExpired(claims)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
+    public ResponseEntity deleteProducto(@PathVariable("id_producto") int idProducto) {
         if (!this.productoService.isIdRegistered(idProducto)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

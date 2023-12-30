@@ -34,16 +34,12 @@ public class GrupoController {
             @RequestHeader("Token") String token,
             @PathVariable(name = "grupoName") String grupoName
     ) {
-        Claims claims = TokenUtils.getTokenClaims(token);
-        if (claims == null) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         if (this.grupoService.isNameUsed(grupoName)) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
         Grupo newGrupo = this.grupoService.newGrupo(
                 grupoName,
-                this.miembroService.getUsuarioFromEmail(claims.getSubject()));
+                this.miembroService.getUsuarioFromEmail(TokenUtils.getTokenClaims(token).getSubject()));
         if (newGrupo != null) {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
