@@ -878,8 +878,11 @@ paths:
                                   example: correo@dominio.com
                             RFC:
                               type: string
-                            direccion:
-                              type: string
+                            direcciones:
+                              type: array
+                              items:
+                                type: string
+                                example: Cerrada Tajin 12
                             telefono:
                               type: string
                         - type: object
@@ -929,8 +932,11 @@ paths:
                       example: correo@dominio.com
                 RFC:
                   type: string
-                direccion:
-                  type: string
+                direcciones:
+                  type: array
+                  items:
+                    type: string
+                    example: Cerrada Tajin 12
                 telefono:
                   type: string
       responses:
@@ -957,8 +963,11 @@ paths:
                             example: correo@dominio.com
                       RFC:
                         type: string
-                      direccion:
-                        type: string
+                      direcciones:
+                        type: array
+                        items:
+                          type: string
+                          example: Cerrada Tajin 12
                       telefono:
                         type: string
                   - type: object
@@ -1020,8 +1029,11 @@ paths:
                       example: correo@dominio.com
                 RFC:
                   type: string
-                direccion:
-                  type: string
+                direcciones:
+                  type: array
+                  items:
+                    type: string
+                    example: Cerrada Tajin 12
                 telefono:
                   type: string
       responses:
@@ -1048,8 +1060,11 @@ paths:
                             example: correo@dominio.com
                       RFC:
                         type: string
-                      direccion:
-                        type: string
+                      direcciones:
+                        type: array
+                        items:
+                          type: string
+                          example: Cerrada Tajin 12
                       telefono:
                         type: string
                   - type: object
@@ -1177,8 +1192,11 @@ paths:
                                                   example: correo@dominio.com
                                             RFC:
                                               type: string
-                                            direccion:
-                                              type: string
+                                            direcciones:
+                                              type: array
+                                              items:
+                                                type: string
+                                                example: Cerrada Tajin 12
                                             telefono:
                                               type: string
                                         - type: object
@@ -1292,8 +1310,11 @@ paths:
                                       example: correo@dominio.com
                                 RFC:
                                   type: string
-                                direccion:
-                                  type: string
+                                direcciones:
+                                  type: array
+                                  items:
+                                    type: string
+                                    example: Cerrada Tajin 12
                                 telefono:
                                   type: string
                             - type: object
@@ -1382,8 +1403,11 @@ paths:
                                             example: correo@dominio.com
                                       RFC:
                                         type: string
-                                      direccion:
-                                        type: string
+                                      direcciones:
+                                        type: array
+                                        items:
+                                          type: string
+                                          example: Cerrada Tajin 12
                                       telefono:
                                         type: string
                                   - type: object
@@ -1509,8 +1533,11 @@ paths:
                                             example: correo@dominio.com
                                       RFC:
                                         type: string
-                                      direccion:
-                                        type: string
+                                      direcciones:
+                                        type: array
+                                        items:
+                                          type: string
+                                          example: Cerrada Tajin 12
                                       telefono:
                                         type: string
                                   - type: object
@@ -1627,8 +1654,11 @@ paths:
                                   example: correo@dominio.com
                             RFC:
                               type: string
-                            direccion:
-                              type: string
+                            direcciones:
+                              type: array
+                              items:
+                                type: string
+                                example: Cerrada Tajin 12
                             telefono:
                               type: string
                         - type: object
@@ -1685,8 +1715,11 @@ paths:
                                             example: correo@dominio.com
                                       RFC:
                                         type: string
-                                      direccion:
-                                        type: string
+                                      direcciones:
+                                        type: array
+                                        items:
+                                          type: string
+                                          example: Cerrada Tajin 12
                                       telefono:
                                         type: string
                                   - type: object
