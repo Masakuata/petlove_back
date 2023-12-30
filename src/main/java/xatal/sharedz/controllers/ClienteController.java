@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.services.ClienteService;
+import xatal.sharedz.structures.ClienteMinimal;
 import xatal.sharedz.structures.PublicCliente;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin
 @RestController
@@ -33,16 +36,19 @@ public class ClienteController {
             @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
             @RequestParam(name = "cant", required = false, defaultValue = "10") int size
     ) {
-        List<PublicCliente> clientes;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            clientes = this.clienteService.searchByNamePublic(nombreQuery, size);
+            List<PublicCliente> clientes = this.clienteService.searchByNamePublic(nombreQuery, size);
+            if (clientes.isEmpty()) {
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            return ResponseEntity.ok(clientes);
         } else {
-            clientes = this.clienteService.getAllPublic();
+            List<ClienteMinimal> clientes = this.clienteService.getMinimal();
+            if (clientes.isEmpty()) {
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            return ResponseEntity.ok(clientes);
         }
-        if (clientes.isEmpty()) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(clientes);
     }
 
     @PostMapping()

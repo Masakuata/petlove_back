@@ -6,6 +6,7 @@ import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.entities.Direccion;
 import xatal.sharedz.repositories.ClienteRepository;
 import xatal.sharedz.repositories.DireccionRepository;
+import xatal.sharedz.structures.ClienteMinimal;
 import xatal.sharedz.structures.PublicCliente;
 
 import java.util.LinkedList;
@@ -35,6 +36,11 @@ public class ClienteService {
                 .stream()
                 .map(PublicCliente::new)
                 .collect(Collectors.toList());
+    }
+
+    public List<ClienteMinimal> getMinimal() {
+        return this.clientes.getMinimal()
+                .stream().toList();
     }
 
     public List<Cliente> searchByName(String nombre, int size) {
