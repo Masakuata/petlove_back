@@ -852,7 +852,56 @@ paths:
           required: false
       responses:
         '200':
-          description: Se han retornado los clientes registrados
+          description: Se han retornado una version minima de los clientes registrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  allOf:
+                    - type: object
+                      allOf:
+                        - type: object
+                          required:
+                            - id
+                          allOf:
+                            - type: object
+                              title: Producto de venta
+                              required:
+                                - nombre
+                                - presentacion
+                                - raza
+                                - precio
+                              properties:
+                                nombre:
+                                  type: string
+                                presentacion:
+                                  type: string
+                                tipoMascota:
+                                  type: string
+                                raza:
+                                  type: string
+                                precio:
+                                  type: number
+                                  format: decimal
+                                cantidad:
+                                  type: number
+                                  format: integer
+                          properties:
+                            id:
+                              type: number
+                              format: integer
+                      properties:
+                        nombre:
+                          type: string
+                        tipoCliente:
+                          type: number
+                          format: integer
+                        RFC:
+                          type: string
+        '202':
+          description: Se han retornado los resultados de la busqueda de clientes
           content:
             application/json:
               schema:
