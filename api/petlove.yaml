@@ -1,12 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Sharedz service
-  version: 0.4.2
+  title: PetLove Service
+  version: 0.6.4
 servers:
-  - description: Desarrollo HTTPS
-    url: https://neutral-kindly-wildcat.ngrok-free.app
-  - description: Desarrollo HTTP
-    url: http://clayrite.ddns.net:81
+  - description: Produccion HTTPS
+    url: https://petloveback-x7smt.ondigitalocean.app
 components:
   headers:
     Token:
@@ -177,7 +175,7 @@ paths:
       summary: Cambia el username de un usuario
       description: Actualiza el username de un usuario identificado por su username actual
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/header_token'
         - $ref: 'parameters.yaml#/components/parameters/path_username'
@@ -211,7 +209,7 @@ paths:
       summary: Cambia el email de un usuario
       description: Actualiza el email de un usuario identificado por su username
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/path_username'
         - $ref: 'parameters.yaml#/components/parameters/header_token'
@@ -248,7 +246,7 @@ paths:
       summary: Cambia la contraseña de un usuario
       description: Actualiza la contraseña del usuario identificado por su username
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/path_username'
         - $ref: 'parameters.yaml#/components/parameters/header_token'
@@ -325,6 +323,30 @@ paths:
           $ref: '#/components/responses/400'
         406:
           $ref: '#/components/responses/invalid_token'
+        500:
+          $ref: '#/components/responses/500'
+  /producto/{id_producto}:
+    summary: Realiza operaciones sobre un producto
+    description: Endpoint para realizaro operaciones sobre un producto identificado por su id
+    delete:
+      summary: Elimina un producto
+      description: Elimina un producto identificado por su id
+      tags:
+        - Producto
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/header_token'
+        - $ref: 'parameters.yaml#/components/parameters/path_producto_id'
+      responses:
+        200:
+          description: Se ha eliminado el producto
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/invalid_token'
+        409:
+          description: El producto se encuentra registrado en una o mas ventas
         500:
           $ref: '#/components/responses/500'
   /cliente:

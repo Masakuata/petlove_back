@@ -38,6 +38,14 @@ components:
         type: number
         format: integer
       required: true
+    path_producto_id:
+      name: id_producto
+      description: Id del producto
+      in: path
+      schema:
+        type: number
+        format: integer
+      required: true
     query_producto_nombre:
       name: nombre
       description: Cadena para buscar producto por nombre

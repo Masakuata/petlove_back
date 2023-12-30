@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.repositories.ProductoRepository;
+import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.structures.PublicProducto;
 import xatal.sharedz.util.Util;
 
@@ -13,11 +14,13 @@ import java.util.stream.Collectors;
 @Service
 public class ProductoService {
     private final ProductoRepository productos;
+    private final ProductoVentaRepository productoVenta;
 
     private List<Producto> productosCache = null;
 
-    public ProductoService(ProductoRepository productos) {
+    public ProductoService(ProductoRepository productos, ProductoVentaRepository productoVenta) {
         this.productos = productos;
+        this.productoVenta = productoVenta;
     }
 
     public List<Producto> getAll() {
@@ -47,11 +50,18 @@ public class ProductoService {
         return this.productos.countById(idProducto) > 0;
     }
 
+    public boolean isUsed(int idProducto) {
+        return this.productoVenta.countByProducto((long) idProducto) > 0;
+    }
+
     @Transactional
     public boolean deleteById(int idProducto) {
-        this.productosCache = null;
-        this.productos.deleteById(idProducto);
-        return true;
+        if (!this.isUsed(idProducto)) {
+            this.productosCache = null;
+            this.productos.deleteById(idProducto);
+            return true;
+        }
+        return false;
         // TODO Check if producto is used on another table
     }
 }

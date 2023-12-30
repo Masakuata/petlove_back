@@ -59,6 +59,9 @@ public class ProductoController {
         if (!this.productoService.isIdRegistered(idProducto)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
+        if (this.productoService.isUsed(idProducto)) {
+            return new ResponseEntity(HttpStatus.CONFLICT);
+        }
         this.productoService.deleteById(idProducto);
         return ResponseEntity.ok().build();
     }

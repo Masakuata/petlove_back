@@ -6,4 +6,5 @@ import xatal.sharedz.entities.ProductoVenta;
 
 @Repository
 public interface ProductoVentaRepository extends CrudRepository<ProductoVenta, Long> {
+    Long countByProducto(Long producto);
 }
