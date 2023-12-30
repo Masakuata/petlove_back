@@ -1,12 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Sharedz service
-  version: 0.4.2
+  title: PetLove Service
+  version: 0.6.4
 servers:
-  - description: Desarrollo HTTPS
-    url: 'https://neutral-kindly-wildcat.ngrok-free.app'
-  - description: Desarrollo HTTP
-    url: 'http://clayrite.ddns.net:81'
+  - description: Produccion HTTPS
+    url: 'https://petloveback-x7smt.ondigitalocean.app'
 components:
   headers:
     Token:
@@ -405,7 +403,7 @@ paths:
       summary: Cambia el username de un usuario
       description: Actualiza el username de un usuario identificado por su username actual
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - name: Token
           description: Token identificador de la sesion de usuario
@@ -482,7 +480,7 @@ paths:
       summary: Cambia el email de un usuario
       description: Actualiza el email de un usuario identificado por su username
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - name: username
           description: Username del usuario
@@ -561,7 +559,7 @@ paths:
       summary: Cambia la contraseña de un usuario
       description: Actualiza la contraseña del usuario identificado por su username
       tags:
-        - Actualizar usuario
+        - Usuario
       parameters:
         - name: username
           description: Username del usuario
@@ -780,6 +778,43 @@ paths:
           description: La solicitud esta incompleta o malformada
         '406':
           description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+  '/producto/{id_producto}':
+    summary: Realiza operaciones sobre un producto
+    description: Endpoint para realizaro operaciones sobre un producto identificado por su id
+    delete:
+      summary: Elimina un producto
+      description: Elimina un producto identificado por su id
+      tags:
+        - Producto
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_producto
+          description: Id del producto
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      responses:
+        '200':
+          description: Se ha eliminado el producto
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '409':
+          description: El producto se encuentra registrado en una o mas ventas
         '500':
           description: Error interno del servidor
   /cliente:
