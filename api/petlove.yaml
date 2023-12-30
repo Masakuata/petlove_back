@@ -363,7 +363,13 @@ paths:
         - $ref: 'parameters.yaml#/components/parameters/cantidad_clientes'
       responses:
         200:
-          description: Se han retornado los clientes registrados
+          description: Se han retornado una version minima de los clientes registrados
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/minimal_cliente_array'
+        202:
+          description: Se han retornado los resultados de la busqueda de clientes
           content:
             application/json:
               schema:

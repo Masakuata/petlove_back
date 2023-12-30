@@ -101,6 +101,24 @@ components:
         type: object
         allOf:
           - $ref: '#/components/schemas/producto'
+    minimal_cliente:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/producto'
+      properties:
+        nombre:
+          type: string
+        tipoCliente:
+          type: number
+          format: integer
+        RFC:
+          type: string
+    minimal_cliente_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/minimal_cliente'
     cliente:
       type: object
       properties:
