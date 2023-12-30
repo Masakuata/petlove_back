@@ -1066,3 +1066,511 @@ paths:
           description: El token provisto es invalido o ha expirado
         '500':
           description: Error interno del servidor
+  /venta:
+    summary: Catalogo de ventas
+    description: Endpoint para realizar operaciones sobre el catalogo de ventas
+    get:
+      summary: Retorna las ventas registradas
+      description: Retorna las ventas registradas con sus productos
+      tags:
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: nombre
+          description: Cadena para buscar cliente por nombre
+          in: query
+          schema:
+            type: string
+            title: Username del usuario
+            example: juanito
+          required: false
+        - name: fecha
+          description: Fecha para buscar ventas
+          in: query
+          schema:
+            type: string
+            format: date
+            example: 10-07-2023
+          required: false
+      responses:
+        '200':
+          description: Se han retornado las ventas registradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  allOf:
+                    - type: object
+                      allOf:
+                        - type: object
+                          required:
+                            - productos
+                          allOf:
+                            - type: object
+                              required:
+                                - cliente
+                                - pagado
+                                - fecha
+                              properties:
+                                cliente:
+                                  type: number
+                                  format: integer
+                                pagado:
+                                  type: boolean
+                                fecha:
+                                  type: string
+                                  format: date
+                                  example: 10-09-2023
+                                facturado:
+                                  type: boolean
+                          properties:
+                            productos:
+                              type: array
+                              items:
+                                type: object
+                                allOf:
+                                  - type: object
+                                    required:
+                                      - producto
+                                      - cantidad
+                                    properties:
+                                      producto:
+                                        type: number
+                                        format: integer
+                                        example: 8
+                                      cantidad:
+                                        type: number
+                                        format: integer
+                                        example: 10
+                                  - type: object
+                                    required:
+                                      - producto
+                                      - cantidad
+                                    properties:
+                                      producto:
+                                        type: number
+                                        format: integer
+                                        example: 8
+                                      cantidad:
+                                        type: number
+                                        format: integer
+                                        example: 10
+                        - type: object
+                          required:
+                            - id
+                          properties:
+                            id:
+                              type: number
+                              format: integer
+        '204':
+          description: No hay ventas registradas
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+    post:
+      summary: Registra una nueva venta
+      description: Registra una nueva venta
+      tags:
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productos
+              allOf:
+                - type: object
+                  required:
+                    - cliente
+                    - pagado
+                    - fecha
+                  properties:
+                    cliente:
+                      type: number
+                      format: integer
+                    pagado:
+                      type: boolean
+                    fecha:
+                      type: string
+                      format: date
+                      example: 10-09-2023
+                    facturado:
+                      type: boolean
+              properties:
+                productos:
+                  type: array
+                  items:
+                    type: object
+                    allOf:
+                      - type: object
+                        required:
+                          - producto
+                          - cantidad
+                        properties:
+                          producto:
+                            type: number
+                            format: integer
+                            example: 8
+                          cantidad:
+                            type: number
+                            format: integer
+                            example: 10
+                      - type: object
+                        required:
+                          - producto
+                          - cantidad
+                        properties:
+                          producto:
+                            type: number
+                            format: integer
+                            example: 8
+                          cantidad:
+                            type: number
+                            format: integer
+                            example: 10
+      responses:
+        '201':
+          description: Se ha registrado la venta
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - productos
+                    allOf:
+                      - type: object
+                        required:
+                          - cliente
+                          - pagado
+                          - fecha
+                        properties:
+                          cliente:
+                            type: number
+                            format: integer
+                          pagado:
+                            type: boolean
+                          fecha:
+                            type: string
+                            format: date
+                            example: 10-09-2023
+                          facturado:
+                            type: boolean
+                    properties:
+                      productos:
+                        type: array
+                        items:
+                          type: object
+                          allOf:
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: number
+                        format: integer
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+  '/venta/{id_venta}':
+    summary: Realiza operaciones sobre una venta
+    description: Realiza operaciones sobre una venta identificada por su id
+    get:
+      summary: Retorna la informacion de la venta
+      description: Retorna la informacion registrada de la venta identificada por su id
+      tags:
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      responses:
+        '200':
+          description: Se ha retornado la informacion de la venta
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - productos
+                    allOf:
+                      - type: object
+                        required:
+                          - cliente
+                          - pagado
+                          - fecha
+                        properties:
+                          cliente:
+                            type: number
+                            format: integer
+                          pagado:
+                            type: boolean
+                          fecha:
+                            type: string
+                            format: date
+                            example: 10-09-2023
+                          facturado:
+                            type: boolean
+                    properties:
+                      productos:
+                        type: array
+                        items:
+                          type: object
+                          allOf:
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: number
+                        format: integer
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+    put:
+      summary: Actualiza la informacion de una venta
+      description: Actualiza la informacion de una venta identificada por su id
+      tags:
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cliente
+                - pagado
+                - fecha
+              properties:
+                cliente:
+                  type: number
+                  format: integer
+                pagado:
+                  type: boolean
+                fecha:
+                  type: string
+                  format: date
+                  example: 10-09-2023
+                facturado:
+                  type: boolean
+      responses:
+        '200':
+          description: Se ha actualizado la informacion de la venta
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - productos
+                    allOf:
+                      - type: object
+                        required:
+                          - cliente
+                          - pagado
+                          - fecha
+                        properties:
+                          cliente:
+                            type: number
+                            format: integer
+                          pagado:
+                            type: boolean
+                          fecha:
+                            type: string
+                            format: date
+                            example: 10-09-2023
+                          facturado:
+                            type: boolean
+                    properties:
+                      productos:
+                        type: array
+                        items:
+                          type: object
+                          allOf:
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                            - type: object
+                              required:
+                                - producto
+                                - cantidad
+                              properties:
+                                producto:
+                                  type: number
+                                  format: integer
+                                  example: 8
+                                cantidad:
+                                  type: number
+                                  format: integer
+                                  example: 10
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: number
+                        format: integer
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+    delete:
+      summary: Elimina una venta
+      description: Elimina una venta identificada por su id
+      tags:
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      responses:
+        '200':
+          description: Se ha eliminado la venta
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
