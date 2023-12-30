@@ -1,5 +1,6 @@
 package xatal.sharedz.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -7,8 +8,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import xatal.sharedz.structures.PublicCliente;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class Cliente {
@@ -29,13 +32,29 @@ public class Cliente {
     @Column(name = "RFC")
     private String RFC;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Direccion> direcciones;
 
     @Column(name = "telefono", nullable = false)
     private String telefono;
 
     public Cliente() {
+    }
+
+    public Cliente(PublicCliente cliente) {
+        this.tipoCliente = cliente.tipoCliente;
+        this.nombre = cliente.nombre;
+        this.email = cliente.email;
+        this.RFC = cliente.RFC;
+        this.telefono = cliente.telefono;
+        this.direcciones = cliente.direcciones
+                .stream()
+                .map(s -> {
+                    Direccion aux = new Direccion();
+                    aux.setDireccion(s);
+                    return aux;
+                })
+                .collect(Collectors.toList());
     }
 
     public void setId(Long id) {

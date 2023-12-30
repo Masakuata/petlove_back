@@ -3,20 +3,24 @@ package xatal.sharedz.services;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Cliente;
+import xatal.sharedz.entities.Direccion;
 import xatal.sharedz.repositories.ClienteRepository;
+import xatal.sharedz.repositories.DireccionRepository;
 import xatal.sharedz.structures.PublicCliente;
-import xatal.sharedz.structures.PublicVenta;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ClienteService {
     private final ClienteRepository clientes;
+    private final DireccionRepository direcciones;
     private List<Cliente> clientesCache = null;
 
-    public ClienteService(ClienteRepository clientes) {
+    public ClienteService(ClienteRepository clientes, DireccionRepository direcciones) {
         this.clientes = clientes;
+        this.direcciones = direcciones;
     }
 
     public List<Cliente> getAll() {
@@ -53,8 +57,16 @@ public class ClienteService {
     }
 
     public Cliente saveCliente(Cliente cliente) {
-        this.clientesCache = null;
-        return this.clientes.save(cliente);
+        List<Direccion> direcciones = new LinkedList<>();
+        this.direcciones.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
+        cliente.setDirecciones(direcciones);
+        Cliente tmp = this.clientes.save(cliente);
+        new Thread(() -> this.clientesCache = this.clientes.getAll()).start();
+        return tmp;
+    }
+
+    public Cliente saveCliente(PublicCliente cliente) {
+        return this.saveCliente(new Cliente(cliente));
     }
 
     public Cliente getById(int id) {
@@ -63,8 +75,8 @@ public class ClienteService {
 
     @Transactional
     public void removeById(int id) {
-        this.clientesCache = null;
         this.clientes.deleteById((long) id);
+        new Thread(() -> this.clientesCache = this.clientes.getAll()).start();
     }
 
     public boolean isIdRegistered(int id) {

@@ -46,15 +46,11 @@ public class ClienteController {
     }
 
     @PostMapping()
-    public ResponseEntity addCliente(@RequestBody Cliente cliente) {
-        if (this.clienteService.isEmailUsed(cliente.getEmail())) {
+    public ResponseEntity addCliente(@RequestBody PublicCliente cliente) {
+        if (this.clienteService.isEmailUsed(cliente.email)) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
-        cliente = this.clienteService.saveCliente(cliente);
-        if (cliente == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity(cliente, HttpStatus.CREATED);
+        return new ResponseEntity(this.clienteService.saveCliente(cliente), HttpStatus.CREATED);
     }
 
     @PutMapping("/{cliente_id}")
