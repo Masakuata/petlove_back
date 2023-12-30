@@ -4,8 +4,11 @@ import io.jsonwebtoken.Claims;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,10 +67,52 @@ public class VentaController {
         return new ResponseEntity(new PublicVenta(savedVenta), HttpStatus.CREATED);
     }
 
-//    @GetMapping("/{id_venta}")
-//    public ResponseEntity getVenta(
-//        @RequestHeader("")
-//    ) {
-//
-//    }
+    @GetMapping("/{id_venta}")
+    public ResponseEntity getVenta(
+            @RequestHeader("Token") String token,
+            @PathVariable("id_venta") int ventaId
+    ) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims)) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        Venta venta = this.ventaService.getById(ventaId);
+        if (venta == null) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(venta);
+    }
+
+    @PutMapping("/{id_venta}")
+    public ResponseEntity updateVenta(
+            @RequestHeader("Token") String token,
+            @PathVariable("id_venta") int ventaId,
+            @RequestBody PublicVenta venta
+    ) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims)) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        Venta updatedVenta = this.ventaService.updateVenta(venta);
+        if (updatedVenta == null) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(updatedVenta);
+    }
+
+    @DeleteMapping("/{id_venta}")
+    public ResponseEntity deleteVenta(
+            @RequestHeader("Token") String token,
+            @PathVariable("id_venta") int ventaId
+    ) {
+        Claims claims = TokenUtils.getTokenClaims(token);
+        if (claims == null || TokenUtils.isExpired(claims)) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        if (!this.ventaService.isIdRegistered(ventaId)) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        this.ventaService.deleteById(ventaId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

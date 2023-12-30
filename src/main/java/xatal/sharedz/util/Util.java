@@ -1,7 +1,10 @@
 package xatal.sharedz.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public abstract class Util {
     public static boolean containsAnyCase(String s1, String s2) {
@@ -16,5 +19,9 @@ public abstract class Util {
         return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
                 && c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
                 && c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH);
+    }
+
+    public static Date dateFromString(String date) throws ParseException {
+        return new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(date);
     }
 }

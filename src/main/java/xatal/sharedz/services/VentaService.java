@@ -1,5 +1,6 @@
 package xatal.sharedz.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.ProductoVenta;
 import xatal.sharedz.entities.Venta;
@@ -9,12 +10,9 @@ import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,16 +61,57 @@ public class VentaService {
         return this.newVenta(this.buildFromPublicVenta(publicVenta));
     }
 
+    public Venta updateVenta(PublicVenta publicVenta) {
+        Venta storedVenta = this.getById(publicVenta.id);
+        if (storedVenta != null) {
+            return this.updateVenta(publicVenta, storedVenta);
+        }
+        return null;
+    }
+
+    public Venta updateVenta(PublicVenta publicVenta, Venta storedVenta) {
+        if (publicVenta.cliente != -1) {
+            storedVenta.setCliente(this.clienteService.getById(publicVenta.cliente));
+        }
+        if (publicVenta.fecha != null
+                && !publicVenta.fecha.isEmpty()
+                && !publicVenta.fecha.equals("01-01-1970")) {
+            try {
+                storedVenta.setFecha(Util.dateFromString(publicVenta.fecha));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        storedVenta.setPagado(publicVenta.pagado);
+        storedVenta.setFacturado(publicVenta.facturado);
+        return this.ventaRepository.save(storedVenta);
+    }
+
     public Venta buildFromPublicVenta(PublicVenta publicVenta) {
         Venta aux = new Venta();
         aux.setCliente(this.clienteService.getById(publicVenta.cliente));
         aux.setPagado(publicVenta.pagado);
         try {
-            aux.setFecha(new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(publicVenta.fecha));
+            aux.setFecha(Util.dateFromString(publicVenta.fecha));
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
         aux.setProductos(publicVenta.productos);
         return aux;
+    }
+
+    public Venta getById(int id) {
+        return this.ventaRepository.getById((long) id).orElse(null);
+    }
+
+    public boolean isIdRegistered(int id) {
+        return this.ventaRepository.countById((long) id) > 0;
+    }
+
+    @Transactional
+    public void deleteById(int id) {
+        Venta venta = this.getById(id);
+        this.productoVentaRepository.deleteAll(venta.getProductos());
+        this.ventaRepository.deleteById((long) id);
     }
 }
