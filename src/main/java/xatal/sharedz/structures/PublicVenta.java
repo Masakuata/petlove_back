@@ -1,6 +1,5 @@
 package xatal.sharedz.structures;
 
-import xatal.sharedz.entities.ProductoVenta;
 import xatal.sharedz.entities.Venta;
 
 import java.text.SimpleDateFormat;
@@ -13,7 +12,7 @@ public class PublicVenta {
     public boolean pagado = false;
     public String fecha = "01-01-1970";
     public boolean facturado = false;
-    public List<ProductoVenta> productos = new ArrayList<>();
+    public List<PublicProductoVenta> productos = new ArrayList<>();
 
     public PublicVenta() {
     }
@@ -24,6 +23,6 @@ public class PublicVenta {
         this.pagado = venta.isPagado();
         this.fecha = new SimpleDateFormat("dd/MM/yyyy").format(venta.getFecha());
         this.facturado = venta.isFacturado();
-        this.productos = venta.getProductos();
+        venta.getProductos().forEach(producto -> this.productos.add(new PublicProductoVenta(producto)));
     }
 }

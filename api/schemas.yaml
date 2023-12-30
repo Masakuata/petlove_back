@@ -157,8 +157,9 @@ components:
       required: [ cliente, pagado, fecha ]
       properties:
         cliente:
-          type: number
-          format: integer
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/cliente_record'
         pagado:
           type: boolean
         fecha:

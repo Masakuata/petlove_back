@@ -40,13 +40,15 @@ public class VentaService {
         Stream<Venta> ventas = this.ventaRepository.getAll().stream();
         Predicate<Venta> filtros = venta -> true;
         if (nombreCliente != null && !nombreCliente.isEmpty()) {
-            filtros.and(venta ->
+            filtros = filtros.and(venta ->
                     Util.containsAnyCase(venta.getCliente().getNombre(), nombreCliente));
         }
         if (fechaVenta != null) {
-            filtros.and(venta -> Util.compareDates(venta.getFecha(), fechaVenta));
+            filtros = filtros.and(venta -> Util.compareDates(venta.getFecha(), fechaVenta));
         }
-        return ventas.filter(filtros).collect(Collectors.toList());
+        return ventas
+                .filter(filtros)
+                .collect(Collectors.toList());
     }
 
     public Venta newVenta(Venta venta) {
@@ -96,8 +98,15 @@ public class VentaService {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-        aux.setProductos(publicVenta.productos);
+        aux.setProductos(publicVenta.productos.stream().map(ProductoVenta::new).toList());
         return aux;
+    }
+
+    public List<PublicVenta> fromVentas(List<Venta> ventas) {
+        return ventas
+                .stream()
+                .map(PublicVenta::new)
+                .toList();
     }
 
     public Venta getById(int id) {
