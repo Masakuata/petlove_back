@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.repositories.ClienteRepository;
+import xatal.sharedz.structures.PublicCliente;
+import xatal.sharedz.structures.PublicVenta;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +26,13 @@ public class ClienteService {
         return this.clientesCache;
     }
 
+    public List<PublicCliente> getAllPublic() {
+        return this.getAll()
+                .stream()
+                .map(PublicCliente::new)
+                .collect(Collectors.toList());
+    }
+
     public List<Cliente> searchByName(String nombre, int size) {
         if (this.clientesCache == null) {
             this.clientesCache = this.clientes.getAll();
@@ -33,6 +42,13 @@ public class ClienteService {
                 .filter(cliente ->
                         cliente.getNombre().toLowerCase().contains(nombre.toLowerCase()))
                 .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    public List<PublicCliente> searchByNamePublic(String nombre, int size) {
+        return this.searchByName(nombre, size)
+                .stream()
+                .map(PublicCliente::new)
                 .collect(Collectors.toList());
     }
 

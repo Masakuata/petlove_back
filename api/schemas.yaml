@@ -114,8 +114,11 @@ components:
             - $ref: '#/components/schemas/email'
         RFC:
           type: string
-        direccion:
-          type: string
+        direcciones:
+          type: array
+          items:
+            type: string
+            example: Cerrada Tajin 12
         telefono:
           type: string
     cliente_record:

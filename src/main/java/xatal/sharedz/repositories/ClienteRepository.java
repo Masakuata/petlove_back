@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends CrudRepository<Cliente, Long> {
-    @Query(value = "SELECT * FROM Sharedz.cliente",
+    @Query(value = "SELECT * FROM cliente",
             nativeQuery = true)
     List<Cliente> getAll();
 

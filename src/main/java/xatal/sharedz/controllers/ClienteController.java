@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Cliente;
 import xatal.sharedz.services.ClienteService;
+import xatal.sharedz.structures.PublicCliente;
 
 import java.util.List;
 
@@ -32,11 +33,11 @@ public class ClienteController {
             @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
             @RequestParam(name = "cant", required = false, defaultValue = "10") int size
     ) {
-        List<Cliente> clientes;
+        List<PublicCliente> clientes;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            clientes = this.clienteService.searchByName(nombreQuery, size);
+            clientes = this.clienteService.searchByNamePublic(nombreQuery, size);
         } else {
-            clientes = this.clienteService.getAll();
+            clientes = this.clienteService.getAllPublic();
         }
         if (clientes.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
