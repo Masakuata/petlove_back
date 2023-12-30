@@ -33,8 +33,7 @@ public class VentaController {
     public ResponseEntity getVentas(
             @RequestHeader("Token") String token,
             @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
-            @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Optional<Date> fecha,
-            @RequestParam(name = "producto", required = false) Optional<String> productoNombre
+            @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Optional<Date> fecha
     ) {
         Claims claims = TokenUtils.getTokenClaims(token);
         if (claims == null || TokenUtils.isExpired(claims)) {

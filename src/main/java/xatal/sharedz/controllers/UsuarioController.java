@@ -76,9 +76,11 @@ public class UsuarioController {
         miembro.encodePassword();
         miembro = this.usuarioService.login(miembro);
         if (miembro != null) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Token", miembro.getToken());
-            return new ResponseEntity(new PublicUsuario(miembro), headers, HttpStatus.OK);
+            HashMap<String, String> response = new HashMap<>();
+            response.put("username", miembro.getUsername());
+            response.put("email", miembro.getEmail());
+            response.put("token", miembro.getToken());
+            return new ResponseEntity(response, HttpStatus.OK);
         }
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }

@@ -45,3 +45,20 @@ components:
       schema:
         type: string
       required: false
+    query_venta_fecha:
+      name: fecha
+      description: Fecha para buscar ventas
+      in: query
+      schema:
+        type: string
+        format: date
+        example: 10-07-2023
+      required: false
+    path_venta_id:
+      name: id_venta
+      description: Id de la venta
+      in: path
+      schema:
+        type: number
+        format: integer
+      required: true

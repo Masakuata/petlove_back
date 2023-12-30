@@ -129,4 +129,65 @@ components:
         type: object
         allOf:
           - $ref: '#/components/schemas/cliente_record'
-      
+    producto_venta:
+      type: object
+      required: [ producto, cantidad ]
+      properties:
+        producto:
+          type: number
+          format: integer
+          example: 8
+        cantidad:
+          type: number
+          format: integer
+          example: 10
+    producto_venta_record:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/producto_venta'
+        - $ref: '#/components/schemas/record'
+    producto_venta_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          $ref: '#/components/schemas/producto_venta'
+    venta_vacia:
+      type: object
+      required: [ cliente, pagado, fecha ]
+      properties:
+        cliente:
+          type: number
+          format: integer
+        pagado:
+          type: boolean
+        fecha:
+          type: string
+          format: date
+          example: 10-09-2023
+        facturado:
+          type: boolean
+    venta:
+      type: object
+      required: [ productos ]
+      allOf:
+        - $ref: '#/components/schemas/venta_vacia'
+      properties:
+        productos:
+          type: array
+          items:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/producto_venta'
+              - $ref: '#/components/schemas/producto_venta'
+    venta_record:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/venta'
+        - $ref: '#/components/schemas/record'
+    venta_record_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/venta_record'
