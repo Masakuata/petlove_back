@@ -78,7 +78,7 @@ jobs:
     uses: ./.github/workflows/deploy.yaml
     with:
       external_port: ${{ fromJSON(inputs.external_port) }}
-      internal_port: $ {{ fromJSON(inputs.internal_port) }}
+      internal_port: ${{ fromJSON(inputs.internal_port) }}
       tag: ${{ github.event.inputs.tag }}
       deploy_on_anton: ${{ fromJSON(inputs.deploy_on_anton) }}
       deploy_digital_ocean: ${{ fromJSON(inputs.deploy_digital_ocean) }}
