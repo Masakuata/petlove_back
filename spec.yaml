@@ -896,7 +896,15 @@ paths:
                         format: decimal
       responses:
         '200':
-          description: Ok
+          description: Se han actualizado los precios del producto
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
   /cliente:
     summary: Catalogo de clientes
     description: Endpoint para realizar operaciones sobre el catalogo de productos
