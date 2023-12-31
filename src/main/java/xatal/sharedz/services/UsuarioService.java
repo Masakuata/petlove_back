@@ -34,7 +34,7 @@ public class UsuarioService {
     }
 
     public Usuario login(Usuario miembro) {
-        return this.usuarios.login(miembro.getEmail(), miembro.getPassword()).orElse(null);
+        return this.usuarios.findByEmailAndPassword(miembro.getEmail(), miembro.getPassword()).orElse(null);
     }
 
     public Usuario getUsuarioFromEmail(String email) {

@@ -524,7 +524,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: 'schemas.yaml#/components/schemas/venta'
+              $ref: 'schemas.yaml#/components/schemas/nueva_venta'
       responses:
         201:
           description: Se ha registrado la venta

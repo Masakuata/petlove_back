@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import xatal.sharedz.entities.Usuario;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,11 +16,7 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
             nativeQuery = true)
     List<Usuario> getAll();
 
-    @Query(value = "SELECT * FROM Sharedz.usuario WHERE email = :email AND password = :password",
-            nativeQuery = true)
-    Optional<Usuario> login(
-            @Param("email") String email,
-            @Param("password") String password);
+    Optional<Usuario> findByEmailAndPassword(String email, String password);
 
     Optional<Usuario> getUsuarioByEmailAndPassword(String email, String password);
 

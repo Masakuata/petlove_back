@@ -190,7 +190,21 @@ components:
       items:
         type: object
         allOf:
-          $ref: '#/components/schemas/producto_venta'
+          - $ref: '#/components/schemas/producto_venta'
+    nueva_venta:
+      type: object
+      properties:
+        cliente:
+          type: number
+          format: integer
+        pagado:
+          type: boolean
+        fecha:
+          type: string
+          format: date
+          example: 10-09-2023
+        facturado:
+          type: boolean
     venta_vacia:
       type: object
       required: [ cliente, pagado, fecha ]

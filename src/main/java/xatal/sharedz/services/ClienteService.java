@@ -30,6 +30,10 @@ public class ClienteService {
         }
     }
 
+    private void refreshClientesCacheAsync() {
+        new Thread(() -> this.clientesCache = this.clientes.getAll()).start();
+    }
+
     public List<Cliente> getAll() {
         this.ensureClientesCacheLoaded();
         return this.clientesCache;
@@ -66,16 +70,20 @@ public class ClienteService {
     }
 
     public Cliente saveCliente(Cliente cliente) {
-        List<Direccion> direcciones = new LinkedList<>();
-        this.direcciones.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
-        cliente.setDirecciones(direcciones);
-        Cliente tmp = this.clientes.save(cliente);
-        new Thread(() -> this.clientesCache = this.clientes.getAll()).start();
-        return tmp;
+        this.saveClienteDirecciones(cliente);
+        Cliente savedCliente = this.clientes.save(cliente);
+        this.refreshClientesCacheAsync();
+        return savedCliente;
     }
 
     public Cliente saveCliente(PublicCliente cliente) {
         return this.saveCliente(new Cliente(cliente));
+    }
+
+    private void saveClienteDirecciones(Cliente cliente) {
+        List<Direccion> direcciones = new LinkedList<>();
+        this.direcciones.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
+        cliente.setDirecciones(direcciones);
     }
 
     public Cliente getById(int id) {
@@ -85,7 +93,7 @@ public class ClienteService {
     @Transactional
     public void removeById(int id) {
         this.clientes.deleteById((long) id);
-        new Thread(() -> this.clientesCache = this.clientes.getAll()).start();
+        this.refreshClientesCacheAsync();
     }
 
     public boolean isIdRegistered(int id) {
