@@ -1953,3 +1953,240 @@ paths:
           description: El token provisto es invalido o ha expirado
         '500':
           description: Error interno del servidor
+  '/venta/{idVenta}/abono':
+    summary: Catalogo de abonos de una venta
+    description: Endpoint para realizar operaciones sobre el catalogo de abonos de una venta
+    get:
+      summary: Retorna los abonos registrados en una venta
+      description: Retorna los abonos registrados en una venta
+      tags:
+        - Abono
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      responses:
+        '200':
+          description: Se han retornado los abonos registrados en la venta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  allOf:
+                    - type: object
+                      allOf:
+                        - type: object
+                          required:
+                            - venta
+                            - cantidad
+                            - fecha
+                          properties:
+                            venta:
+                              type: number
+                              format: integer
+                            cantidad:
+                              type: number
+                              format: decimal
+                            fecha:
+                              type: string
+                              format: date
+                        - type: object
+                          required:
+                            - id
+                          properties:
+                            id:
+                              type: number
+                              format: integer
+        '204':
+          description: No hay abonos registrados en esta venta
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
+    post:
+      summary: Registra un nuevo abono en la venta
+      description: Registra un nuevo abono en la venta
+      tags:
+        - Abono
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - venta
+                - cantidad
+                - fecha
+              properties:
+                venta:
+                  type: number
+                  format: integer
+                cantidad:
+                  type: number
+                  format: decimal
+                fecha:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Se ha registrado el abono en la venta
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - venta
+                      - cantidad
+                      - fecha
+                    properties:
+                      venta:
+                        type: number
+                        format: integer
+                      cantidad:
+                        type: number
+                        format: decimal
+                      fecha:
+                        type: string
+                        format: date
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: number
+                        format: integer
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: La solicitud o su contenido no es aceptable y no puede ser procesada
+        '500':
+          description: Error interno del servidor
+  '/venta/{idVenta}/abono/{idAbono}':
+    summary: Realiza operaciones sobre un abono
+    description: Realiza operaciones sobre un abono identificado por su id
+    put:
+      summary: Actualiza la informacion del abono
+      description: Actualiza la informacion del abono identificado por su id
+      tags:
+        - Abono
+        - Venta
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_venta
+          description: Id de la venta
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+        - name: id_abono
+          description: Id del abono
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - venta
+                - cantidad
+                - fecha
+              properties:
+                venta:
+                  type: number
+                  format: integer
+                cantidad:
+                  type: number
+                  format: decimal
+                fecha:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Se ha actualizado la informacion del abono
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - venta
+                      - cantidad
+                      - fecha
+                    properties:
+                      venta:
+                        type: number
+                        format: integer
+                      cantidad:
+                        type: number
+                        format: decimal
+                      fecha:
+                        type: string
+                        format: date
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: number
+                        format: integer
+        '400':
+          description: La solicitud esta incompleta o malformada
+        '404':
+          description: El recurso buscado no se encuentra registrado
+        '406':
+          description: El token provisto es invalido o ha expirado
+        '500':
+          description: Error interno del servidor
