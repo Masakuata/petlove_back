@@ -367,7 +367,15 @@ paths:
               $ref: 'schemas.yaml#/components/schemas/precio_array'
       responses:
         200:
-          description: Ok
+          description: Se han actualizado los precios del producto
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/invalid_token'
+        500:
+          $ref: '#/components/responses/500'
   /cliente:
     summary: Catalogo de clientes
     description: Endpoint para realizar operaciones sobre el catalogo de productos
