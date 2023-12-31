@@ -650,9 +650,16 @@ paths:
           schema:
             type: string
           required: false
+        - name: tipo_cliente
+          description: Id del tipo de cliente
+          in: query
+          schema:
+            type: number
+            format: integer
+          required: false
       responses:
         '200':
-          description: Se ha retornado la informacion de los productos registrados
+          description: Se ha retornado la informacion de los productos registrados. El precio depende del tipo de cliente
           content:
             application/json:
               schema:
@@ -817,6 +824,79 @@ paths:
           description: El producto se encuentra registrado en una o mas ventas
         '500':
           description: Error interno del servidor
+  '/producto/{id_producto}/precio':
+    post:
+      summary: Establece los precios del producto por tipo de cliente
+      description: Establece los precios del producto por tipo de cliente
+      tags:
+        - Producto
+      parameters:
+        - name: Token
+          description: Token identificador de la sesion de usuario
+          in: header
+          schema:
+            type: string
+            title: Token identificador de la sesion de usuario
+            example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
+          required: true
+        - name: id_producto
+          description: Id del producto
+          in: path
+          schema:
+            type: number
+            format: integer
+          required: true
+        - name: tipo_cliente
+          description: Id del tipo de cliente
+          in: query
+          schema:
+            type: number
+            format: integer
+          required: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                allOf:
+                  - type: object
+                    required:
+                      - tipoCliente
+                      - precio
+                    properties:
+                      tipoCliente:
+                        type: number
+                        format: integer
+                      precio:
+                        type: number
+                        format: decimal
+                  - type: object
+                    required:
+                      - tipoCliente
+                      - precio
+                    properties:
+                      tipoCliente:
+                        type: number
+                        format: integer
+                      precio:
+                        type: number
+                        format: decimal
+                  - type: object
+                    required:
+                      - tipoCliente
+                      - precio
+                    properties:
+                      tipoCliente:
+                        type: number
+                        format: integer
+                      precio:
+                        type: number
+                        format: decimal
+      responses:
+        '200':
+          description: Ok
   /cliente:
     summary: Catalogo de clientes
     description: Endpoint para realizar operaciones sobre el catalogo de productos
