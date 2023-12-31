@@ -47,7 +47,7 @@ public class UsuarioController {
         if (!Usuario.isValid(usuario)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (this.usuarioService.isEmailUsed(usuario.getEmail())) {
+        if (!this.usuarioService.isUserAvailable(usuario)) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
         usuario.encodePassword();

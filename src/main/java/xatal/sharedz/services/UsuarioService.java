@@ -58,4 +58,8 @@ public class UsuarioService {
     public boolean isUsernameUsed(String username) {
         return this.usuarios.countByUsername(username) > 0;
     }
+
+    public boolean isUserAvailable(Usuario newUsuario) {
+        return this.usuarios.countByEmailAndUsername(newUsuario.getEmail(), newUsuario.getUsername()) > 0;
+    }
 }

@@ -27,4 +27,6 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
     Long countByEmail(String email);
 
     Long countByUsername(String username);
+
+    Long countByEmailAndUsername(String email, String username);
 }
