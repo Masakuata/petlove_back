@@ -89,6 +89,14 @@ public class ProductoService {
         return true;
     }
 
+    private Precio publicToPrecio(PublicPrecio publicPrecio, Long productoId) {
+        Precio precio = new Precio();
+        precio.setProducto(productoId);
+        precio.setCliente((long) publicPrecio.tipoCliente);
+        precio.setPrecio(publicPrecio.precio);
+        return precio;
+    }
+
     public Producto newProducto(PublicProducto newProducto) {
         this.productosCache = null;
         return this.productos.save(new Producto(newProducto));

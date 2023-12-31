@@ -3,10 +3,13 @@ package xatal.sharedz.services;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import xatal.sharedz.entities.Abono;
 import xatal.sharedz.entities.ProductoVenta;
 import xatal.sharedz.entities.Venta;
+import xatal.sharedz.repositories.AbonoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.repositories.VentaRepository;
+import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
 
@@ -19,14 +22,16 @@ import java.util.List;
 public class VentaService {
     private final VentaRepository ventaRepository;
     private final ProductoVentaRepository productoVentaRepository;
+    private final AbonoRepository abonoRepository;
     private final ClienteService clienteService;
 
     public VentaService(
             VentaRepository ventaRepository,
-            ProductoVentaRepository productoVentaRepository,
+            ProductoVentaRepository productoVentaRepository, AbonoRepository abonoRepository,
             ClienteService clienteService) {
         this.ventaRepository = ventaRepository;
         this.productoVentaRepository = productoVentaRepository;
+        this.abonoRepository = abonoRepository;
         this.clienteService = clienteService;
     }
 
@@ -58,6 +63,22 @@ public class VentaService {
 
     public Venta newVenta(PublicVenta publicVenta) {
         return this.newVenta(this.buildFromPublicVenta(publicVenta));
+    }
+
+    public Abono saveAbono(Abono abono) {
+        return this.abonoRepository.save(abono);
+    }
+
+    public Abono saveAbono(PublicAbono abono) {
+        return this.saveAbono(new Abono(abono));
+    }
+
+    public List<Abono> getAbonos(int idVenta) {
+        return this.abonoRepository.findByVenta((long) idVenta);
+    }
+
+    public boolean isAbonoRegistered(int idAbono) {
+        return this.abonoRepository.countById(Long.valueOf(idAbono)) > 0;
     }
 
     public Venta updateVenta(PublicVenta publicVenta) {
@@ -100,7 +121,6 @@ public class VentaService {
     }
 
     public List<PublicVenta> publicFromVentas(List<Venta> ventas) {
-
         return ventas
                 .stream()
                 .map(PublicVenta::new)

@@ -78,3 +78,11 @@ components:
         type: number
         format: integer
       required: true
+    path_abono_id:
+      name: id_abono
+      description: Id del abono
+      in: path
+      schema:
+        type: number
+        format: integer
+      required: true

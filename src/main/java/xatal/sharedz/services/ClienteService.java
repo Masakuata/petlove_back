@@ -24,10 +24,14 @@ public class ClienteService {
         this.direcciones = direcciones;
     }
 
-    public List<Cliente> getAll() {
+    private void ensureClientesCacheLoaded() {
         if (this.clientesCache == null) {
             this.clientesCache = this.clientes.getAll();
         }
+    }
+
+    public List<Cliente> getAll() {
+        this.ensureClientesCacheLoaded();
         return this.clientesCache;
     }
 
@@ -44,13 +48,12 @@ public class ClienteService {
     }
 
     public List<Cliente> searchByName(String nombre, int size) {
-        if (this.clientesCache == null) {
-            this.clientesCache = this.clientes.getAll();
-        }
+        this.ensureClientesCacheLoaded();
+        String lowercaseNombre = nombre.toLowerCase();
         return this.clientesCache
                 .stream()
                 .filter(cliente ->
-                        cliente.getNombre().toLowerCase().contains(nombre.toLowerCase()))
+                        cliente.getNombre().toLowerCase().contains(lowercaseNombre))
                 .limit(size)
                 .collect(Collectors.toList());
     }

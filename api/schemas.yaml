@@ -231,3 +231,27 @@ components:
         type: object
         allOf:
           - $ref: '#/components/schemas/venta_record'
+    abono:
+      type: object
+      required: [ venta, cantidad, fecha ]
+      properties:
+        venta:
+          type: number
+          format: integer
+        cantidad:
+          type: number
+          format: decimal
+        fecha:
+          type: string
+          format: date
+    abono_record:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/abono'
+        - $ref: '#/components/schemas/record'
+    abono_record_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/abono_record'
