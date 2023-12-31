@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Producto;
 import xatal.sharedz.services.ProductoService;
+import xatal.sharedz.structures.PublicPrecio;
 import xatal.sharedz.structures.PublicProducto;
 
+import java.util.HashMap;
 import java.util.List;
 
 @CrossOrigin
@@ -29,10 +31,16 @@ public class ProductoController {
 
     @GetMapping()
     public ResponseEntity getProductos(
-            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery) {
+            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
+            @RequestParam(name = "id_cliente", required = false, defaultValue = "-1") int idCliente
+    ) {
         List<Producto> productos;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            productos = this.productoService.searchByName(nombreQuery);
+            if (idCliente != -1) {
+                productos = this.productoService.searchByNameAndCliente(nombreQuery, idCliente);
+            } else {
+                productos = this.productoService.searchByName(nombreQuery);
+            }
         } else {
             productos = this.productoService.getAll();
         }
@@ -50,6 +58,18 @@ public class ProductoController {
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
+
+    @PostMapping("/{id_producto}/precio")
+    public ResponseEntity setPrecios(
+            @PathVariable("id_producto") int idProducto,
+            @RequestBody List<PublicPrecio> precios
+    ) {
+        if (this.productoService.setPreciosById(idProducto, precios)) {
+            return ResponseEntity.ok().build();
+        }
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
+    }
+
 
     @DeleteMapping("/{id_producto}")
     public ResponseEntity deleteProducto(@PathVariable("id_producto") int idProducto) {

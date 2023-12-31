@@ -101,6 +101,24 @@ components:
         type: object
         allOf:
           - $ref: '#/components/schemas/producto'
+    precio:
+      type: object
+      required: [ tipoCliente, precio ]
+      properties:
+        tipoCliente:
+          type: number
+          format: integer
+        precio:
+          type: number
+          format: decimal
+    precio_array:
+      type: array
+      items:
+        type: object
+        allOf:
+          - $ref: '#/components/schemas/precio'
+          - $ref: '#/components/schemas/precio'
+          - $ref: '#/components/schemas/precio'
     minimal_cliente:
       type: object
       allOf:
