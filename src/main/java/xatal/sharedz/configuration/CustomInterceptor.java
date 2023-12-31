@@ -1,5 +1,6 @@
 package xatal.sharedz.configuration;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,12 +55,17 @@ public class CustomInterceptor implements Filter {
 
     private boolean usernameMatchesToken(HttpServletRequest request) {
         String[] pathParts = request.getRequestURI().split("/");
-        if (Arrays.asList(pathParts).contains("usuario")
-                && pathParts.length == 4) {
+        boolean containsUsuario = Arrays.asList(pathParts).contains("usuario");
+        boolean pathLengthIsFour = pathParts.length == 4;
+        if (containsUsuario && pathLengthIsFour) {
             String token = request.getHeader("Token");
+            if (token == null) {
+                return false;
+            }
             String pathUsername = pathParts[2];
-            String tokenUsername = (String) TokenUtils.getTokenClaims(token).get("username");
-            return token != null && pathUsername.equals(tokenUsername);
+            Claims tokenClaims = TokenUtils.getTokenClaims(token);
+            String tokenUsername = tokenClaims != null ? (String) tokenClaims.get("username") : null;
+            return pathUsername.equals(tokenUsername);
         }
         return true;
     }

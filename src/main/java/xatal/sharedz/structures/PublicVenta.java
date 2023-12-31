@@ -14,6 +14,8 @@ public class PublicVenta {
     public boolean facturado = false;
     public List<PublicProductoVenta> productos = new ArrayList<>();
 
+    public float total = 0;
+
     public PublicVenta() {
     }
 

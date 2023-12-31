@@ -42,7 +42,7 @@ public class VentaController {
         if (ventas.isEmpty()) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.ok(this.ventaService.fromVentas(ventas));
+        return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
     }
 
     @PostMapping

@@ -1,6 +1,7 @@
 package xatal.sharedz.services;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.ProductoVenta;
 import xatal.sharedz.entities.Venta;
@@ -10,12 +11,9 @@ import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class VentaService {
@@ -37,18 +35,17 @@ public class VentaService {
     }
 
     public List<Venta> searchVentas(String nombreCliente, Date fechaVenta) {
-        List<Predicate<Venta>> predicates = new ArrayList<>();
+        Specification<Venta> spec = Specification.where(null);
         if (nombreCliente != null && !nombreCliente.isEmpty()) {
-            predicates.add(venta -> Util.containsAnyCase(venta.getCliente().getNombre(), nombreCliente));
+            spec = spec.and(((root, query, builder) ->
+                    builder.like(builder.lower(root.get("cliente").get("nombre")),
+                            "%" + nombreCliente.toLowerCase() + "%")));
         }
         if (fechaVenta != null) {
-            predicates.add(venta -> Util.compareDates(venta.getFecha(), fechaVenta));
+            spec = spec.and((root, query, builder) ->
+                    builder.equal(root.get("fecha"), fechaVenta));
         }
-        return this.ventaRepository
-                .getAll()
-                .parallelStream()
-                .filter(predicates.stream().reduce(x -> true, Predicate::and))
-                .collect(Collectors.toList());
+        return this.ventaRepository.findAll(spec);
     }
 
     public Venta newVenta(Venta venta) {
@@ -102,7 +99,8 @@ public class VentaService {
         return aux;
     }
 
-    public List<PublicVenta> fromVentas(List<Venta> ventas) {
+    public List<PublicVenta> publicFromVentas(List<Venta> ventas) {
+
         return ventas
                 .stream()
                 .map(PublicVenta::new)
