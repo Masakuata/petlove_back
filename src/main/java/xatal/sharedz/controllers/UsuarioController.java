@@ -47,7 +47,7 @@ public class UsuarioController {
         if (!Usuario.isValid(usuario)) {
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (this.usuarioService.areCredentialsUsed(usuario.getEmail(), usuario.getUsername())) {
+        if (this.usuarioService.isEmailUsed(usuario.getEmail())) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
         usuario.encodePassword();
@@ -85,7 +85,7 @@ public class UsuarioController {
     @GetMapping("/token")
     public ResponseEntity checkToken(@RequestHeader("Token") String token) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (!this.usuarioService.areCredentialsUsed(claims.getSubject(), claims.get("username").toString())) {
+        if (!this.usuarioService.isEmailUsed(claims.getSubject())) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         PublicUsuario miembro = new PublicUsuario();

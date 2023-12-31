@@ -58,8 +58,4 @@ public class UsuarioService {
     public boolean isUsernameUsed(String username) {
         return this.usuarios.countByUsername(username) > 0;
     }
-
-    public boolean areCredentialsUsed(String email, String username) {
-        return this.usuarios.countByEmailAndUsername(email, username) > 0;
-    }
 }
