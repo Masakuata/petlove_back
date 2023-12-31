@@ -7,32 +7,35 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerMapping;
 import xatal.sharedz.security.TokenUtils;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Arrays;
 
 @Component
+@Order()
 public class CustomInterceptor implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        if (!this.tokenValid(request)) {
-            HttpServletResponse httpResponse = (HttpServletResponse) response;
-            httpResponse.sendError(HttpStatus.NOT_ACCEPTABLE.value());
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        if (!this.tokenValid(httpRequest)) {
+            httpResponse.sendError(HttpStatus.NOT_ACCEPTABLE.value(), "Token is invalid");
+        } else if (!this.usernameMatchesToken(httpRequest)) {
+            httpResponse.sendError(HttpStatus.NOT_ACCEPTABLE.value(), "Token does not match path username");
         } else {
             chain.doFilter(request, response);
         }
     }
 
-    private boolean tokenValid(ServletRequest request) {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        if (!this.isLogin(httpRequest) && !this.isPostUsuario(httpRequest)) {
-            String token = httpRequest.getHeader("Token");
+    private boolean tokenValid(HttpServletRequest request) {
+        if (!this.isLogin(request) && !this.isPostUsuario(request)) {
+            String token = request.getHeader("Token");
             return token != null
                     && TokenUtils.getTokenClaims(token) != null
                     && !TokenUtils.isExpired(token);
@@ -49,9 +52,15 @@ public class CustomInterceptor implements Filter {
         return request.getServletPath().contains("login");
     }
 
-    private boolean usernameMatchesToken(HttpServletRequest request, String token) {
-        Map pathVars = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        return pathVars.containsKey("username")
-                && TokenUtils.getTokenClaims(token).get("username").equals(pathVars.get("username"));
+    private boolean usernameMatchesToken(HttpServletRequest request) {
+        String[] pathParts = request.getRequestURI().split("/");
+        if (Arrays.asList(pathParts).contains("usuario")
+                && pathParts.length == 4) {
+            String token = request.getHeader("Token");
+            String pathUsername = pathParts[2];
+            String tokenUsername = (String) TokenUtils.getTokenClaims(token).get("username");
+            return token != null && pathUsername.equals(tokenUsername);
+        }
+        return true;
     }
 }

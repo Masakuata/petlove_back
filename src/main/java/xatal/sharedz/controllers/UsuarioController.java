@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -110,13 +109,9 @@ public class UsuarioController {
     @PutMapping("/{username}/username")
     public ResponseEntity changeUsername(
             @RequestHeader("Token") String token,
-            @PathVariable("username") String username,
             @RequestBody Map<String, String> payload
     ) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (!claims.get("username").equals(username)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         if (!this.usuarioService.isUsernameUsed(payload.get("username"))) {
             Usuario miembro = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
             if (miembro == null) {
@@ -135,12 +130,8 @@ public class UsuarioController {
     @PutMapping("/{username}/email")
     public ResponseEntity changeEmail(
             @RequestHeader("Token") String token,
-            @PathVariable("username") String username,
             @RequestBody Map<String, String> payload) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (!claims.get("username").equals(username)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         if (!this.usuarioService.isEmailUsed(payload.get("email"))) {
             Usuario miembro = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
             if (miembro == null) {
@@ -159,12 +150,8 @@ public class UsuarioController {
     @PutMapping("/{username}/password")
     public ResponseEntity changePassword(
             @RequestHeader("Token") String token,
-            @PathVariable("username") String username,
             @RequestBody Map<String, String> payload) {
         Claims claims = TokenUtils.getTokenClaims(token);
-        if (!claims.get("username").equals(username)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
-        }
         Usuario usuario = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
         if (usuario == null) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
