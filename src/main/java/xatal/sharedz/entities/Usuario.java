@@ -37,14 +37,6 @@ public class Usuario {
     @Column(name = "status", nullable = false, columnDefinition = "TINYINT")
     private boolean status = true;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "miembros_grupo",
-            joinColumns = @JoinColumn(name = "id_miembro", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "id_grupo", referencedColumnName = "id")
-    )
-    private Set<Grupo> groups = new HashSet<>();
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -83,14 +75,6 @@ public class Usuario {
 
     public void setStatus(boolean status) {
         this.status = status;
-    }
-
-    public Set<Grupo> getGrupos() {
-        return groups;
-    }
-
-    public void setGrupos(Set<Grupo> groups) {
-        this.groups = groups;
     }
 
     public boolean validLogin() {
