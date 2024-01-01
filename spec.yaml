@@ -1267,6 +1267,12 @@ paths:
             format: date
             example: 10-07-2023
           required: false
+        - name: enviar
+          description: Enviar correo con excel de ventas de fecha
+          in: query
+          schema:
+            type: boolean
+          required: false
       responses:
         '200':
           description: Se han retornado las ventas registradas
@@ -1371,6 +1377,8 @@ paths:
                             id:
                               type: number
                               format: integer
+        '201':
+          description: Se ha enviado el correo con las ventas indicadas
         '204':
           description: No hay ventas registradas
         '400':
