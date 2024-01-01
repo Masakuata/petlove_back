@@ -76,7 +76,7 @@ public class ReportService {
         file.append(producto.getPresentacion()).append(",");
         file.append(producto.getTipoMascota()).append(",");
         file.append(producto.getRaza()).append(",");
-        file.append(producto.getPrecio()).append(",");
+        file.append(producto.getPrecio());
         file.append("\n");
     }
 
