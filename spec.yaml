@@ -953,29 +953,6 @@ paths:
                         - type: object
                           required:
                             - id
-                          allOf:
-                            - type: object
-                              title: Producto de venta
-                              required:
-                                - nombre
-                                - presentacion
-                                - raza
-                                - precio
-                              properties:
-                                nombre:
-                                  type: string
-                                presentacion:
-                                  type: string
-                                tipoMascota:
-                                  type: string
-                                raza:
-                                  type: string
-                                precio:
-                                  type: number
-                                  format: decimal
-                                cantidad:
-                                  type: number
-                                  format: integer
                           properties:
                             id:
                               type: number
@@ -987,6 +964,10 @@ paths:
                           type: number
                           format: integer
                         RFC:
+                          type: string
+                        email:
+                          type: string
+                        telefono:
                           type: string
         '202':
           description: Se han retornado los resultados de la busqueda de clientes
