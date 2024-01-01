@@ -70,6 +70,13 @@ components:
         format: date
         example: 10-07-2023
       required: false
+    query_enviar_csv:
+      name: enviar
+      description: Enviar correo con excel de ventas de fecha
+      in: query
+      schema:
+        type: boolean
+      required: false
     path_venta_id:
       name: id_venta
       description: Id de la venta

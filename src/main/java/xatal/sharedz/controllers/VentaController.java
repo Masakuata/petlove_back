@@ -46,7 +46,7 @@ public class VentaController {
         if (enviar.isPresent() && enviar.get() && fecha.isPresent()) {
             Claims claims = TokenUtils.getTokenClaims(token);
             this.ventaService.sendCSV(fecha.get(), claims.get("username").toString(), claims.getSubject());
-            return ResponseEntity.ok().build();
+            return new ResponseEntity(HttpStatus.CREATED);
         }
         List<Venta> ventas = this.ventaService.searchVentas(
                 clienteNombre.orElse(null),
