@@ -11,19 +11,11 @@ import xatal.sharedz.entities.Venta;
 import xatal.sharedz.repositories.AbonoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.repositories.VentaRepository;
-import xatal.sharedz.structures.Attachment;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
-import xatal.sharedz.util.XEmail;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,7 +81,7 @@ public class VentaService {
     }
 
     public boolean isAbonoRegistered(int idAbono) {
-        return this.abonoRepository.countById(Long.valueOf(idAbono)) > 0;
+        return this.abonoRepository.countById((long) idAbono) > 0;
     }
 
     public Venta updateVenta(PublicVenta publicVenta) {
@@ -151,59 +143,5 @@ public class VentaService {
         Venta venta = this.getById(id);
         this.productoVentaRepository.deleteAll(venta.getProductos());
         this.ventaRepository.deleteById((long) id);
-    }
-
-    public String dateCSV(Date ventaDate) {
-        String path;
-        try {
-            path = "ventas.csv";
-            List<Venta> ventas = this.searchVentas(null, ventaDate);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-            writer.write("ID VENTA,CLIENTE,PAGADO,FECHA,FACTURADO\n");
-            for (Venta venta : ventas) {
-                StringBuilder message = new StringBuilder();
-                message.append(venta.getId()).append(",");
-                message.append(venta.getCliente().getNombre()).append(",");
-                if (venta.isPagado()) {
-                    message.append("SI").append(",");
-                } else {
-                    message.append("NO").append(",");
-                }
-                message.append(new SimpleDateFormat("dd-MM-yyyy").format(venta.getFecha())).append(",");
-                if (venta.isFacturado()) {
-                    message.append("SI").append(",");
-                } else {
-                    message.append("NO").append(",");
-                }
-                message.append("\n");
-                writer.write(message.toString());
-            }
-            writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return path;
-    }
-
-    public void sendCSV(Date ventaDate, String recipientName, String recipientEmail) {
-        String csvPath = this.dateCSV(ventaDate);
-        if (csvPath != null && !csvPath.isEmpty()) {
-            String stringDate = new SimpleDateFormat("dd-MM-yyyy").format(ventaDate);
-            XEmail email = new XEmail();
-            email.setFrom("edsonmanuelcarballovera@gmail.com");
-            email.setSubject("Ventas del dia " + stringDate);
-            email.addRecipient(recipientName, recipientEmail);
-            email.setMessage("A continuacion encontrara adjunto las ventas del dia " + stringDate);
-            try {
-                email.addAttachment(
-                        csvPath,
-                        Files.readAllBytes(new File(csvPath).toPath()),
-                        "text/csv"
-                );
-            } catch (IOException e) {
-                this.logger.error(e.getMessage());
-            }
-            email.send();
-        }
     }
 }

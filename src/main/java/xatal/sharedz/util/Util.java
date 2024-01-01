@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public abstract class Util {
+    public static final String DATE_FORMAT = "dd-MM-yyyy";
+
     public static boolean containsAnyCase(String s1, String s2) {
         return s1.toLowerCase().contains(s2.toLowerCase());
     }
@@ -22,6 +24,18 @@ public abstract class Util {
     }
 
     public static Date dateFromString(String date) throws ParseException {
-        return new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH).parse(date);
+        return Util.dateFromString(date, Util.DATE_FORMAT);
+    }
+
+    public static Date dateFromString(String date, String pattern) throws ParseException {
+        return new SimpleDateFormat(pattern, Locale.ENGLISH).parse(date);
+    }
+
+    public static String dateToString(Date date) {
+        return Util.dateToString(date, Util.DATE_FORMAT);
+    }
+
+    public static String dateToString(Date date, String pattern) {
+        return new SimpleDateFormat(pattern).format(date);
     }
 }

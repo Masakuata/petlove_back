@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Abono;
 import xatal.sharedz.entities.Venta;
 import xatal.sharedz.security.TokenUtils;
+import xatal.sharedz.services.ReportService;
 import xatal.sharedz.services.VentaService;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
+import xatal.sharedz.util.Util;
 
 import java.util.Date;
 import java.util.List;
@@ -31,27 +33,26 @@ import java.util.Optional;
 @RequestMapping("/venta")
 public class VentaController {
     private final VentaService ventaService;
+    private final ReportService reportService;
 
-    public VentaController(VentaService ventaService) {
+    public VentaController(VentaService ventaService, ReportService reportService) {
         this.ventaService = ventaService;
+        this.reportService = reportService;
     }
 
     @GetMapping
     public ResponseEntity getVentas(
             @RequestHeader("Token") String token,
             @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
-            @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Optional<Date> fecha,
+            @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = Util.DATE_FORMAT) Optional<Date> fecha,
             @RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
     ) {
         if (enviar.isPresent() && enviar.get() && fecha.isPresent()) {
             Claims claims = TokenUtils.getTokenClaims(token);
-            this.ventaService.sendCSV(fecha.get(), claims.get("username").toString(), claims.getSubject());
+            this.reportService.ventasFromDate(fecha.get(), claims.get("username").toString(), claims.getSubject());
             return new ResponseEntity(HttpStatus.CREATED);
         }
-        List<Venta> ventas = this.ventaService.searchVentas(
-                clienteNombre.orElse(null),
-                fecha.orElse(null));
-        fecha.ifPresent(this.ventaService::dateCSV);
+        List<Venta> ventas = this.ventaService.searchVentas(clienteNombre.orElse(null), fecha.orElse(null));
         if (ventas.isEmpty()) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }

@@ -7,6 +7,7 @@ import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
 import xatal.sharedz.structures.Attachment;
+import xatal.sharedz.structures.MIMEType;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public class XEmail {
-    private Mailer mailer;
-    private Map<String, String> recipients = new HashMap();
+    private final Mailer mailer;
+    private Map<String, String> recipients = new HashMap<>();
 
     private String subject;
 
@@ -23,7 +24,7 @@ public class XEmail {
 
     private String message;
 
-    private List<Attachment> attachments = new LinkedList<>();
+    private final List<Attachment> attachments = new LinkedList<>();
 
     public XEmail() {
         this.mailer = MailerBuilder
@@ -75,7 +76,7 @@ public class XEmail {
         this.message = message;
     }
 
-    public void addAttachment(String filename, byte[] bytes, String mimeType) {
+    public void addAttachment(String filename, byte[] bytes, MIMEType mimeType) {
         this.attachments.add(new Attachment(filename, bytes, mimeType));
     }
 
@@ -87,8 +88,12 @@ public class XEmail {
                 .withPlainText(this.message);
         this.recipients.forEach(builder::to);
         this.attachments.forEach(attachment ->
-                builder.withAttachment(attachment.getFilename(), attachment.getBytes(), attachment.getMimeType()));
-
+                builder.withAttachment(
+                        attachment.getFilename(),
+                        attachment.getBytes(),
+                        attachment.getMimeType().toString()
+                )
+        );
         return builder.buildEmail();
     }
 

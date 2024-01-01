@@ -9,7 +9,6 @@ import xatal.sharedz.repositories.ProductoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.structures.PublicPrecio;
 import xatal.sharedz.structures.PublicProducto;
-import xatal.sharedz.util.Util;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,21 +38,21 @@ public class ProductoService {
     }
 
     public List<Producto> searchByName(String nombre) {
+        String lowercase = nombre.toLowerCase();
         return this.productos.getAll()
                 .stream()
-                .filter(producto ->
-                        Util.containsAnyCase(producto.getNombre(), nombre))
+                .filter(producto -> producto.getNombre().toLowerCase().contains(lowercase))
                 .collect(Collectors.toList());
     }
 
-    public List<Producto> searchByNameAndCliente(String nombre, int idCliente) {
+    public List<Producto> searchByNameAndTipoCliente(String nombre, int tipoCliente) {
         List<Producto> productos = this.searchByName(nombre);
         if (productos.isEmpty()) {
             return Collections.emptyList();
         }
         List<Precio> precios = this.precioRepository.findByProductoInAndCliente(
                 productos.stream().map(Producto::getId).collect(Collectors.toList()),
-                (long) idCliente
+                (long) tipoCliente
         );
         productos.forEach(producto -> {
             Optional<Precio> currentPrecio = precios.stream()
@@ -62,6 +61,25 @@ public class ProductoService {
             currentPrecio.ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
         });
         return productos;
+    }
+
+    public Optional<Producto> getByIdAndTipoCliente(int idProducto, int tipoCliente) {
+        Optional<Producto> producto = this.getProductoById(idProducto);
+        producto.ifPresent(value -> this.setProductPrice(value, tipoCliente));
+        return producto;
+    }
+
+    private Optional<Producto> getProductoById(int idProducto) {
+        return this.getAll()
+                .stream()
+                .filter(producto -> producto.getId() == idProducto)
+                .findFirst();
+    }
+
+    private void setProductPrice(Producto producto, int tipoCliente) {
+        this.precioRepository
+                .findByProductoAndCliente(producto.getId(), (long) tipoCliente)
+                .ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
     }
 
     public boolean setPreciosById(int idProducto, List<PublicPrecio> newPrecios) {

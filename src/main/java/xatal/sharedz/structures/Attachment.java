@@ -3,12 +3,12 @@ package xatal.sharedz.structures;
 public class Attachment {
     private String filename;
     private byte[] bytes;
-    private String mimeType;
+    private MIMEType mimeType;
 
     public Attachment() {
     }
 
-    public Attachment(String filename, byte[] bytes, String mimeType) {
+    public Attachment(String filename, byte[] bytes, MIMEType mimeType) {
         this.filename = filename;
         this.bytes = bytes;
         this.mimeType = mimeType;
@@ -30,11 +30,11 @@ public class Attachment {
         this.bytes = bytes;
     }
 
-    public String getMimeType() {
+    public MIMEType getMimeType() {
         return mimeType;
     }
 
-    public void setMimeType(String mimeType) {
+    public void setMimeType(MIMEType mimeType) {
         this.mimeType = mimeType;
     }
 }

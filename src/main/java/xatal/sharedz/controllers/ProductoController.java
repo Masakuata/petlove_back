@@ -16,7 +16,6 @@ import xatal.sharedz.services.ProductoService;
 import xatal.sharedz.structures.PublicPrecio;
 import xatal.sharedz.structures.PublicProducto;
 
-import java.util.HashMap;
 import java.util.List;
 
 @CrossOrigin
@@ -32,12 +31,12 @@ public class ProductoController {
     @GetMapping()
     public ResponseEntity getProductos(
             @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
-            @RequestParam(name = "id_cliente", required = false, defaultValue = "-1") int idCliente
+            @RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") int tipoCliente
     ) {
         List<Producto> productos;
         if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            if (idCliente != -1) {
-                productos = this.productoService.searchByNameAndCliente(nombreQuery, idCliente);
+            if (tipoCliente != -1) {
+                productos = this.productoService.searchByNameAndTipoCliente(nombreQuery, tipoCliente);
             } else {
                 productos = this.productoService.searchByName(nombreQuery);
             }
