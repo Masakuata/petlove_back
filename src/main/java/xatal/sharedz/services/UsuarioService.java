@@ -60,6 +60,6 @@ public class UsuarioService {
     }
 
     public boolean isUserAvailable(Usuario newUsuario) {
-        return this.usuarios.countByEmailAndUsername(newUsuario.getEmail(), newUsuario.getUsername()) < 0;
+        return this.usuarios.countByEmailAndUsername(newUsuario.getEmail(), newUsuario.getUsername()) == 0;
     }
 }
