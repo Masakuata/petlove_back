@@ -1,5 +1,7 @@
 package xatal.sharedz.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,14 +19,16 @@ import xatal.sharedz.services.ClienteService;
 import xatal.sharedz.structures.ClienteMinimal;
 import xatal.sharedz.structures.PublicCliente;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/cliente")
 public class ClienteController {
+    private final Logger logger = LoggerFactory.getLogger(ClienteController.class);
     private final ClienteService clienteService;
 
     public ClienteController(ClienteService clienteService) {
@@ -36,18 +40,28 @@ public class ClienteController {
             @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
             @RequestParam(name = "cant", required = false, defaultValue = "10") int size
     ) {
-        if (nombreQuery != null && !nombreQuery.isEmpty()) {
-            List<PublicCliente> clientes = this.clienteService.searchByNamePublic(nombreQuery, size);
-            if (clientes.isEmpty()) {
-                return new ResponseEntity(HttpStatus.NO_CONTENT);
-            }
-            return ResponseEntity.ok(clientes);
-        } else {
-            List<ClienteMinimal> clientes = this.clienteService.getMinimal();
-            if (clientes.isEmpty()) {
-                return new ResponseEntity(HttpStatus.NO_CONTENT);
-            }
-            return ResponseEntity.ok(clientes);
+        return Optional.of(nombreQuery)
+                .filter(nombre -> !nombre.isEmpty())
+                .map(n -> getClientes(nombreQuery, size, this.clienteService::searchByNamePublic))
+                .orElse(getMinimalClientes(size, this.clienteService::getMinimal));
+    }
+
+    private <T> ResponseEntity getClientes(String name, int size, BiFunction<String, Integer, List<T>> fetcher) {
+        return Optional.of(fetcher.apply(name, size))
+                .filter(clients -> !clients.isEmpty())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    private <T> ResponseEntity getMinimalClientes(int size, Callable<List<ClienteMinimal>> fetcher) {
+        try {
+            return Optional.of(fetcher.call())
+                    .filter(clients -> !clients.isEmpty())
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.noContent().build());
+        } catch (Exception e) {
+            this.logger.error(e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -65,12 +79,12 @@ public class ClienteController {
             @RequestBody Cliente cliente
     ) {
         if (!this.clienteService.isIdRegistered(clienteId)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         cliente.setId((long) clienteId);
         cliente = this.clienteService.saveCliente(cliente);
         if (cliente == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok(cliente);
     }
@@ -78,7 +92,7 @@ public class ClienteController {
     @DeleteMapping("/{cliente_id}")
     public ResponseEntity deleteCliente(@PathVariable("cliente_id") int clienteId) {
         if (!this.clienteService.isIdRegistered(clienteId)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
         this.clienteService.removeById(clienteId);
         return ResponseEntity.ok().build();
