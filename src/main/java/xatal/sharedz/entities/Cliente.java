@@ -20,7 +20,7 @@ public class Cliente {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "tipo_cliente", nullable = false)
+    @Column(name = "tipoCliente", nullable = false)
     private Integer tipoCliente;
 
     @Column(name = "nombre", nullable = false)

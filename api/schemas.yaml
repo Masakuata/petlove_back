@@ -122,7 +122,7 @@ components:
     minimal_cliente:
       type: object
       allOf:
-        - $ref: '#/components/schemas/producto'
+        - $ref: '#/components/schemas/record'
       properties:
         nombre:
           type: string
@@ -130,6 +130,10 @@ components:
           type: number
           format: integer
         RFC:
+          type: string
+        email:
+          type: string
+        telefono:
           type: string
     minimal_cliente_array:
       type: array

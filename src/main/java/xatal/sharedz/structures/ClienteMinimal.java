@@ -9,4 +9,7 @@ public interface ClienteMinimal {
 
     String getRFC();
 
+    String getEmail();
+
+    String getTelefono();
 }
