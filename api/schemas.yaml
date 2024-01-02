@@ -228,9 +228,18 @@ components:
     venta:
       type: object
       required: [ productos ]
-      allOf:
-        - $ref: '#/components/schemas/venta_vacia'
       properties:
+        cliente:
+          type: number
+          format: integer
+        pagado:
+          type: boolean
+        fecha:
+          type: string
+          format: date
+          example: 10-09-2023
+        facturado:
+          type: boolean
         productos:
           type: array
           items:

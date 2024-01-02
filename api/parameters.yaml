@@ -93,3 +93,27 @@ components:
         type: number
         format: integer
       required: true
+    query_venta_dia:
+      name: dia
+      description: Dia para busqueda de ventas
+      in: query
+      schema:
+        type: number
+        format: integer
+      required: false
+    query_venta_mes:
+      name: mes
+      description: Mes para busqueda de ventas
+      in: query
+      schema:
+        type: number
+        format: integer
+      required: false
+    query_venta_anio:
+      name: anio
+      description: Año para busqueda de ventas
+      in: query
+      schema:
+        type: number
+        format: integer
+      required: false

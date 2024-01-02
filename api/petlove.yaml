@@ -496,9 +496,6 @@ paths:
         - Venta
       parameters:
         - $ref: 'parameters.yaml#/components/parameters/header_token'
-        - $ref: 'parameters.yaml#/components/parameters/query_cliente_nombre'
-        - $ref: 'parameters.yaml#/components/parameters/query_venta_fecha'
-        - $ref: 'parameters.yaml#/components/parameters/query_enviar_csv'
       responses:
         200:
           description: Se han retornado las ventas registradas
@@ -506,8 +503,6 @@ paths:
             application/json:
               schema:
                 $ref: 'schemas.yaml#/components/schemas/venta_record_array'
-        201:
-          description: Se ha enviado el correo con las ventas indicadas
         204:
           description: No hay ventas registradas
         400:
@@ -535,6 +530,37 @@ paths:
             application/json:
               schema:
                 $ref: 'schemas.yaml#/components/schemas/venta_record'
+        400:
+          $ref: '#/components/responses/400'
+        406:
+          $ref: '#/components/responses/invalid_token'
+        500:
+          $ref: '#/components/responses/500'
+  /venta/buscar:
+    summary: Endpoint para realizar busquedas sobre las ventas
+    description: Endpoint para realizar busquedas sobre las ventas
+    get:
+      summary: Endpoint para realizar busquedas sobre las ventas
+      description: Endpoint para realizar busquedas sobre las ventas
+      tags:
+        - Venta
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/header_token'
+        - $ref: 'parameters.yaml#/components/parameters/query_venta_dia'
+        - $ref: 'parameters.yaml#/components/parameters/query_venta_mes'
+        - $ref: 'parameters.yaml#/components/parameters/query_venta_anio'
+        - $ref: 'parameters.yaml#/components/parameters/query_enviar_csv'
+      responses:
+        200:
+          description: Se ha retornado la informacion de las ventas
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/venta_record_array'
+        201:
+          description: Se ha enviado el reporte con los resultados de la busqueda
+        204:
+          description: No hay ventas que coincidan con la busqueda
         400:
           $ref: '#/components/responses/400'
         406:

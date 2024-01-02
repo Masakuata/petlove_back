@@ -1,7 +1,6 @@
 package xatal.sharedz.controllers;
 
 import io.jsonwebtoken.Claims;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,14 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Abono;
 import xatal.sharedz.entities.Venta;
+import xatal.sharedz.reports.VentasReports;
 import xatal.sharedz.security.TokenUtils;
-import xatal.sharedz.services.ReportService;
 import xatal.sharedz.services.VentaService;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
-import xatal.sharedz.util.Util;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,30 +30,47 @@ import java.util.Optional;
 @RequestMapping("/venta")
 public class VentaController {
     private final VentaService ventaService;
-    private final ReportService reportService;
+    private final VentasReports reportService;
 
-    public VentaController(VentaService ventaService, ReportService reportService) {
+    public VentaController(VentaService ventaService, VentasReports reportService) {
         this.ventaService = ventaService;
         this.reportService = reportService;
     }
 
     @GetMapping
-    public ResponseEntity getVentas(
-            @RequestHeader("Token") String token,
-            @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
-            @RequestParam(name = "fecha", required = false) @DateTimeFormat(pattern = Util.DATE_FORMAT) Optional<Date> fecha,
-            @RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
-    ) {
-        if (enviar.isPresent() && enviar.get() && fecha.isPresent()) {
-            Claims claims = TokenUtils.getTokenClaims(token);
-            this.reportService.ventasFromDate(fecha.get(), claims.get("username").toString(), claims.getSubject());
-            return new ResponseEntity(HttpStatus.CREATED);
-        }
-        List<Venta> ventas = this.ventaService.searchVentas(clienteNombre.orElse(null), fecha.orElse(null));
+    public ResponseEntity getVentas() {
+        List<Venta> ventas = this.ventaService.getAll();
         if (ventas.isEmpty()) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity searchVentas(
+            @RequestHeader("Token") String token,
+            @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
+            @RequestParam(name = "producto", required = false) Optional<String> producto,
+            @RequestParam(name = "anio", required = false) Optional<Integer> anio,
+            @RequestParam(name = "mes", required = false) Optional<Integer> mes,
+            @RequestParam(name = "dia", required = false) Optional<Integer> dia,
+            @RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
+    ) {
+        List<Venta> ventas = this.ventaService.searchVentas(
+                clienteNombre.orElse(null),
+                anio.orElse(null),
+                mes.orElse(null),
+                dia.orElse(null));
+        if (ventas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        if (enviar.isPresent() && enviar.get()) {
+            Claims claims = TokenUtils.getTokenClaims(token);
+            this.reportService.reporteFrom(ventas, claims.get("username").toString(), claims.getSubject());
+            return new ResponseEntity(HttpStatus.CREATED);
+        } else {
+            return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+        }
     }
 
     @PostMapping
