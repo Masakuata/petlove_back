@@ -1,9 +1,12 @@
 package xatal.sharedz.services;
 
 import jakarta.transaction.Transactional;
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Precio;
 import xatal.sharedz.entities.Producto;
+import xatal.sharedz.entities.ProductoVenta;
+import xatal.sharedz.entities.Venta;
 import xatal.sharedz.repositories.PrecioRepository;
 import xatal.sharedz.repositories.ProductoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
@@ -11,6 +14,7 @@ import xatal.sharedz.structures.PublicPrecio;
 import xatal.sharedz.structures.PublicProducto;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -127,6 +131,21 @@ public class ProductoService {
         });
         this.precioRepository.saveAll(preciosToSave);
         return true;
+    }
+
+    public void updateStockFromVenta(Venta venta) {
+        List<Producto> updated = new LinkedList<>();
+        venta.getProductos().forEach(productoVenta ->
+                this.updateProductoQuantity(productoVenta).ifPresent(updated::add));
+        this.productos.saveAll(updated);
+    }
+
+    private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {
+        return this.getProductoById(Math.toIntExact(productoVenta.getProducto()))
+                .map(producto -> {
+                    producto.setCantidad(producto.getCantidad() - productoVenta.getCantidad());
+                    return producto;
+                });
     }
 
     private Precio publicToPrecio(PublicPrecio publicPrecio, Long productoId) {

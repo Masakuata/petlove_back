@@ -20,8 +20,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class VentaService {
@@ -61,33 +59,23 @@ public class VentaService {
         return this.ventaRepository.findAll(spec);
     }
 
-    public Venta newVenta(NewVenta newVenta) {
+    public Venta saveVenta(NewVenta newVenta) {
         Pair<Venta, Float> pair = this.buildFromNewVenta(newVenta);
         Venta ventaToSave = pair.a;
-        List<Integer> productosId = ventaToSave.getProductos()
-                .stream()
-                .map(productoVenta -> productoVenta.getProducto().intValue())
-                .toList();
+        float abonoInicial = pair.b;
 
-        List<Producto> productos = this.productoService
-                .searchByIdAndTipoCliente(productosId, ventaToSave.getCliente().getTipoCliente());
+        int tipoCliente = ventaToSave.getCliente().getTipoCliente();
+        float costoTotal = this.getCostoTotalByVentaAndTipoCliente(ventaToSave);
+        ventaToSave.setPagado(abonoInicial >= costoTotal);
 
-        float costoTotal = productos
-                .stream()
-                .reduce(0f, (precio, e) -> precio + e.getPrecio(), Float::sum);
-        ventaToSave.setPagado(pair.b >= costoTotal);
-
-        Venta savedVenta = this.newVenta(ventaToSave);
-        Abono abono = new Abono();
-        abono.setVenta(savedVenta.getId());
-        abono.setCantidad(pair.b);
-        abono.setFecha(new Date());
-        this.saveAbono(abono);
+        Venta savedVenta = this.saveVenta(ventaToSave);
+        this.saveAbono(new Abono(savedVenta.getId().intValue(), abonoInicial, new Date()));
         this.ventaRepository.save(savedVenta);
+        this.updateStocks(savedVenta);
         return savedVenta;
     }
 
-    public Venta newVenta(Venta venta) {
+    public Venta saveVenta(Venta venta) {
         List<ProductoVenta> productosGuardados = new LinkedList<>();
         this.productoVentaRepository.saveAll(venta.getProductos())
                 .forEach(productosGuardados::add);
@@ -99,8 +87,16 @@ public class VentaService {
         return this.abonoRepository.save(abono);
     }
 
-    public Abono saveAbono(PublicAbono abono) {
-        return this.saveAbono(new Abono(abono));
+    public Abono saveAbono(PublicAbono newAbono) {
+        Abono savedAbono = this.saveAbono(new Abono(newAbono));
+        Venta venta = this.ventaRepository.getById((long) newAbono.venta);
+        float costo = this.getCostoTotalByVentaAndTipoCliente(venta);
+        float abonos = this.getTotalAbonosByVenta(Math.toIntExact(venta.getId()));
+
+        venta.setPagado(abonos >= costo);
+        this.ventaRepository.save(venta);
+
+        return savedAbono;
     }
 
     public List<Abono> getAbonos(int idVenta) {
@@ -113,6 +109,25 @@ public class VentaService {
 
     public float getTotalAbonosByVenta(int ventaId) {
         return this.abonoRepository.sumAbonosByVenta((long) ventaId);
+    }
+
+    private List<Producto> getProductosByVentaAndTipoCliente(Venta venta) {
+        List<Integer> productosId = venta.getProductos()
+                .stream()
+                .map(productoVenta -> productoVenta.getProducto().intValue())
+                .toList();
+        return this.productoService
+                .searchByIdAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
+    }
+
+    private float getCostoTotalByVentaAndTipoCliente(Venta venta) {
+        return this.getProductosByVentaAndTipoCliente(venta)
+                .stream()
+                .reduce(0f, (precio, e) -> precio + e.getPrecio(), Float::sum);
+    }
+
+    private void updateStocks(Venta venta) {
+        this.productoService.updateStockFromVenta(venta);
     }
 
     public Venta updateVenta(PublicVenta publicVenta) {

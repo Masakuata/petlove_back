@@ -76,7 +76,7 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity newVenta(@RequestBody NewVenta venta) {
-        Venta savedVenta = this.ventaService.newVenta(venta);
+        Venta savedVenta = this.ventaService.saveVenta(venta);
         if (savedVenta == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }

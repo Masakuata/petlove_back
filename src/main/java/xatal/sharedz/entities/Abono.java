@@ -40,6 +40,18 @@ public class Abono {
         }
     }
 
+    public Abono(int venta, float cantidad, Date fecha) {
+        this.venta = (long) venta;
+        this.cantidad = cantidad;
+        this.fecha = fecha;
+    }
+
+    public Abono(int venta, float cantidad) {
+        this.venta = (long) venta;
+        this.cantidad = cantidad;
+        this.fecha = new Date();
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
