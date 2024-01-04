@@ -1355,6 +1355,9 @@ paths:
                   example: 10-09-2023
                 facturado:
                   type: boolean
+                abono:
+                  type: number
+                  format: decimal
       responses:
         '201':
           description: Se ha registrado la venta
