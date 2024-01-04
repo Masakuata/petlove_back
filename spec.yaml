@@ -1358,6 +1358,37 @@ paths:
                 abono:
                   type: number
                   format: decimal
+                productos:
+                  type: array
+                  items:
+                    type: object
+                    allOf:
+                      - type: object
+                        required:
+                          - producto
+                          - cantidad
+                        properties:
+                          producto:
+                            type: number
+                            format: integer
+                            example: 8
+                          cantidad:
+                            type: number
+                            format: integer
+                            example: 10
+                      - type: object
+                        required:
+                          - producto
+                          - cantidad
+                        properties:
+                          producto:
+                            type: number
+                            format: integer
+                            example: 8
+                          cantidad:
+                            type: number
+                            format: integer
+                            example: 10
       responses:
         '201':
           description: Se ha registrado la venta
