@@ -212,6 +212,13 @@ components:
         abono:
           type: number
           format: decimal
+        productos:
+          type: array
+          items:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/producto_venta'
+              - $ref: '#/components/schemas/producto_venta'
     venta_vacia:
       type: object
       required: [ cliente, pagado, fecha ]
