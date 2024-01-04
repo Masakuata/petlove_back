@@ -19,6 +19,7 @@ import xatal.sharedz.entities.Venta;
 import xatal.sharedz.reports.VentasReports;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.VentaService;
+import xatal.sharedz.structures.NewVenta;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
 
@@ -66,7 +67,7 @@ public class VentaController {
         }
         if (enviar.isPresent() && enviar.get()) {
             Claims claims = TokenUtils.getTokenClaims(token);
-            this.reportService.reporteFrom(ventas, claims.get("username").toString(), claims.getSubject());
+            this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
             return new ResponseEntity(HttpStatus.CREATED);
         } else {
             return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
@@ -74,7 +75,7 @@ public class VentaController {
     }
 
     @PostMapping
-    public ResponseEntity newVenta(@RequestBody PublicVenta venta) {
+    public ResponseEntity newVenta(@RequestBody NewVenta venta) {
         Venta savedVenta = this.ventaService.newVenta(venta);
         if (savedVenta == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);

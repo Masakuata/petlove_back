@@ -10,6 +10,8 @@ import xatal.sharedz.util.Util;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VentasReports extends XReport {
@@ -21,15 +23,10 @@ public class VentasReports extends XReport {
         this.productoService = productoService;
     }
 
-    public void reporteFrom(List<Venta> ventas, String recipientName, String recipientEmail) {
+    public void generateReportsFrom(List<Venta> ventas, String recipientName, String recipientEmail) {
         final List<Attachment> attachments = new LinkedList<>();
         attachments.add(new Attachment("ventas.csv", getVentasBytes(ventas), MIMEType.TEXT_CSV));
-
-        ventas.forEach(venta -> attachments.add(new Attachment(
-                "productos.venta" + venta.getCliente().getNombre() + "." + Util.dateToString(venta.getFecha()) + ".csv",
-                this.getProductosBytes(venta),
-                MIMEType.TEXT_CSV
-        )));
+        attachments.addAll(this.getProductAttachments(ventas));
 
         this.sendEmailWithAttachment(
                 "Reporte de Ventas",
@@ -40,38 +37,59 @@ public class VentasReports extends XReport {
         );
     }
 
+    private List<Attachment> getProductAttachments(List<Venta> ventas) {
+        return ventas
+                .stream()
+                .map(venta -> new Attachment(
+                        "productos.venta" + venta.getCliente().getNombre() + "." + Util.dateToString(venta.getFecha()) + ".csv",
+                        getProductosBytes(venta),
+                        MIMEType.TEXT_CSV
+                ))
+                .collect(Collectors.toList());
+    }
+
     private byte[] getVentasBytes(List<Venta> ventas) {
-        StringBuilder file = new StringBuilder(VentasReports.VENTA_HEADER);
-        ventas.forEach(venta -> this.appendVentaDetails(file, venta));
-        return file.toString().getBytes();
+        String fileContent = ventas
+                .stream()
+                .map(this::formatVentaDetails)
+                .collect(Collectors.joining());
+        return (VentasReports.VENTA_HEADER + fileContent).getBytes();
     }
 
     private byte[] getProductosBytes(Venta venta) {
-        StringBuilder file = new StringBuilder(VentasReports.PRODUCTO_HEADER);
-        List<Producto> productos = new LinkedList<>();
-        venta.getProductos().forEach(productoVenta ->
-                this.productoService
-                        .getByIdAndTipoCliente(Math.toIntExact(productoVenta.getId()), venta.getCliente().getTipoCliente())
-                        .ifPresent(productos::add));
-        productos.forEach(producto -> this.appendProductoDetails(file, producto));
-        return file.toString().getBytes();
+        String fileContent = this.getVentaProductos(venta)
+                .stream()
+                .map(this::formatProductoDetails)
+                .collect(Collectors.joining());
+        return (VentasReports.PRODUCTO_HEADER + fileContent).getBytes();
     }
 
-    private void appendProductoDetails(StringBuilder file, Producto producto) {
-        file.append(producto.getNombre()).append(",");
-        file.append(producto.getPresentacion()).append(",");
-        file.append(producto.getTipoMascota()).append(",");
-        file.append(producto.getRaza()).append(",");
-        file.append(producto.getPrecio());
-        file.append("\n");
+    private List<Producto> getVentaProductos(Venta venta) {
+        return venta.getProductos()
+                .stream()
+                .map(productoVenta ->
+                        this.productoService.getByIdAndTipoCliente(
+                                Math.toIntExact(productoVenta.getId()),
+                                venta.getCliente().getTipoCliente())
+                )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
-    private void appendVentaDetails(StringBuilder file, Venta venta) {
-        file.append(venta.getId()).append(",");
-        file.append(venta.getCliente().getNombre()).append(",");
-        file.append(venta.isPagado() ? "SI" : "NO").append(",");
-        file.append(Util.dateToString(venta.getFecha())).append(",");
-        file.append(venta.isFacturado() ? "SI" : "NO");
-        file.append("\n");
+    private String formatProductoDetails(Producto producto) {
+        return producto.getNombre() + ","
+                + producto.getPresentacion() + ","
+                + producto.getTipoMascota() + ","
+                + producto.getRaza() + ","
+                + producto.getPrecio() + "\n";
+    }
+
+    private String formatVentaDetails(Venta venta) {
+        return venta.getId() + ","
+                + venta.getCliente().getNombre() + ","
+                + (venta.isPagado() ? "Si" : "NO") + ","
+                + Util.dateToString(venta.getFecha()) + ","
+                + (venta.isFacturado() ? "SI" : "NO") + "\n";
     }
 }

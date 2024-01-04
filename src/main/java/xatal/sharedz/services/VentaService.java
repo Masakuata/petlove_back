@@ -1,14 +1,17 @@
 package xatal.sharedz.services;
 
 import jakarta.transaction.Transactional;
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Abono;
+import xatal.sharedz.entities.Producto;
 import xatal.sharedz.entities.ProductoVenta;
 import xatal.sharedz.entities.Venta;
 import xatal.sharedz.repositories.AbonoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.repositories.VentaRepository;
+import xatal.sharedz.structures.NewVenta;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
@@ -17,6 +20,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class VentaService {
@@ -24,15 +29,17 @@ public class VentaService {
     private final ProductoVentaRepository productoVentaRepository;
     private final AbonoRepository abonoRepository;
     private final ClienteService clienteService;
+    private final ProductoService productoService;
 
     public VentaService(
             VentaRepository ventaRepository,
             ProductoVentaRepository productoVentaRepository, AbonoRepository abonoRepository,
-            ClienteService clienteService) {
+            ClienteService clienteService, ProductoService productoService) {
         this.ventaRepository = ventaRepository;
         this.productoVentaRepository = productoVentaRepository;
         this.abonoRepository = abonoRepository;
         this.clienteService = clienteService;
+        this.productoService = productoService;
     }
 
     public List<Venta> getAll() {
@@ -54,16 +61,38 @@ public class VentaService {
         return this.ventaRepository.findAll(spec);
     }
 
+    public Venta newVenta(NewVenta newVenta) {
+        Pair<Venta, Float> pair = this.buildFromNewVenta(newVenta);
+        Venta ventaToSave = pair.a;
+        List<Integer> productosId = ventaToSave.getProductos()
+                .stream()
+                .map(productoVenta -> productoVenta.getProducto().intValue())
+                .toList();
+
+        List<Producto> productos = this.productoService
+                .searchByIdAndTipoCliente(productosId, ventaToSave.getCliente().getTipoCliente());
+
+        float costoTotal = productos
+                .stream()
+                .reduce(0f, (precio, e) -> precio + e.getPrecio(), Float::sum);
+        ventaToSave.setPagado(pair.b >= costoTotal);
+
+        Venta savedVenta = this.newVenta(ventaToSave);
+        Abono abono = new Abono();
+        abono.setVenta(savedVenta.getId());
+        abono.setCantidad(pair.b);
+        abono.setFecha(new Date());
+        this.saveAbono(abono);
+        this.ventaRepository.save(savedVenta);
+        return savedVenta;
+    }
+
     public Venta newVenta(Venta venta) {
         List<ProductoVenta> productosGuardados = new LinkedList<>();
         this.productoVentaRepository.saveAll(venta.getProductos())
                 .forEach(productosGuardados::add);
         venta.setProductos(productosGuardados);
         return this.ventaRepository.save(venta);
-    }
-
-    public Venta newVenta(PublicVenta publicVenta) {
-        return this.newVenta(this.buildFromPublicVenta(publicVenta));
     }
 
     public Abono saveAbono(Abono abono) {
@@ -80,6 +109,10 @@ public class VentaService {
 
     public boolean isAbonoRegistered(int idAbono) {
         return this.abonoRepository.countById((long) idAbono) > 0;
+    }
+
+    public float getTotalAbonosByVenta(int ventaId) {
+        return this.abonoRepository.sumAbonosByVenta((long) ventaId);
     }
 
     public Venta updateVenta(PublicVenta publicVenta) {
@@ -121,6 +154,10 @@ public class VentaService {
         return aux;
     }
 
+    public Pair<Venta, Float> buildFromNewVenta(NewVenta newVenta) {
+        return new Pair<>(this.buildFromPublicVenta(newVenta), newVenta.abono);
+    }
+
     public List<PublicVenta> publicFromVentas(List<Venta> ventas) {
         return ventas
                 .stream()
@@ -148,14 +185,6 @@ public class VentaService {
             spec = spec.and((root, query, builder) ->
                     builder.like(builder.lower(root.get("cliente").get("nombre")),
                             "%" + nombreCliente.toLowerCase() + "%"));
-        }
-        return spec;
-    }
-
-    private Specification<Venta> addFechaVentaSpecification(Date fechaVenta, Specification<Venta> spec) {
-        if (fechaVenta != null) {
-            spec = spec.and((root, query, builder) ->
-                    builder.equal(root.get("fecha"), fechaVenta));
         }
         return spec;
     }

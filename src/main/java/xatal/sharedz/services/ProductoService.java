@@ -23,17 +23,30 @@ public class ProductoService {
     private final PrecioRepository precioRepository;
 
     private List<Producto> productosCache = null;
+    private List<Precio> preciosCache = null;
 
     public ProductoService(ProductoRepository productos, ProductoVentaRepository productoVenta, PrecioRepository precioRepository) {
         this.productos = productos;
         this.productoVenta = productoVenta;
         this.precioRepository = precioRepository;
+        this.ensureProductosCacheLoaded();
+        this.ensurePreciosCacheLoaded();
     }
 
-    public List<Producto> getAll() {
+    private void ensureProductosCacheLoaded() {
         if (this.productosCache == null) {
             this.productosCache = this.productos.getAll();
         }
+    }
+
+    private void ensurePreciosCacheLoaded() {
+        if (this.preciosCache == null) {
+            this.preciosCache = this.precioRepository.getAll();
+        }
+    }
+
+    public List<Producto> getAll() {
+        this.ensureProductosCacheLoaded();
         return this.productosCache;
     }
 
@@ -63,9 +76,15 @@ public class ProductoService {
         return productos;
     }
 
+    public List<Producto> searchByIdAndTipoCliente(List<Integer> ids, int tipoCliente) {
+        List<Producto> productos = this.productos.findByIdIn(ids.stream().map(Integer::longValue).toList());
+        productos.forEach(producto -> this.setProductPrice(producto, tipoCliente));
+        return productos;
+    }
+
     public Optional<Producto> getByIdAndTipoCliente(int idProducto, int tipoCliente) {
         Optional<Producto> producto = this.getProductoById(idProducto);
-        producto.ifPresent(value -> this.setProductPrice(value, tipoCliente));
+        producto.ifPresent(currentProducto -> this.setProductPrice(currentProducto, tipoCliente));
         return producto;
     }
 
@@ -76,9 +95,12 @@ public class ProductoService {
                 .findFirst();
     }
 
-    private void setProductPrice(Producto producto, int tipoCliente) {
-        this.precioRepository
-                .findByProductoAndCliente(producto.getId(), (long) tipoCliente)
+    public void setProductPrice(Producto producto, int tipoCliente) {
+        this.ensureProductosCacheLoaded();
+        this.preciosCache
+                .stream()
+                .filter(precio -> precio.getProducto() == tipoCliente)
+                .findFirst()
                 .ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
     }
 
@@ -124,13 +146,13 @@ public class ProductoService {
         return this.productos.countById(idProducto) > 0;
     }
 
-    public boolean isUsed(int idProducto) {
+    public boolean isReferenced(int idProducto) {
         return this.productoVenta.countByProducto((long) idProducto) > 0;
     }
 
     @Transactional
     public boolean deleteById(int idProducto) {
-        if (!this.isUsed(idProducto)) {
+        if (!this.isReferenced(idProducto)) {
             this.productosCache = null;
             this.productos.deleteById(idProducto);
             return true;

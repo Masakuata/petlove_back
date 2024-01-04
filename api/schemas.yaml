@@ -209,6 +209,9 @@ components:
           example: 10-09-2023
         facturado:
           type: boolean
+        abono:
+          type: number
+          format: decimal
     venta_vacia:
       type: object
       required: [ cliente, pagado, fecha ]

@@ -55,10 +55,14 @@ public class ClienteController {
 
     private <T> ResponseEntity getMinimalClientes(int size, Callable<List<ClienteMinimal>> fetcher) {
         try {
-            return Optional.of(fetcher.call())
-                    .filter(clients -> !clients.isEmpty())
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.noContent().build());
+            List<ClienteMinimal> clientes = fetcher.call()
+                    .stream()
+                    .limit(size)
+                    .toList();
+            if (clientes.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(clientes);
         } catch (Exception e) {
             this.logger.error(e.getMessage());
             return ResponseEntity.internalServerError().build();

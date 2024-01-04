@@ -14,6 +14,8 @@ public interface ProductoRepository extends CrudRepository<Producto, Long> {
 
     Optional<Producto> getProductoByNombre(String nombre);
 
+    List<Producto> findByIdIn(List<Long> ids);
+
     Long countById(int id);
 
     void deleteById(int id);
