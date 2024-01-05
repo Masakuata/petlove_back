@@ -30,124 +30,122 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/venta")
 public class VentaController {
-    private final VentaService ventaService;
-    private final VentasReports reportService;
+	private final VentaService ventaService;
+	private final VentasReports reportService;
 
-    public VentaController(VentaService ventaService, VentasReports reportService) {
-        this.ventaService = ventaService;
-        this.reportService = reportService;
-    }
+	public VentaController(VentaService ventaService, VentasReports reportService) {
+		this.ventaService = ventaService;
+		this.reportService = reportService;
+	}
 
-    @GetMapping
-    public ResponseEntity getVentas() {
-        List<Venta> ventas = this.ventaService.getAll();
-        if (ventas.isEmpty()) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
-    }
+	@GetMapping
+	public ResponseEntity getVentas() {
+		List<Venta> ventas = this.ventaService.getAll();
+		if (ventas.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+	}
 
-    @GetMapping("/buscar")
-    public ResponseEntity searchVentas(
-            @RequestHeader("Token") String token,
-            @RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
-            @RequestParam(name = "producto", required = false) Optional<String> producto,
-            @RequestParam(name = "anio", required = false) Optional<Integer> anio,
-            @RequestParam(name = "mes", required = false) Optional<Integer> mes,
-            @RequestParam(name = "dia", required = false) Optional<Integer> dia,
-            @RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
-    ) {
-        List<Venta> ventas = this.ventaService.searchVentas(
-                clienteNombre.orElse(null),
-                anio.orElse(null),
-                mes.orElse(null),
-                dia.orElse(null));
-        if (ventas.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        if (enviar.isPresent() && enviar.get()) {
-            Claims claims = TokenUtils.getTokenClaims(token);
-            this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
-            return new ResponseEntity(HttpStatus.CREATED);
-        } else {
-            return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
-        }
-    }
+	@GetMapping("/buscar")
+	public ResponseEntity searchVentas(
+		@RequestHeader("Token") String token,
+		@RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
+		@RequestParam(name = "producto", required = false) Optional<String> producto,
+		@RequestParam(name = "anio", required = false) Optional<Integer> anio,
+		@RequestParam(name = "mes", required = false) Optional<Integer> mes,
+		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
+		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
+	) {
+		List<Venta> ventas = this.ventaService.searchVentas(
+			clienteNombre.orElse(null),
+			anio.orElse(null),
+			mes.orElse(null),
+			dia.orElse(null));
+		if (ventas.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		if (enviar.isPresent() && enviar.get()) {
+			Claims claims = TokenUtils.getTokenClaims(token);
+			this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
+			return new ResponseEntity(HttpStatus.CREATED);
+		} else {
+			return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+		}
+	}
 
-    @PostMapping
-    public ResponseEntity newVenta(@RequestBody NewVenta venta) {
-        Venta savedVenta = this.ventaService.saveNewVenta(venta);
-        if (savedVenta == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity(new PublicVenta(savedVenta), HttpStatus.CREATED);
-    }
+	@PostMapping
+	public ResponseEntity newVenta(@RequestBody NewVenta venta) {
+		return this.ventaService.saveNewVenta(venta)
+			.map(value -> new ResponseEntity(new PublicVenta(value), HttpStatus.CREATED))
+			.orElseGet(() -> new ResponseEntity(HttpStatus.CONFLICT));
+	}
 
-    @GetMapping("/{id_venta}")
-    public ResponseEntity getVenta(@PathVariable("id_venta") int ventaId) {
-        Optional<Venta> optionalVenta = this.ventaService.getById(ventaId);
-        return optionalVenta
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
-    }
+	@GetMapping("/{id_venta}")
+	public ResponseEntity getVenta(@PathVariable("id_venta") int ventaId) {
+		Optional<Venta> optionalVenta = this.ventaService.getById(ventaId);
+		return optionalVenta
+			.map(ResponseEntity::ok)
+			.orElseGet(() -> ResponseEntity.notFound().build());
+	}
 
-    @PutMapping("/{id_venta}")
-    public ResponseEntity updateVenta(
-            @PathVariable("id_venta") int ventaId,
-            @RequestBody PublicVenta venta
-    ) {
-        venta.id = ventaId;
-        Venta updatedVenta = this.ventaService.updateVenta(venta);
-        if (updatedVenta == null) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(updatedVenta);
-    }
+	@PutMapping("/{id_venta}")
+	public ResponseEntity updateVenta(
+		@PathVariable("id_venta") int ventaId,
+		@RequestBody PublicVenta venta
+	) {
+		venta.id = ventaId;
+		Venta updatedVenta = this.ventaService.updateVenta(venta);
+		if (updatedVenta == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(updatedVenta);
+	}
 
-    @DeleteMapping("/{id_venta}")
-    public ResponseEntity deleteVenta(@PathVariable("id_venta") int ventaId) {
-        if (!this.ventaService.isIdRegistered(ventaId)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        this.ventaService.deleteById(ventaId);
-        return new ResponseEntity(HttpStatus.OK);
-    }
+	@DeleteMapping("/{id_venta}")
+	public ResponseEntity deleteVenta(@PathVariable("id_venta") int ventaId) {
+		if (!this.ventaService.isIdRegistered(ventaId)) {
+			return ResponseEntity.notFound().build();
+		}
+		this.ventaService.deleteById(ventaId);
+		return ResponseEntity.ok().build();
+	}
 
-    @GetMapping("/{idVenta}/abono")
-    public ResponseEntity getAbonos(@PathVariable("idVenta") int idVenta) {
-        if (!this.ventaService.isIdRegistered(idVenta)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        List<Abono> abonos = ventaService.getAbonosFromVentaId(idVenta);
-        if (abonos.isEmpty()) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        }
-        return ResponseEntity.ok(abonos);
-    }
+	@GetMapping("/{idVenta}/abono")
+	public ResponseEntity getAbonos(@PathVariable("idVenta") int idVenta) {
+		if (!this.ventaService.isIdRegistered(idVenta)) {
+			return ResponseEntity.notFound().build();
+		}
+		List<Abono> abonos = ventaService.getAbonosFromVentaId(idVenta);
+		if (abonos.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(abonos);
+	}
 
-    @PostMapping("/{idVenta}/abono")
-    public ResponseEntity addAbono(
-            @PathVariable("idVenta") int idVenta,
-            @RequestBody PublicAbono abono
-    ) {
-        if (!this.ventaService.isIdRegistered(idVenta)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        abono.venta = idVenta;
-        return new ResponseEntity(this.ventaService.saveNewAbono(abono), HttpStatus.CREATED);
-    }
+	@PostMapping("/{idVenta}/abono")
+	public ResponseEntity addAbono(
+		@PathVariable("idVenta") int idVenta,
+		@RequestBody PublicAbono abono
+	) {
+		if (!this.ventaService.isIdRegistered(idVenta)) {
+			return ResponseEntity.notFound().build();
+		}
+		abono.venta = idVenta;
+		return new ResponseEntity(this.ventaService.saveNewAbono(abono), HttpStatus.CREATED);
+	}
 
-    @PutMapping("/{idVenta}/abono/{idAbono}")
-    public ResponseEntity updateAbono(
-            @PathVariable("idVenta") int idVenta,
-            @PathVariable("idAbono") int idAbono,
-            @RequestBody PublicAbono abono
-    ) {
-        if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        Abono savedAbono = new Abono(abono);
-        savedAbono.setId((long) idAbono);
-        return ResponseEntity.ok(this.ventaService.saveAbono(savedAbono));
-    }
+	@PutMapping("/{idVenta}/abono/{idAbono}")
+	public ResponseEntity updateAbono(
+		@PathVariable("idVenta") int idVenta,
+		@PathVariable("idAbono") int idAbono,
+		@RequestBody PublicAbono abono
+	) {
+		if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
+			return ResponseEntity.notFound().build();
+		}
+		Abono savedAbono = new Abono(abono);
+		savedAbono.setId((long) idAbono);
+		return ResponseEntity.ok(this.ventaService.saveAbono(savedAbono));
+	}
 }

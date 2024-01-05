@@ -534,6 +534,8 @@ paths:
           $ref: '#/components/responses/400'
         406:
           $ref: '#/components/responses/invalid_token'
+        409:
+          description: No hay inventario suficiente para cumplir la venta
         500:
           $ref: '#/components/responses/500'
   /venta/buscar:

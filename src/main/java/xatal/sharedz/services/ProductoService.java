@@ -1,7 +1,7 @@
 package xatal.sharedz.services;
 
 import jakarta.transaction.Transactional;
-import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Precio;
 import xatal.sharedz.entities.Producto;
@@ -17,9 +17,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,6 +128,12 @@ public class ProductoService {
 		return this.productos.save(new Producto(newProducto));
 	}
 
+	public Map<Long, Integer> getStockByProductos(List<Long> idProductos) {
+		return this.productos.findAll(this.productoInIdsSpecification(idProductos))
+			.stream()
+			.collect(Collectors.toMap(Producto::getId, Producto::getCantidad));
+	}
+
 	public boolean isIdRegistered(int idProducto) {
 		return this.productos.countById(idProducto) > 0;
 	}
@@ -193,5 +197,9 @@ public class ProductoService {
 				preciosMap.put(newPrecio.tipoCliente, new Precio(idProducto, newPrecio.tipoCliente, newPrecio.precio));
 			}
 		});
+	}
+
+	private Specification<Producto> productoInIdsSpecification(List<Long> productosId) {
+		return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
 	}
 }
