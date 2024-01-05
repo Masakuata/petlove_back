@@ -6,13 +6,14 @@ import org.springframework.data.repository.CrudRepository;
 import xatal.sharedz.entities.Venta;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VentaRepository extends CrudRepository<Venta, Long>, JpaSpecificationExecutor<Venta> {
     @Query(value = "SELECT * FROM Sharedz.venta",
             nativeQuery = true)
     List<Venta> getAll();
 
-    Venta getById(Long id);
+    Optional<Venta> getById(Long id);
 
     Long countById(Long id);
 }

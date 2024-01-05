@@ -76,7 +76,7 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity newVenta(@RequestBody NewVenta venta) {
-        Venta savedVenta = this.ventaService.saveVenta(venta);
+        Venta savedVenta = this.ventaService.saveNewVenta(venta);
         if (savedVenta == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -85,11 +85,10 @@ public class VentaController {
 
     @GetMapping("/{id_venta}")
     public ResponseEntity getVenta(@PathVariable("id_venta") int ventaId) {
-        Venta venta = this.ventaService.getById(ventaId);
-        if (venta == null) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(venta);
+        Optional<Venta> optionalVenta = this.ventaService.getById(ventaId);
+        return optionalVenta
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/{id_venta}")
@@ -119,7 +118,7 @@ public class VentaController {
         if (!this.ventaService.isIdRegistered(idVenta)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-        List<Abono> abonos = ventaService.getAbonos(idVenta);
+        List<Abono> abonos = ventaService.getAbonosFromVentaId(idVenta);
         if (abonos.isEmpty()) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
@@ -135,7 +134,7 @@ public class VentaController {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         abono.venta = idVenta;
-        return new ResponseEntity(this.ventaService.saveAbono(abono), HttpStatus.CREATED);
+        return new ResponseEntity(this.ventaService.saveNewAbono(abono), HttpStatus.CREATED);
     }
 
     @PutMapping("/{idVenta}/abono/{idAbono}")
@@ -144,8 +143,7 @@ public class VentaController {
             @PathVariable("idAbono") int idAbono,
             @RequestBody PublicAbono abono
     ) {
-        if (!this.ventaService.isIdRegistered(idVenta)
-                || !this.ventaService.isAbonoRegistered(idAbono)) {
+        if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
         Abono savedAbono = new Abono(abono);

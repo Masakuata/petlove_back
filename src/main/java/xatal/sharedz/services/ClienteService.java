@@ -56,8 +56,7 @@ public class ClienteService {
         String lowercaseNombre = nombre.toLowerCase();
         return this.clientesCache
                 .stream()
-                .filter(cliente ->
-                        cliente.getNombre().toLowerCase().contains(lowercaseNombre))
+                .filter(cliente -> cliente.getNombre().toLowerCase().contains(lowercaseNombre))
                 .limit(size)
                 .collect(Collectors.toList());
     }

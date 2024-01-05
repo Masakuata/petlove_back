@@ -22,6 +22,15 @@ public class Precio {
     @Column(name = "precio", nullable = false)
     private float precio;
 
+    public Precio() {
+    }
+
+    public Precio(int producto, int cliente, float precio) {
+        this.producto = (long) producto;
+        this.cliente = (long) cliente;
+        this.precio = precio;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }

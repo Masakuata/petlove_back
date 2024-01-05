@@ -23,8 +23,12 @@ public abstract class Util {
                 && c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH);
     }
 
-    public static Date dateFromString(String date) throws ParseException {
-        return Util.dateFromString(date, Util.DATE_FORMAT);
+    public static Date dateFromString(String date) {
+        try {
+            return Util.dateFromString(date, Util.DATE_FORMAT);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Date dateFromString(String date, String pattern) throws ParseException {
@@ -37,5 +41,15 @@ public abstract class Util {
 
     public static String dateToString(Date date, String pattern) {
         return new SimpleDateFormat(pattern).format(date);
+    }
+
+    public static boolean isNotDefaultFecha(Date fecha) {
+        return Util.isNotDefaultFecha(Util.dateToString(fecha));
+    }
+
+    public static boolean isNotDefaultFecha(String fecha) {
+        return fecha != null
+                && !fecha.isEmpty()
+                && !fecha.equals("01-01-1970");
     }
 }

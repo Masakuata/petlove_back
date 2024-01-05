@@ -16,10 +16,10 @@ import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicVenta;
 import xatal.sharedz.util.Util;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VentaService {
@@ -59,23 +59,22 @@ public class VentaService {
         return this.ventaRepository.findAll(spec);
     }
 
-    public Venta saveVenta(NewVenta newVenta) {
+    public Venta saveNewVenta(NewVenta newVenta) {
         Pair<Venta, Float> pair = this.buildFromNewVenta(newVenta);
         Venta ventaToSave = pair.a;
         float abonoInicial = pair.b;
 
-        int tipoCliente = ventaToSave.getCliente().getTipoCliente();
         float costoTotal = this.getCostoTotalByVentaAndTipoCliente(ventaToSave);
         ventaToSave.setPagado(abonoInicial >= costoTotal);
 
-        Venta savedVenta = this.saveVenta(ventaToSave);
+        Venta savedVenta = this.saveVentaWithProductos(ventaToSave);
         this.saveAbono(new Abono(savedVenta.getId().intValue(), abonoInicial, new Date()));
         this.ventaRepository.save(savedVenta);
         this.updateStocks(savedVenta);
         return savedVenta;
     }
 
-    public Venta saveVenta(Venta venta) {
+    public Venta saveVentaWithProductos(Venta venta) {
         List<ProductoVenta> productosGuardados = new LinkedList<>();
         this.productoVentaRepository.saveAll(venta.getProductos())
                 .forEach(productosGuardados::add);
@@ -83,23 +82,22 @@ public class VentaService {
         return this.ventaRepository.save(venta);
     }
 
+    public Abono saveNewAbono(PublicAbono newAbono) {
+        Optional<Venta> optionalVenta = this.ventaRepository.getById((long) newAbono.venta);
+        if (optionalVenta.isEmpty()) {
+            return null;
+        }
+        Abono savedAbono = this.saveAbono(new Abono(newAbono));
+        this.setVentaIfPagado(optionalVenta.get());
+        this.ventaRepository.save(optionalVenta.get());
+        return savedAbono;
+    }
+
     public Abono saveAbono(Abono abono) {
         return this.abonoRepository.save(abono);
     }
 
-    public Abono saveAbono(PublicAbono newAbono) {
-        Abono savedAbono = this.saveAbono(new Abono(newAbono));
-        Venta venta = this.ventaRepository.getById((long) newAbono.venta);
-        float costo = this.getCostoTotalByVentaAndTipoCliente(venta);
-        float abonos = this.getTotalAbonosByVenta(Math.toIntExact(venta.getId()));
-
-        venta.setPagado(abonos >= costo);
-        this.ventaRepository.save(venta);
-
-        return savedAbono;
-    }
-
-    public List<Abono> getAbonos(int idVenta) {
+    public List<Abono> getAbonosFromVentaId(int idVenta) {
         return this.abonoRepository.findByVenta((long) idVenta);
     }
 
@@ -107,49 +105,23 @@ public class VentaService {
         return this.abonoRepository.countById((long) idAbono) > 0;
     }
 
-    public float getTotalAbonosByVenta(int ventaId) {
+    public float getTotalAbonosByVentaId(int ventaId) {
         return this.abonoRepository.sumAbonosByVenta((long) ventaId);
     }
 
-    private List<Producto> getProductosByVentaAndTipoCliente(Venta venta) {
-        List<Integer> productosId = venta.getProductos()
-                .stream()
-                .map(productoVenta -> productoVenta.getProducto().intValue())
-                .toList();
-        return this.productoService
-                .searchByIdAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
-    }
-
-    private float getCostoTotalByVentaAndTipoCliente(Venta venta) {
-        return this.getProductosByVentaAndTipoCliente(venta)
-                .stream()
-                .reduce(0f, (precio, e) -> precio + e.getPrecio(), Float::sum);
-    }
-
-    private void updateStocks(Venta venta) {
-        this.productoService.updateStockFromVenta(venta);
-    }
-
     public Venta updateVenta(PublicVenta publicVenta) {
-        Venta storedVenta = this.getById(publicVenta.id);
-        if (storedVenta != null) {
-            return this.updateVenta(publicVenta, storedVenta);
-        }
-        return null;
+        Optional<Venta> storedVenta = this.getById(publicVenta.id);
+        return storedVenta
+                .map(venta -> this.updateVenta(publicVenta, venta))
+                .orElse(null);
     }
 
     public Venta updateVenta(PublicVenta publicVenta, Venta storedVenta) {
         if (publicVenta.cliente != -1) {
             storedVenta.setCliente(this.clienteService.getById(publicVenta.cliente));
         }
-        if (publicVenta.fecha != null
-                && !publicVenta.fecha.isEmpty()
-                && !publicVenta.fecha.equals("01-01-1970")) {
-            try {
-                storedVenta.setFecha(Util.dateFromString(publicVenta.fecha));
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
+        if (Util.isNotDefaultFecha(publicVenta.fecha)) {
+            storedVenta.setFecha(Util.dateFromString(publicVenta.fecha));
         }
         storedVenta.setPagado(publicVenta.pagado);
         storedVenta.setFacturado(publicVenta.facturado);
@@ -160,11 +132,7 @@ public class VentaService {
         Venta aux = new Venta();
         aux.setCliente(this.clienteService.getById(publicVenta.cliente));
         aux.setPagado(publicVenta.pagado);
-        try {
-            aux.setFecha(Util.dateFromString(publicVenta.fecha));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        aux.setFecha(Util.dateFromString(publicVenta.fecha));
         aux.setProductos(publicVenta.productos.stream().map(ProductoVenta::new).toList());
         return aux;
     }
@@ -180,7 +148,7 @@ public class VentaService {
                 .toList();
     }
 
-    public Venta getById(int id) {
+    public Optional<Venta> getById(int id) {
         return this.ventaRepository.getById((long) id);
     }
 
@@ -190,8 +158,8 @@ public class VentaService {
 
     @Transactional
     public void deleteById(int id) {
-        Venta venta = this.getById(id);
-        this.productoVentaRepository.deleteAll(venta.getProductos());
+        this.getById(id).ifPresent(venta ->
+                this.productoVentaRepository.deleteAll(venta.getProductos()));
         this.ventaRepository.deleteById((long) id);
     }
 
@@ -226,5 +194,31 @@ public class VentaService {
                     builder.equal(builder.function("year", Integer.class, root.get("fecha")), year));
         }
         return spec;
+    }
+
+    private List<Producto> getProductosByVentaAndTipoCliente(Venta venta) {
+        List<Integer> productosId = venta.getProductos()
+                .stream()
+                .map(productoVenta -> productoVenta.getProducto().intValue())
+                .toList();
+        return this.productoService
+                .searchByIdAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
+    }
+
+    private float getCostoTotalByVentaAndTipoCliente(Venta venta) {
+        final float CERO = 0;
+        return this.getProductosByVentaAndTipoCliente(venta)
+                .stream()
+                .reduce(CERO, (precio, e) -> precio + e.getPrecio(), Float::sum);
+    }
+
+    private void updateStocks(Venta venta) {
+        this.productoService.updateStockFromVenta(venta);
+    }
+
+    private void setVentaIfPagado(Venta venta) {
+        float costo = this.getCostoTotalByVentaAndTipoCliente(venta);
+        float abonos = this.getTotalAbonosByVentaId(Math.toIntExact(venta.getId()));
+        venta.setPagado(abonos >= costo);
     }
 }
