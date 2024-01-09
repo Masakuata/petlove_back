@@ -48,17 +48,19 @@ public class VentaService {
 
 	public List<Venta> searchVentas(
 		String nombreCliente,
-//            String nombreProducto,
 		Integer year,
 		Integer month,
-		Integer day
+		Integer day,
+		Boolean pagado,
+		Integer size
 	) {
 		Specification<Venta> spec = Specification.where(null);
 		spec = this.addNombreClienteSpecification(nombreCliente, spec);
 		spec = this.addYearSpecification(year, spec);
 		spec = this.addMonthSpecification(month, spec);
 		spec = this.addDaySpecification(day, spec);
-		return this.ventaRepository.findAll(spec);
+		spec = this.addPagadoSpecification(pagado, spec);
+		return this.ventaRepository.findAll(spec).stream().limit(size).toList();
 	}
 
 	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
@@ -203,6 +205,14 @@ public class VentaService {
 		if (year != null) {
 			spec = spec.and((root, query, builder) ->
 				builder.equal(builder.function("year", Integer.class, root.get("fecha")), year));
+		}
+		return spec;
+	}
+
+	private Specification<Venta> addPagadoSpecification(Boolean pagado, Specification<Venta> spec) {
+		if (pagado != null) {
+			spec = spec.and((root, query, builder) ->
+				builder.equal(root.get("pagado"), pagado));
 		}
 		return spec;
 	}

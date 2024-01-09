@@ -33,11 +33,7 @@ public class Abono {
     public Abono(PublicAbono abono) {
         this.venta = (long) abono.venta;
         this.cantidad = abono.cantidad;
-        try {
-            this.fecha = Util.dateFromString(abono.fecha);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+	    this.fecha = Util.dateFromString(abono.fecha);
     }
 
     public Abono(int venta, float cantidad, Date fecha) {

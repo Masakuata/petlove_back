@@ -55,13 +55,17 @@ public class VentaController {
 		@RequestParam(name = "anio", required = false) Optional<Integer> anio,
 		@RequestParam(name = "mes", required = false) Optional<Integer> mes,
 		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
+		@RequestParam(name = "size", required = false, defaultValue = "10") Integer sizePag,
+		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado,
 		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
 	) {
 		List<Venta> ventas = this.ventaService.searchVentas(
 			clienteNombre.orElse(null),
 			anio.orElse(null),
 			mes.orElse(null),
-			dia.orElse(null));
+			dia.orElse(null),
+			pagado.orElse(null),
+			sizePag);
 		if (ventas.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}

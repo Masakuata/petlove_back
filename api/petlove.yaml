@@ -551,6 +551,8 @@ paths:
         - $ref: 'parameters.yaml#/components/parameters/query_venta_dia'
         - $ref: 'parameters.yaml#/components/parameters/query_venta_mes'
         - $ref: 'parameters.yaml#/components/parameters/query_venta_anio'
+        - $ref: 'parameters.yaml#/components/parameters/query_venta_pagado'
+        - $ref: 'parameters.yaml#/components/parameters/query_venta_size'
         - $ref: 'parameters.yaml#/components/parameters/query_enviar_csv'
       responses:
         200:
