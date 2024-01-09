@@ -24,7 +24,7 @@ public class ProductoVenta {
     }
 
     public ProductoVenta(PublicProductoVenta productoVenta) {
-        this.producto = (long) productoVenta.producto;
+        this.producto = productoVenta.producto;
         this.cantidad = productoVenta.cantidad;
     }
 

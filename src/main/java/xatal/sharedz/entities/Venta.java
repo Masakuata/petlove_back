@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import xatal.sharedz.structures.PublicVenta;
 
 import java.util.Date;
 import java.util.List;

@@ -66,6 +66,7 @@ public class VentaService {
 		spec = this.addMonthSpecification(month, spec);
 		spec = this.addDaySpecification(day, spec);
 		spec = this.addPagadoSpecification(pagado, spec);
+		spec = this.orderByNewer(spec);
 		Pageable pageable = PageRequest.of(pag, size);
 		return this.ventaRepository.findAll(spec, pageable).stream().toList();
 	}
@@ -237,6 +238,11 @@ public class VentaService {
 			spec = spec.and((root, query, builder) ->
 				builder.equal(root.get("pagado"), pagado));
 		}
+		return spec;
+	}
+
+	private Specification<Venta> orderByNewer(Specification<Venta> spec) {
+		spec = spec.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
 		return spec;
 	}
 
