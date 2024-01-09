@@ -1475,6 +1475,21 @@ paths:
             title: Token identificador de la sesion de usuario
             example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkY29ycmVvMkBjb3JyZW8uY29tIiwiZXhwIjoxNzA0OTYwNjUzLCJ1c2VybmFtZ
           required: true
+        - name: nombre
+          description: Cadena para buscar cliente por nombre
+          in: query
+          schema:
+            type: string
+            title: Username del usuario
+            example: juanito
+          required: false
+        - name: producto
+          description: Id del producto a buscar en las ventas
+          in: query
+          schema:
+            type: number
+            format: integer
+          required: false
         - name: dia
           description: Dia para busqueda de ventas
           in: query
