@@ -85,8 +85,8 @@ public class ClienteService {
         cliente.setDirecciones(direcciones);
     }
 
-    public Cliente getById(int id) {
-        return this.clientes.getById((long) id).orElse(null);
+    public Cliente getById(Long id) {
+        return this.clientes.getById(id).orElse(null);
     }
 
     @Transactional

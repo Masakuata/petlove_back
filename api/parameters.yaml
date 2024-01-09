@@ -61,6 +61,14 @@ components:
       schema:
         type: string
       required: false
+    query_venta_producto:
+      name: producto
+      description: Id del producto a buscar en las ventas
+      in: query
+      schema:
+        type: number
+        format: integer
+      required: false
     query_venta_fecha:
       name: fecha
       description: Fecha para buscar ventas

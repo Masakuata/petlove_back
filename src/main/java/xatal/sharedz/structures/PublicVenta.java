@@ -7,22 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PublicVenta {
-    public int id = -1;
-    public int cliente = -1;
-    public boolean pagado = false;
-    public String fecha = "01-01-1970";
-    public boolean facturado = false;
-    public List<PublicProductoVenta> productos = new ArrayList<>();
+	public Long id = -1L;
+	public Long cliente = -1L;
+	public boolean pagado = false;
+	public String fecha = "01-01-1970";
+	public boolean facturado = false;
+	public float abonado = 0F;
+	public float total = 0F;
+	public List<PublicProductoVenta> productos = new ArrayList<>();
 
-    public PublicVenta() {
-    }
+	public PublicVenta() {
+	}
 
-    public PublicVenta(Venta venta) {
-        this.id = Math.toIntExact(venta.getId());
-        this.cliente = Math.toIntExact(venta.getCliente().getId());
-        this.pagado = venta.isPagado();
-        this.fecha = new SimpleDateFormat("dd/MM/yyyy").format(venta.getFecha());
-        this.facturado = venta.isFacturado();
-        venta.getProductos().forEach(producto -> this.productos.add(new PublicProductoVenta(producto)));
-    }
+	public PublicVenta(Venta venta) {
+		this.id = venta.getId();
+		this.cliente = venta.getCliente().getId();
+		this.pagado = venta.isPagado();
+		this.fecha = new SimpleDateFormat("dd/MM/yyyy").format(venta.getFecha());
+		this.facturado = venta.isFacturado();
+		this.abonado = venta.getAbonado();
+		this.total = venta.getTotal();
+		venta.getProductos().forEach(producto -> this.productos.add(new PublicProductoVenta(producto)));
+	}
 }

@@ -2,6 +2,8 @@ package xatal.sharedz.services;
 
 import jakarta.transaction.Transactional;
 import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.sharedz.entities.Abono;
@@ -22,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VentaService {
@@ -48,19 +51,23 @@ public class VentaService {
 
 	public List<Venta> searchVentas(
 		String nombreCliente,
+		Integer producto,
 		Integer year,
 		Integer month,
 		Integer day,
 		Boolean pagado,
-		Integer size
+		Integer size,
+		Integer pag
 	) {
 		Specification<Venta> spec = Specification.where(null);
 		spec = this.addNombreClienteSpecification(nombreCliente, spec);
+		spec = this.addProductoSpecification(producto, spec);
 		spec = this.addYearSpecification(year, spec);
 		spec = this.addMonthSpecification(month, spec);
 		spec = this.addDaySpecification(day, spec);
 		spec = this.addPagadoSpecification(pagado, spec);
-		return this.ventaRepository.findAll(spec).stream().limit(size).toList();
+		Pageable pageable = PageRequest.of(pag, size);
+		return this.ventaRepository.findAll(spec, pageable).stream().toList();
 	}
 
 	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
@@ -75,14 +82,13 @@ public class VentaService {
 		}
 
 		Venta ventaToSave = pair.a;
-		float abonoInicial = pair.b;
+		ventaToSave.setAbonado(pair.b);
 
-		float costoTotal = this.getCostoTotalByVentaAndTipoCliente(ventaToSave);
-		ventaToSave.setPagado(abonoInicial >= costoTotal);
+		ventaToSave.setTotal(this.getCostoTotalByVenta(ventaToSave));
+		ventaToSave.setPagado(ventaToSave.getAbonado() >= ventaToSave.getTotal());
 
 		Venta savedVenta = this.saveVentaWithProductos(ventaToSave);
-		this.saveAbono(new Abono(savedVenta.getId().intValue(), abonoInicial, new Date()));
-		this.ventaRepository.save(savedVenta);
+		this.abonoRepository.save(new Abono(savedVenta.getId().intValue(), ventaToSave.getAbonado(), new Date()));
 		this.updateStocks(savedVenta);
 		return Optional.of(savedVenta);
 	}
@@ -95,27 +101,35 @@ public class VentaService {
 		return this.ventaRepository.save(venta);
 	}
 
-	public Abono saveNewAbono(PublicAbono newAbono) {
+	public Optional<Abono> saveNewAbono(PublicAbono newAbono) {
 		Optional<Venta> optionalVenta = this.ventaRepository.getById((long) newAbono.venta);
 		if (optionalVenta.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
-		Abono savedAbono = this.saveAbono(new Abono(newAbono));
-		this.setVentaIfPagado(optionalVenta.get());
+		Abono savedAbono = this.abonoRepository.save(new Abono(newAbono));
+		this.setPagadoOnVenta(optionalVenta.get());
 		this.ventaRepository.save(optionalVenta.get());
-		return savedAbono;
+		return Optional.of(savedAbono);
 	}
 
-	public Abono saveAbono(Abono abono) {
-		return this.abonoRepository.save(abono);
+	public Abono updateAbono(PublicAbono publicAbono, Long idAbono) {
+		this.abonoRepository.updateAbonoCantidad(idAbono, publicAbono.cantidad);
+		Optional<Venta> optionalVenta = this.ventaRepository.getById(publicAbono.venta);
+		optionalVenta.ifPresent(venta -> {
+			venta.setAbonado(this.abonoRepository.sumAbonosByVenta(venta.getId()));
+			this.ventaRepository.save(venta);
+		});
+		Abono abono = new Abono(publicAbono);
+		abono.setId((long) idAbono);
+		return abono;
 	}
 
-	public List<Abono> getAbonosFromVentaId(int idVenta) {
-		return this.abonoRepository.findByVenta((long) idVenta);
+	public List<Abono> getAbonosFromVentaId(Long idVenta) {
+		return this.abonoRepository.findByVenta(idVenta);
 	}
 
-	public boolean isAbonoRegistered(int idAbono) {
-		return this.abonoRepository.countById((long) idAbono) > 0;
+	public boolean isAbonoRegistered(Long idAbono) {
+		return this.abonoRepository.countById(idAbono) > 0;
 	}
 
 	public float getTotalAbonosByVentaId(int ventaId) {
@@ -147,6 +161,8 @@ public class VentaService {
 		aux.setPagado(publicVenta.pagado);
 		aux.setFecha(Util.dateFromString(publicVenta.fecha));
 		aux.setProductos(publicVenta.productos.stream().map(ProductoVenta::new).toList());
+		aux.setAbonado(publicVenta.abonado);
+		aux.setTotal(publicVenta.total);
 		return aux;
 	}
 
@@ -161,19 +177,19 @@ public class VentaService {
 			.toList();
 	}
 
-	public Optional<Venta> getById(int id) {
-		return this.ventaRepository.getById((long) id);
+	public Optional<Venta> getById(Long id) {
+		return this.ventaRepository.getById(id);
 	}
 
-	public boolean isIdRegistered(int id) {
-		return this.ventaRepository.countById((long) id) > 0;
+	public boolean isIdRegistered(Long id) {
+		return this.ventaRepository.countById(id) > 0;
 	}
 
 	@Transactional
-	public void deleteById(int id) {
+	public void deleteById(Long id) {
 		this.getById(id).ifPresent(venta ->
 			this.productoVentaRepository.deleteAll(venta.getProductos()));
-		this.ventaRepository.deleteById((long) id);
+		this.ventaRepository.deleteById(id);
 	}
 
 	private Specification<Venta> addNombreClienteSpecification(String nombreCliente, Specification<Venta> spec) {
@@ -181,6 +197,13 @@ public class VentaService {
 			spec = spec.and((root, query, builder) ->
 				builder.like(builder.lower(root.get("cliente").get("nombre")),
 					"%" + nombreCliente.toLowerCase() + "%"));
+		}
+		return spec;
+	}
+
+	private Specification<Venta> addProductoSpecification(Integer producto, Specification<Venta> spec) {
+		if (producto != null) {
+			spec = spec.and((root, query, builder) -> builder.equal(root.get("productos").get("producto"), producto));
 		}
 		return spec;
 	}
@@ -217,7 +240,20 @@ public class VentaService {
 		return spec;
 	}
 
-	private List<Producto> getProductosByVentaAndTipoCliente(Venta venta) {
+	private Specification<Abono> addSumAbonosByVentasSpecification(List<Venta> ventas, Specification<Abono> spec) {
+		if (ventas != null && !ventas.isEmpty()) {
+			List<Long> idVentas = ventas.stream().map(Venta::getId).toList();
+			spec = spec.and((root, query, builder) -> {
+				query.multiselect(root.get("venta"), builder.sum(root.get("cantidad")))
+					.where(builder.in(root.get("venta")).value(idVentas))
+					.groupBy(root.get("venta"));
+				return query.getRestriction();
+			});
+		}
+		return spec;
+	}
+
+	private List<Producto> getProductosByVenta(Venta venta) {
 		List<Integer> productosId = venta.getProductos()
 			.stream()
 			.map(productoVenta -> productoVenta.getProducto().intValue())
@@ -226,21 +262,35 @@ public class VentaService {
 			.searchByIdAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
 	}
 
-	private float getCostoTotalByVentaAndTipoCliente(Venta venta) {
+	private float getCostoTotalByVenta(Venta venta) {
 		final float CERO = 0;
-		return this.getProductosByVentaAndTipoCliente(venta)
+		Map<Long, Float> productos = this.getProductosByVenta(venta)
 			.stream()
-			.reduce(CERO, (precio, e) -> precio + e.getPrecio(), Float::sum);
+			.collect(Collectors.toMap(Producto::getId, Producto::getPrecio));
+
+		return venta.getProductos()
+			.stream()
+			.map(productoVenta -> {
+				return productos.get(productoVenta.getProducto()) * productoVenta.getCantidad();
+			})
+			.reduce(CERO, Float::sum);
+	}
+
+	private Map<Long, Float> getCostoTotalByVentas(List<Venta> ventas) {
+
+		return null;
 	}
 
 	private void updateStocks(Venta venta) {
 		this.productoService.updateStockFromVenta(venta);
 	}
 
-	private void setVentaIfPagado(Venta venta) {
-		float costo = this.getCostoTotalByVentaAndTipoCliente(venta);
+	private void setPagadoOnVenta(Venta venta) {
+		float total = this.getCostoTotalByVenta(venta);
 		float abonos = this.getTotalAbonosByVentaId(Math.toIntExact(venta.getId()));
-		venta.setPagado(abonos >= costo);
+		venta.setAbonado(abonos);
+		venta.setTotal(total);
+		venta.setPagado(abonos >= total);
 	}
 
 	private boolean productsOnStock(List<PublicProductoVenta> productos, Map<Long, Integer> stock) {
@@ -250,5 +300,13 @@ public class VentaService {
 				stock.containsKey(productoVenta.producto)
 					&& stock.get(productoVenta.producto) >= productoVenta.cantidad
 			);
+	}
+
+	private Map<Long, Float> sumAbonosByVentas(List<Venta> ventas) {
+		Specification<Abono> spec = Specification.where(null);
+		spec = this.addSumAbonosByVentasSpecification(ventas, spec);
+		return this.abonoRepository.findAll(spec)
+			.stream()
+			.collect(Collectors.toMap(Abono::getVenta, Abono::getCantidad));
 	}
 }

@@ -8,81 +8,104 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import xatal.sharedz.structures.PublicVenta;
 
 import java.util.Date;
 import java.util.List;
 
 @Entity
 public class Venta {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente", nullable = false)
-    private Cliente cliente;
+	@ManyToOne
+	@JoinColumn(name = "cliente", nullable = false)
+	private Cliente cliente;
 
-    @Column(name = "pagado", nullable = false)
-    private boolean pagado = false;
+	@Column(name = "pagado", nullable = false)
+	private boolean pagado = false;
 
-    @Column(name = "fecha", nullable = false)
-    private Date fecha = new Date();
+	@Column(name = "fecha", nullable = false)
+	private Date fecha = new Date();
 
-    @Column(name = "facturado", nullable = false)
-    private boolean facturado = false;
+	@Column(name = "facturado", nullable = false)
+	private boolean facturado = false;
 
-    @OneToMany
-    private List<ProductoVenta> productos;
+	@Column(name = "abonado", nullable = false)
+	private float abonado = 0F;
 
-    public Venta() {
-    }
+	@Column(name = "total", nullable = false)
+	private float total = 0F;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@OneToMany
+	private List<ProductoVenta> productos;
 
-    public Long getId() {
-        return id;
-    }
+	public Venta() {
+	}
 
-    public Cliente getCliente() {
-        return cliente;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public boolean isPagado() {
-        return pagado;
-    }
+	public Cliente getCliente() {
+		return cliente;
+	}
 
-    public void setPagado(boolean pagado) {
-        this.pagado = pagado;
-    }
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
 
-    public Date getFecha() {
-        return fecha;
-    }
+	public boolean isPagado() {
+		return pagado;
+	}
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
+	public void setPagado(boolean pagado) {
+		this.pagado = pagado;
+	}
 
-    public boolean isFacturado() {
-        return facturado;
-    }
+	public Date getFecha() {
+		return fecha;
+	}
 
-    public void setFacturado(boolean facturado) {
-        this.facturado = facturado;
-    }
+	public void setFecha(Date fecha) {
+		this.fecha = fecha;
+	}
 
-    public List<ProductoVenta> getProductos() {
-        return productos;
-    }
+	public boolean isFacturado() {
+		return facturado;
+	}
 
-    public void setProductos(List<ProductoVenta> productos) {
-        this.productos = productos;
-    }
+	public void setFacturado(boolean facturado) {
+		this.facturado = facturado;
+	}
+
+	public float getAbonado() {
+		return abonado;
+	}
+
+	public void setAbonado(float abonado) {
+		this.abonado = abonado;
+	}
+
+	public float getTotal() {
+		return total;
+	}
+
+	public void setTotal(float total) {
+		this.total = total;
+	}
+
+	public List<ProductoVenta> getProductos() {
+		return productos;
+	}
+
+	public void setProductos(List<ProductoVenta> productos) {
+		this.productos = productos;
+	}
 }

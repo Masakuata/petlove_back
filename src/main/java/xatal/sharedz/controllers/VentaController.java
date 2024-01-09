@@ -51,21 +51,23 @@ public class VentaController {
 	public ResponseEntity searchVentas(
 		@RequestHeader("Token") String token,
 		@RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
-		@RequestParam(name = "producto", required = false) Optional<String> producto,
+		@RequestParam(name = "producto", required = false) Optional<Integer> producto,
 		@RequestParam(name = "anio", required = false) Optional<Integer> anio,
 		@RequestParam(name = "mes", required = false) Optional<Integer> mes,
 		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
 		@RequestParam(name = "size", required = false, defaultValue = "10") Integer sizePag,
+		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag,
 		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado,
 		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
 	) {
 		List<Venta> ventas = this.ventaService.searchVentas(
 			clienteNombre.orElse(null),
+			producto.orElse(null),
 			anio.orElse(null),
 			mes.orElse(null),
 			dia.orElse(null),
 			pagado.orElse(null),
-			sizePag);
+			sizePag, pag);
 		if (ventas.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -74,7 +76,7 @@ public class VentaController {
 			this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
 			return new ResponseEntity(HttpStatus.CREATED);
 		} else {
-			return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+			return ResponseEntity.ok(ventas);
 		}
 	}
 
@@ -86,7 +88,7 @@ public class VentaController {
 	}
 
 	@GetMapping("/{id_venta}")
-	public ResponseEntity getVenta(@PathVariable("id_venta") int ventaId) {
+	public ResponseEntity getVenta(@PathVariable("id_venta") Long ventaId) {
 		Optional<Venta> optionalVenta = this.ventaService.getById(ventaId);
 		return optionalVenta
 			.map(ResponseEntity::ok)
@@ -95,7 +97,7 @@ public class VentaController {
 
 	@PutMapping("/{id_venta}")
 	public ResponseEntity updateVenta(
-		@PathVariable("id_venta") int ventaId,
+		@PathVariable("id_venta") Long ventaId,
 		@RequestBody PublicVenta venta
 	) {
 		venta.id = ventaId;
@@ -107,7 +109,7 @@ public class VentaController {
 	}
 
 	@DeleteMapping("/{id_venta}")
-	public ResponseEntity deleteVenta(@PathVariable("id_venta") int ventaId) {
+	public ResponseEntity deleteVenta(@PathVariable("id_venta") Long ventaId) {
 		if (!this.ventaService.isIdRegistered(ventaId)) {
 			return ResponseEntity.notFound().build();
 		}
@@ -116,7 +118,7 @@ public class VentaController {
 	}
 
 	@GetMapping("/{idVenta}/abono")
-	public ResponseEntity getAbonos(@PathVariable("idVenta") int idVenta) {
+	public ResponseEntity getAbonos(@PathVariable("idVenta") Long idVenta) {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
 		}
@@ -129,27 +131,31 @@ public class VentaController {
 
 	@PostMapping("/{idVenta}/abono")
 	public ResponseEntity addAbono(
-		@PathVariable("idVenta") int idVenta,
+		@PathVariable("idVenta") Long idVenta,
 		@RequestBody PublicAbono abono
 	) {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
 		}
 		abono.venta = idVenta;
-		return new ResponseEntity(this.ventaService.saveNewAbono(abono), HttpStatus.CREATED);
+		Optional<Abono> savedAbono = this.ventaService.saveNewAbono(abono);
+		return savedAbono
+			.map(value -> new ResponseEntity(value, HttpStatus.CREATED))
+			.orElseGet(() -> ResponseEntity.internalServerError().build());
 	}
 
 	@PutMapping("/{idVenta}/abono/{idAbono}")
 	public ResponseEntity updateAbono(
-		@PathVariable("idVenta") int idVenta,
-		@PathVariable("idAbono") int idAbono,
+		@PathVariable("idVenta") Long idVenta,
+		@PathVariable("idAbono") Long idAbono,
 		@RequestBody PublicAbono abono
 	) {
 		if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
 			return ResponseEntity.notFound().build();
 		}
 		Abono savedAbono = new Abono(abono);
-		savedAbono.setId((long) idAbono);
-		return ResponseEntity.ok(this.ventaService.saveAbono(savedAbono));
+		savedAbono.setId(idAbono);
+		this.ventaService.updateAbono(abono, idAbono);
+		return ResponseEntity.ok().build();
 	}
 }
