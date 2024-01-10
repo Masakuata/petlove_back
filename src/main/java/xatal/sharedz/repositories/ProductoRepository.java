@@ -15,6 +15,8 @@ public interface ProductoRepository extends CrudRepository<Producto, Long>, JpaS
 
 	Optional<Producto> getProductoByNombre(String nombre);
 
+	@Query(value = "SELECT * FROM producto WHERE id IN :ids",
+		nativeQuery = true)
 	List<Producto> findByIdIn(List<Long> ids);
 
 	Long countById(int id);

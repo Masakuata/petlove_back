@@ -178,6 +178,21 @@ public class VentaService {
 			.toList();
 	}
 
+	public List<PublicProductoVenta> notInStock(NewVenta newVenta) {
+		List<PublicProductoVenta> unavailable = new LinkedList<>();
+		List<Long> idProductos = newVenta.productos.stream().map(productoVenta -> productoVenta.producto).toList();
+		Map<Long, Integer> stock = this.productoService.getStockByProductos(idProductos);
+
+		newVenta.productos.forEach(productoVenta -> {
+			if (!stock.containsKey(productoVenta.producto)) {
+				unavailable.add(new PublicProductoVenta(productoVenta.producto, productoVenta.cantidad));
+			} else if (stock.get(productoVenta.producto) < productoVenta.cantidad) {
+				unavailable.add(new PublicProductoVenta(productoVenta.producto, stock.get(productoVenta.producto)));
+			}
+		});
+		return unavailable;
+	}
+
 	public Optional<Venta> getById(Long id) {
 		return this.ventaRepository.getById(id);
 	}
@@ -235,15 +250,14 @@ public class VentaService {
 
 	private Specification<Venta> addPagadoSpecification(Boolean pagado, Specification<Venta> spec) {
 		if (pagado != null) {
-			spec = spec.and((root, query, builder) ->
-				builder.equal(root.get("pagado"), pagado));
+			spec = spec.and((root, query, builder) -> builder.equal(root.get("pagado"), pagado));
 		}
 		return spec;
 	}
 
 	private Specification<Venta> orderByNewer(Specification<Venta> spec) {
-		spec = spec.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
-		return spec;
+		return spec
+			.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
 	}
 
 	private Specification<Abono> addSumAbonosByVentasSpecification(List<Venta> ventas, Specification<Abono> spec) {
@@ -265,7 +279,7 @@ public class VentaService {
 			.map(productoVenta -> productoVenta.getProducto().intValue())
 			.toList();
 		return this.productoService
-			.searchByIdAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
+			.searchByIdsAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
 	}
 
 	private float getCostoTotalByVenta(Venta venta) {
@@ -276,15 +290,8 @@ public class VentaService {
 
 		return venta.getProductos()
 			.stream()
-			.map(productoVenta -> {
-				return productos.get(productoVenta.getProducto()) * productoVenta.getCantidad();
-			})
+			.map(productoVenta -> productos.get(productoVenta.getProducto()) * productoVenta.getCantidad())
 			.reduce(CERO, Float::sum);
-	}
-
-	private Map<Long, Float> getCostoTotalByVentas(List<Venta> ventas) {
-
-		return null;
 	}
 
 	private void updateStocks(Venta venta) {

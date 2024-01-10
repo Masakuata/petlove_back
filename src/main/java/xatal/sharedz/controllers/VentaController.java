@@ -21,9 +21,11 @@ import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.VentaService;
 import xatal.sharedz.structures.NewVenta;
 import xatal.sharedz.structures.PublicAbono;
+import xatal.sharedz.structures.PublicProductoVenta;
 import xatal.sharedz.structures.PublicVenta;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin
@@ -82,6 +84,10 @@ public class VentaController {
 
 	@PostMapping
 	public ResponseEntity newVenta(@RequestBody NewVenta venta) {
+		List<PublicProductoVenta> notInStock = this.ventaService.notInStock(venta);
+		if (!notInStock.isEmpty()) {
+			return new ResponseEntity(notInStock, HttpStatus.CONFLICT);
+		}
 		return this.ventaService.saveNewVenta(venta)
 			.map(value -> new ResponseEntity(new PublicVenta(value), HttpStatus.CREATED))
 			.orElseGet(() -> new ResponseEntity(HttpStatus.CONFLICT));

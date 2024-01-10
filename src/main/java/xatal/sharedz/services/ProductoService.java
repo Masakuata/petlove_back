@@ -84,9 +84,9 @@ public class ProductoService {
 		return productos;
 	}
 
-	public List<Producto> searchByIdAndTipoCliente(List<Integer> ids, int tipoCliente) {
+	public List<Producto> searchByIdsAndTipoCliente(List<Integer> ids, int tipoCliente) {
 		List<Producto> productos = this.productos.findByIdIn(ids.stream().map(Integer::longValue).toList());
-		productos.forEach(producto -> this.setProductPrice(producto, tipoCliente));
+		this.setProductosPrices(productos, tipoCliente);
 		return productos;
 	}
 
@@ -100,9 +100,22 @@ public class ProductoService {
 		this.ensureProductosCacheLoaded();
 		this.preciosCache
 			.stream()
-			.filter(precio -> precio.getProducto() == tipoCliente)
+			.filter(precio -> precio.getCliente() == tipoCliente)
 			.findFirst()
 			.ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
+	}
+
+	public void setProductosPrices(List<Producto> productos, int tipoCliente) {
+		List<Long> idProductos = productos.stream().map(Producto::getId).toList();
+		Map<Long, Float> precios = this.precioRepository.findByProductoInAndCliente(idProductos, (long) tipoCliente)
+			.stream()
+			.collect(Collectors.toMap(Precio::getProducto, Precio::getPrecio));
+
+		productos.forEach(producto -> {
+			if (precios.containsKey(producto.getId())) {
+				producto.setPrecio(precios.get(producto.getId()));
+			}
+		});
 	}
 
 	public boolean setPreciosById(int idProducto, List<PublicPrecio> newPrecios) {
@@ -202,4 +215,6 @@ public class ProductoService {
 	private Specification<Producto> productoInIdsSpecification(List<Long> productosId) {
 		return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
 	}
+
+
 }

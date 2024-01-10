@@ -14,7 +14,7 @@ public class TipoCliente {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "tipo_cliente", nullable = false)
+    @Column(name = "tipoCliente", nullable = false)
     private String tipoCliente;
 
     public TipoCliente() {

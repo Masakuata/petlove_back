@@ -22,6 +22,7 @@ public class ClienteService {
     public ClienteService(ClienteRepository clientes, DireccionRepository direcciones) {
         this.clientes = clientes;
         this.direcciones = direcciones;
+        this.ensureClientesCacheLoaded();
     }
 
     private void ensureClientesCacheLoaded() {

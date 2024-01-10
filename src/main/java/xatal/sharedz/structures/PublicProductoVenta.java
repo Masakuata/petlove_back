@@ -13,4 +13,9 @@ public class PublicProductoVenta {
         this.producto = venta.getProducto();
         this.cantidad = venta.getCantidad();
     }
+
+    public PublicProductoVenta(Long producto, int cantidad) {
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
 }
