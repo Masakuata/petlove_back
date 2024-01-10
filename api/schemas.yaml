@@ -292,3 +292,17 @@ components:
         type: object
         allOf:
           - $ref: '#/components/schemas/abono_record'
+    lista_ids:
+      type: array
+      items:
+        type: number
+        format: integer
+    payload_producto_detalles:
+      type: object
+      properties:
+        productos:
+          allOf:
+            - $ref: '#/components/schemas/lista_ids'
+        tipoCliente:
+          type: number
+          format: integer

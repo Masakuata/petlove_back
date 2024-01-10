@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.sharedz.entities.Abono;
+import xatal.sharedz.entities.Producto;
 import xatal.sharedz.entities.Venta;
 import xatal.sharedz.reports.VentasReports;
 import xatal.sharedz.security.TokenUtils;
 import xatal.sharedz.services.VentaService;
+import xatal.sharedz.structures.NewAbono;
 import xatal.sharedz.structures.NewVenta;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicProductoVenta;
@@ -138,7 +140,7 @@ public class VentaController {
 	@PostMapping("/{idVenta}/abono")
 	public ResponseEntity addAbono(
 		@PathVariable("idVenta") Long idVenta,
-		@RequestBody PublicAbono abono
+		@RequestBody NewAbono abono
 	) {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
@@ -163,5 +165,18 @@ public class VentaController {
 		savedAbono.setId(idAbono);
 		this.ventaService.updateAbono(abono, idAbono);
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/{idVenta}/productos")
+	public ResponseEntity getProductos(@PathVariable("idVenta") Long idVenta) {
+		Optional<Venta> optionalVenta = this.ventaService.getById(idVenta);
+		if (optionalVenta.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		List<Producto> productos = this.ventaService.getProductosByVentaReplaceCantidad(optionalVenta.get());
+		if (productos.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(productos);
 	}
 }

@@ -13,6 +13,7 @@ import xatal.sharedz.entities.Venta;
 import xatal.sharedz.repositories.AbonoRepository;
 import xatal.sharedz.repositories.ProductoVentaRepository;
 import xatal.sharedz.repositories.VentaRepository;
+import xatal.sharedz.structures.NewAbono;
 import xatal.sharedz.structures.NewVenta;
 import xatal.sharedz.structures.PublicAbono;
 import xatal.sharedz.structures.PublicProductoVenta;
@@ -102,13 +103,18 @@ public class VentaService {
 		return this.ventaRepository.save(venta);
 	}
 
-	public Optional<Abono> saveNewAbono(PublicAbono newAbono) {
-		Optional<Venta> optionalVenta = this.ventaRepository.getById((long) newAbono.venta);
+	public Optional<Abono> saveNewAbono(NewAbono newAbono) {
+		Optional<Venta> optionalVenta = this.ventaRepository.getById(newAbono.venta);
 		if (optionalVenta.isEmpty()) {
 			return Optional.empty();
 		}
+		if (newAbono.finiquito) {
+			newAbono.cantidad = this.getCostoTotalByVenta(optionalVenta.get());
+			optionalVenta.get().setPagado(true);
+		} else {
+			this.setPagadoOnVenta(optionalVenta.get());
+		}
 		Abono savedAbono = this.abonoRepository.save(new Abono(newAbono));
-		this.setPagadoOnVenta(optionalVenta.get());
 		this.ventaRepository.save(optionalVenta.get());
 		return Optional.of(savedAbono);
 	}
@@ -282,6 +288,15 @@ public class VentaService {
 			.searchByIdsAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
 	}
 
+	public List<Producto> getProductosByVentaReplaceCantidad(Venta venta) {
+		List<Producto> productos = this.getProductosByVenta(venta);
+		Map<Long, Integer> productQuantities = venta.getProductos()
+			.stream()
+			.collect(Collectors.toMap(ProductoVenta::getProducto, ProductoVenta::getCantidad));
+		productos.forEach(producto -> producto.setCantidad(productQuantities.get(producto.getId())));
+		return productos;
+	}
+
 	private float getCostoTotalByVenta(Venta venta) {
 		final float CERO = 0;
 		Map<Long, Float> productos = this.getProductosByVenta(venta)
@@ -313,13 +328,5 @@ public class VentaService {
 				stock.containsKey(productoVenta.producto)
 					&& stock.get(productoVenta.producto) >= productoVenta.cantidad
 			);
-	}
-
-	private Map<Long, Float> sumAbonosByVentas(List<Venta> ventas) {
-		Specification<Abono> spec = Specification.where(null);
-		spec = this.addSumAbonosByVentasSpecification(ventas, spec);
-		return this.abonoRepository.findAll(spec)
-			.stream()
-			.collect(Collectors.toMap(Abono::getVenta, Abono::getCantidad));
 	}
 }

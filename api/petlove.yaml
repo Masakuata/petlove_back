@@ -376,6 +376,34 @@ paths:
           $ref: '#/components/responses/invalid_token'
         500:
           $ref: '#/components/responses/500'
+  /producto/detalles:
+    patch:
+      summary: Obten los detalles de una lista de productos
+      description: Obten los detalles de una lista de productos de acuerdo a un tipo de cliente
+      tags:
+        - Producto
+      parameters:
+        - $ref: 'parameters.yaml#/components/parameters/header_token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'schemas.yaml#/components/schemas/payload_producto_detalles'
+      responses:
+        200:
+          description: Se ha retornado la informacion de los productos
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas.yaml#/components/schemas/producto_array'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/invalid_token'
+        500:
+          $ref: '#/components/responses/500'
   /cliente:
     summary: Catalogo de clientes
     description: Endpoint para realizar operaciones sobre el catalogo de productos
