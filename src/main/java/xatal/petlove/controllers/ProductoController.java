@@ -2,16 +2,7 @@ package xatal.petlove.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.services.ProductoService;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
@@ -20,6 +11,7 @@ import xatal.petlove.structures.PublicPrecio;
 import xatal.petlove.structures.PublicProducto;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -39,32 +31,38 @@ public class ProductoController {
 
 	@GetMapping()
 	public ResponseEntity getProductos(
-		@RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
-		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") int tipoCliente
+		@RequestParam(name = "nombre", required = false, defaultValue = "") Optional<String> nombreQuery,
+		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") Optional<Integer> tipoCliente
 	) {
-		List<Producto> productos;
-		if (nombreQuery != null && !nombreQuery.isEmpty()) {
-			if (tipoCliente != -1) {
-				productos = this.productoService.searchByNameAndTipoCliente(nombreQuery, tipoCliente);
-			} else {
-				productos = this.productoService.searchByName(nombreQuery);
-			}
-		} else {
-			productos = this.productoService.getAll();
-		}
+		List<Producto> productos = this.productoService.search(
+				nombreQuery.orElse(null),
+				tipoCliente.orElse(null)
+		);
 		if (productos.isEmpty()) {
-			return new ResponseEntity(HttpStatus.NO_CONTENT);
+			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.ok(productos);
 	}
 
 	@PostMapping()
 	public ResponseEntity registerProducto(@RequestBody PublicProducto newProducto) {
-		Producto savedProducto = this.productoService.newProducto(newProducto);
+		Producto savedProducto = this.productoService.saveProducto(newProducto);
 		if (savedProducto != null) {
 			return new ResponseEntity(savedProducto, HttpStatus.CREATED);
 		}
 		return new ResponseEntity(HttpStatus.BAD_REQUEST);
+	}
+
+	@PutMapping("/{id_producto}")
+	public ResponseEntity updateProducto(
+		@PathVariable("id_producto") long idProducto,
+		@RequestBody Producto producto
+    ) {
+		if (!this.productoService.isIdRegistered((int) idProducto)) {
+			return ResponseEntity.notFound().build();
+		}
+		producto.setId(idProducto);
+		return ResponseEntity.ok(this.productoService.saveProducto(producto));
 	}
 
 	@PostMapping("/{id_producto}/precio")

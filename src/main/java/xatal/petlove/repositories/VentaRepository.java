@@ -14,6 +14,8 @@ public interface VentaRepository extends CrudRepository<Venta, Long>, JpaSpecifi
 		nativeQuery = true)
 	List<Venta> getAll();
 
+	@Query(value = "SELECT * FROM venta WHERE id = :id",
+		nativeQuery = true)
 	Optional<Venta> getById(Long id);
 
 	Long countById(Long id);

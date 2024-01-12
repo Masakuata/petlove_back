@@ -109,14 +109,19 @@ public class VentaService {
 		if (optionalVenta.isEmpty()) {
 			return Optional.empty();
 		}
+		Venta venta = optionalVenta.get();
 		if (newAbono.finiquito) {
-			newAbono.cantidad = this.getCostoTotalByVenta(optionalVenta.get());
-			optionalVenta.get().setPagado(true);
+			newAbono.cantidad = venta.getTotal() - venta.getAbonado();
+			venta.setPagado(true);
 		} else {
-			this.setPagadoOnVenta(optionalVenta.get());
+			this.setPagadoOnVenta(venta);
+		}
+		venta.setAbonado(venta.getAbonado() + newAbono.cantidad);
+		if (Util.isFechaDefault(newAbono.fecha)) {
+			newAbono.fecha = Util.dateToString(new Date());
 		}
 		Abono savedAbono = this.abonoRepository.save(new Abono(newAbono));
-		this.ventaRepository.save(optionalVenta.get());
+		Venta save = this.ventaRepository.save(venta);
 		return Optional.of(savedAbono);
 	}
 
@@ -128,7 +133,7 @@ public class VentaService {
 			this.ventaRepository.save(venta);
 		});
 		Abono abono = new Abono(publicAbono);
-		abono.setId((long) idAbono);
+		abono.setId(idAbono);
 		return abono;
 	}
 

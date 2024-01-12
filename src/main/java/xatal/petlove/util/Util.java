@@ -52,4 +52,8 @@ public abstract class Util {
                 && !fecha.isEmpty()
                 && !fecha.equals("01-01-1970");
     }
+
+    public static boolean isFechaDefault(String fecha) {
+        return !Util.isNotDefaultFecha(fecha);
+    }
 }

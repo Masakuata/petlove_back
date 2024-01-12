@@ -8,7 +8,6 @@ public class PublicProducto {
     public String tipoMascota = "";
     public String raza = "";
     public float precio = -1;
-
     public int cantidad = 0;
 
     public PublicProducto() {

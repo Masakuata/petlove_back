@@ -14,7 +14,6 @@ import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
 import xatal.petlove.structures.PublicProducto;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,33 +59,11 @@ public class ProductoService {
         return this.productoRepository.getAll();
     }
 
-    public List<Producto> searchByName(String nombre) {
-        String lowercase = nombre.toLowerCase();
-        return this.productoRepository.getAll()
-                .stream()
-                .filter(producto -> producto.getNombre().toLowerCase().contains(lowercase))
-                .collect(Collectors.toList());
-    }
-
-    public List<Producto> searchByNameAndTipoCliente(String nombre, int tipoCliente) {
-        List<Producto> productos = this.searchByName(nombre);
-        if (productos.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<Precio> precios = this.precioRepository.findByProductoInAndCliente(
-                this.getProductosId(productos), (long) tipoCliente
-        );
-
-        Map<Long, Precio> precioMap = precios
-                .stream()
-                .collect(Collectors.toMap(Precio::getProducto, precio -> precio));
-
-        productos.forEach(producto -> {
-            if (precioMap.containsKey(producto.getId())) {
-                producto.setPrecio(precioMap.get(producto.getId()).getPrecio());
-            }
-        });
+    public List<Producto> search(String nombre, Integer tipoCliente) {
+        Specification<Producto> spec = Specification.where(null);
+        spec = this.addSpecNombreInProducto(nombre, spec);
+        List<Producto> productos = this.productoRepository.findAll(spec).stream().toList();
+        this.setProductosPrices(productos, tipoCliente.longValue());
         return productos;
     }
 
@@ -114,9 +91,9 @@ public class ProductoService {
                 .ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
     }
 
-    public void setProductosPrices(List<Producto> productos, int tipoCliente) {
+    public void setProductosPrices(List<Producto> productos, long tipoCliente) {
         List<Long> idProductos = productos.stream().map(Producto::getId).toList();
-        Map<Long, Float> precios = this.precioRepository.findByProductoInAndCliente(idProductos, (long) tipoCliente)
+        Map<Long, Float> precios = this.precioRepository.findByProductoInAndCliente(idProductos, tipoCliente)
                 .stream()
                 .collect(Collectors.toMap(Precio::getProducto, Precio::getPrecio));
 
@@ -145,10 +122,14 @@ public class ProductoService {
         this.productoRepository.saveAll(updated);
     }
 
-    public Producto newProducto(PublicProducto newProducto) {
+    public Producto saveProducto(PublicProducto newProducto) {
         return this.productoRepository.save(new Producto(newProducto));
     }
 
+    public Producto saveProducto(Producto producto) {
+        return this.productoRepository.save(producto);
+    }
+    
     public Map<Long, Integer> getStockByProductos(List<Long> idProductos) {
         return this.productoRepository.findAll(this.productoInIdsSpecification(idProductos))
                 .stream()
@@ -221,5 +202,14 @@ public class ProductoService {
 
     private Specification<Producto> productoInIdsSpecification(List<Long> productosId) {
         return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
+    }
+
+    private Specification<Producto> addSpecNombreInProducto(String nombre, Specification<Producto> spec) {
+        if (nombre != null && !nombre.isEmpty()) {
+            spec = spec.and(((root, query, builder) ->
+                    builder.like(builder.lower(root.get("nombre")),
+                            "%" + nombre.toLowerCase() + "%")));
+        }
+        return spec;
     }
 }
