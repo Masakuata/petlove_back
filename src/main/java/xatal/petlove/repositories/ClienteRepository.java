@@ -16,7 +16,7 @@ public interface ClienteRepository extends CrudRepository<Cliente, Long> {
             nativeQuery = true)
     List<Cliente> getAll();
 
-    @Query(value = "SELECT id, nombre, tipoCliente, RFC, telefono, email FROM cliente",
+    @Query(value = "SELECT id, nombre, tipo_cliente, RFC, telefono, email FROM cliente",
             nativeQuery = true)
     Collection<ClienteMinimal> getMinimal();
 

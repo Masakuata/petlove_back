@@ -1,13 +1,15 @@
 package xatal.petlove.repositories;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import xatal.petlove.entities.Precio;
+import xatal.petlove.entities.Venta;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface PrecioRepository extends CrudRepository<Precio, Long> {
+public interface PrecioRepository extends CrudRepository<Precio, Long>, JpaSpecificationExecutor<Precio> {
 
     @Query(value = "SELECT * FROM precio",
             nativeQuery = true)
