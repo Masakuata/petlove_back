@@ -8,6 +8,9 @@ import java.util.List;
 public class MultiPrecioProducto extends PublicProducto {
 	public List<PublicPrecio> precios = new ArrayList<>();
 
+	public MultiPrecioProducto() {
+	}
+
 	public MultiPrecioProducto(Producto producto) {
 		this.nombre = producto.getNombre();
 		this.presentacion = producto.getPresentacion();

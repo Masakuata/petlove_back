@@ -23,7 +23,9 @@ public interface ProductoRepository extends CrudRepository<Producto, Long>, JpaS
 		nativeQuery = true)
 	void returnStock(long idProducto, int retorno);
 
-	Long countById(int id);
+	Long countById(long id);
+
+	Long countByNombreAndPresentacion(String nombre, String presentacion);
 
 	void deleteById(int id);
 }

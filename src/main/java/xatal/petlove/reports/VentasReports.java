@@ -98,7 +98,7 @@ public class VentasReports extends XReport {
 			.stream()
 			.map(venta -> new Attachment(
 				"productos.venta" + venta.getCliente().getNombre() + "." + Util.dateToString(venta.getFecha()) + ".csv",
-				getProductosBytes(venta),
+				this.getProductosBytes(venta),
 				MIMEType.TEXT_CSV
 			))
 			.collect(Collectors.toList());

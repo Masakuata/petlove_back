@@ -18,8 +18,6 @@ import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
 import xatal.petlove.structures.PublicProducto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +130,7 @@ public class ProductoService {
 		});
 	}
 
-	public boolean setPreciosById(int idProducto, List<PublicPrecio> newPrecios) {
+	public boolean savePreciosById(int idProducto, List<PublicPrecio> newPrecios) {
 		if (!this.isIdRegistered(idProducto)) {
 			return false;
 		}
@@ -154,8 +152,10 @@ public class ProductoService {
 		this.productoRepository.returnStock(idProducto, cantidad);
 	}
 
-	public Producto saveProducto(PublicProducto newProducto) {
-		return this.productoRepository.save(new Producto(newProducto));
+	public Producto saveProducto(MultiPrecioProducto newProducto) {
+		Producto savedProducto = this.productoRepository.save(new Producto(newProducto));
+		this.savePreciosById(Math.toIntExact(savedProducto.getId()), newProducto.precios);
+		return savedProducto;
 	}
 
 	public Producto saveProducto(Producto producto) {
@@ -168,7 +168,15 @@ public class ProductoService {
 			.collect(Collectors.toMap(Producto::getId, Producto::getCantidad));
 	}
 
-	public boolean isIdRegistered(int idProducto) {
+	public boolean isProductoRegistered(PublicProducto producto) {
+		return this.isProductoRegistered(new Producto(producto));
+	}
+
+	public boolean isProductoRegistered(Producto producto) {
+		return this.productoRepository.countByNombreAndPresentacion(producto.getNombre(), producto.getPresentacion()) > 0;
+	}
+
+	public boolean isIdRegistered(long idProducto) {
 		return this.productoRepository.countById(idProducto) > 0;
 	}
 
@@ -203,10 +211,7 @@ public class ProductoService {
 	}
 
 	private Optional<Producto> getProductoById(int idProducto) {
-		return this.getAll()
-			.stream()
-			.filter(producto -> producto.getId() == idProducto)
-			.findFirst();
+		return this.productoRepository.findById((long) idProducto);
 	}
 
 	private List<Long> getProductosId(List<Producto> productos) {

@@ -9,7 +9,6 @@ import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
 import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
-import xatal.petlove.structures.PublicProducto;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +49,10 @@ public class ProductoController {
 	}
 
 	@PostMapping()
-	public ResponseEntity registerProducto(@RequestBody PublicProducto newProducto) {
+	public ResponseEntity registerProducto(@RequestBody MultiPrecioProducto newProducto) {
+		if (this.productoService.isProductoRegistered(newProducto)) {
+			return new ResponseEntity(HttpStatus.CONFLICT);
+		}
 		Producto savedProducto = this.productoService.saveProducto(newProducto);
 		if (savedProducto != null) {
 			return new ResponseEntity(savedProducto, HttpStatus.CREATED);
@@ -72,7 +74,7 @@ public class ProductoController {
 		@PathVariable("id_producto") long idProducto,
 		@RequestBody Producto producto
 	) {
-		if (!this.productoService.isIdRegistered((int) idProducto)) {
+		if (!this.productoService.isIdRegistered(idProducto)) {
 			return ResponseEntity.notFound().build();
 		}
 		producto.setId(idProducto);
@@ -84,7 +86,7 @@ public class ProductoController {
 		@PathVariable("id_producto") int idProducto,
 		@RequestBody List<PublicPrecio> precios
 	) {
-		if (this.productoService.setPreciosById(idProducto, precios)) {
+		if (this.productoService.savePreciosById(idProducto, precios)) {
 			return ResponseEntity.ok().build();
 		}
 		return new ResponseEntity(HttpStatus.NOT_FOUND);
