@@ -8,17 +8,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import xatal.petlove.reports.ReportableField;
+import xatal.petlove.reports.ReportableList;
 
 import java.util.Date;
 import java.util.List;
 
 @Entity
 public class Venta {
+	@ReportableField(headerName = "ID VENTA")
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false)
 	private Long id;
 
+	@ReportableField(headerName = "CLIENTE", getValueFrom = "getNombre")
 	@ManyToOne
 	@JoinColumn(name = "cliente", nullable = false)
 	private Cliente cliente;
@@ -26,21 +30,27 @@ public class Venta {
 	@Column(name = "vendedor", nullable = false)
 	private Long vendedor;
 
+	@ReportableField(headerName = "PAGADO")
 	@Column(name = "pagado", nullable = false)
 	private boolean pagado = false;
 
+	@ReportableField(headerName = "FECHA", isDate = true)
 	@Column(name = "fecha", nullable = false)
 	private Date fecha = new Date();
 
+	@ReportableField(headerName = "FACTURADO")
 	@Column(name = "facturado", nullable = false)
 	private boolean facturado = false;
 
+	@ReportableField(headerName = "ABONADO")
 	@Column(name = "abonado", nullable = false)
 	private float abonado = 0F;
 
+	@ReportableField(headerName = "TOTAL")
 	@Column(name = "total", nullable = false)
 	private float total = 0F;
 
+//	@ReportableList(headerName = "PRODUCTOS")
 	@OneToMany
 	private List<ProductoVenta> productos;
 

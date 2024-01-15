@@ -1,5 +1,7 @@
 package xatal.petlove.reports;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
@@ -8,6 +10,10 @@ import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +23,61 @@ import java.util.stream.Collectors;
 public class VentasReports extends XReport {
 	private static final String VENTA_HEADER = "ID VENTA,CLIENTE,PAGADO,TOTAL,ABONADO,FECHA,FACTURADO\n";
 	private static final String PRODUCTO_HEADER = "NOMBRE,PRESENTACION,TIPO MASCOTA,RAZA,PRECIO\n";
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final ProductoService productoService;
 
 	public VentasReports(ProductoService productoService) {
 		this.productoService = productoService;
 	}
+
+	public void generateReportsFrom(Object reportable) {
+		List<Field> reportableFields = Arrays.stream(reportable.getClass().getDeclaredFields())
+			.filter(field -> field.isAnnotationPresent(ReportableField.class))
+			.toList();
+		String header = this.getReportableHeader(reportableFields);
+		String values;
+		Optional<String> optionalValues = this.getFieldValues(reportable, reportableFields);
+		if (optionalValues.isPresent()) {
+			values = optionalValues.get();
+		}
+
+	}
+
+	public String getReportableHeader(List<Field> reportableFields) {
+		StringBuilder header = new StringBuilder();
+		reportableFields.forEach(field -> header.append(field.getAnnotation(ReportableField.class).headerName()));
+		header.append("\n");
+		return header.toString();
+	}
+
+	public Optional<String> getFieldValues(Object reportable, List<Field> reportableFields) {
+		StringBuilder values = new StringBuilder();
+		for (Field field : reportableFields) {
+			field.setAccessible(true);
+			try {
+				if (!field.getAnnotation(ReportableField.class).getValueFrom().isEmpty()) {
+					String method = field.getAnnotation(ReportableField.class).getValueFrom();
+					values.append((String) reportable.getClass().getMethod(method).invoke(reportable));
+				} else {
+					if (field.getAnnotation(ReportableField.class).isDate()) {
+						values.append(Util.dateToString((Date) field.get(reportable)));
+					} else {
+						values.append(field.get(reportable)).append(",");
+					}
+				}
+			} catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+				this.logger.error(e.getMessage());
+				return Optional.empty();
+			}
+		}
+		values.append("\n");
+		return values.toString().describeConstable();
+	}
+
+//	public Optional<String> getListValues(Object reportable) {
+//
+//	}
 
 	public void generateReportsFrom(List<Venta> ventas, String recipientName, String recipientEmail) {
 		final List<Attachment> attachments = new LinkedList<>();

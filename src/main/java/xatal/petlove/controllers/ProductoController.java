@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
 import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
@@ -32,11 +33,15 @@ public class ProductoController {
 	@GetMapping()
 	public ResponseEntity getProductos(
 		@RequestParam(name = "nombre", required = false, defaultValue = "") Optional<String> nombreQuery,
-		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") Optional<Integer> tipoCliente
+		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") Optional<Integer> tipoCliente,
+		@RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
+		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag
 	) {
 		List<Producto> productos = this.productoService.search(
-				nombreQuery.orElse(null),
-				tipoCliente.orElse(null)
+			nombreQuery.orElse(null),
+			tipoCliente.orElse(null),
+			size,
+			pag
 		);
 		if (productos.isEmpty()) {
 			return ResponseEntity.noContent().build();
@@ -53,11 +58,20 @@ public class ProductoController {
 		return new ResponseEntity(HttpStatus.BAD_REQUEST);
 	}
 
+	@GetMapping("/precio")
+	public ResponseEntity getWithPrecios() {
+		List<MultiPrecioProducto> productos = this.productoService.getWithPrecios();
+    	if (productos.isEmpty()) {
+    		return ResponseEntity.noContent().build();
+    	}
+    	return ResponseEntity.ok(productos);
+	}
+
 	@PutMapping("/{id_producto}")
 	public ResponseEntity updateProducto(
 		@PathVariable("id_producto") long idProducto,
 		@RequestBody Producto producto
-    ) {
+	) {
 		if (!this.productoService.isIdRegistered((int) idProducto)) {
 			return ResponseEntity.notFound().build();
 		}

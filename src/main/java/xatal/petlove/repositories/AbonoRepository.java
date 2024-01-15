@@ -23,4 +23,6 @@ public interface AbonoRepository extends CrudRepository<Abono, Long>, JpaSpecifi
 	@Query(value = "UPDATE abono SET cantidad = :cantidad WHERE id = :idAbono",
 		nativeQuery = true)
 	void updateAbonoCantidad(Long idAbono, float cantidad);
+
+	void deleteAbonosByVenta(Long venta);
 }

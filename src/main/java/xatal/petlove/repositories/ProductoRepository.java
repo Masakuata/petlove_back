@@ -19,6 +19,10 @@ public interface ProductoRepository extends CrudRepository<Producto, Long>, JpaS
 		nativeQuery = true)
 	List<Producto> findByIdIn(List<Long> ids);
 
+	@Query(value = "UPDATE producto SET cantidad = (cantidad + :retorno) WHERE id = :idProducto",
+		nativeQuery = true)
+	void returnStock(long idProducto, int retorno);
+
 	Long countById(int id);
 
 	void deleteById(int id);

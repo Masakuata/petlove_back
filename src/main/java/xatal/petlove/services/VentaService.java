@@ -38,7 +38,8 @@ public class VentaService {
 	public VentaService(
 		VentaRepository ventaRepository,
 		ProductoVentaRepository productoVentaRepository, AbonoRepository abonoRepository,
-		ClienteService clienteService, ProductoService productoService) {
+		ClienteService clienteService, ProductoService productoService
+	) {
 		this.ventaRepository = ventaRepository;
 		this.productoVentaRepository = productoVentaRepository;
 		this.abonoRepository = abonoRepository;
@@ -121,7 +122,7 @@ public class VentaService {
 			newAbono.fecha = Util.dateToString(new Date());
 		}
 		Abono savedAbono = this.abonoRepository.save(new Abono(newAbono));
-		Venta save = this.ventaRepository.save(venta);
+		this.ventaRepository.save(venta);
 		return Optional.of(savedAbono);
 	}
 
@@ -214,10 +215,17 @@ public class VentaService {
 	}
 
 	@Transactional
-	public void deleteById(Long id) {
-		this.getById(id).ifPresent(venta ->
-			this.productoVentaRepository.deleteAll(venta.getProductos()));
-		this.ventaRepository.deleteById(id);
+	public void deleteById(Long idVenta) {
+		Optional<Venta> optionalVenta = this.getById(idVenta);
+		if (optionalVenta.isEmpty()) {
+			return;
+		}
+		Venta venta = optionalVenta.get();
+		venta.getProductos().forEach(productoVenta ->
+			this.productoService.returnStock(productoVenta.getProducto(), productoVenta.getCantidad()));
+		this.abonoRepository.deleteAbonosByVenta(idVenta);
+		this.productoVentaRepository.deleteAll(venta.getProductos());
+		this.ventaRepository.deleteById(idVenta);
 	}
 
 	private Specification<Venta> addNombreClienteSpecification(String nombreCliente, Specification<Venta> spec) {
