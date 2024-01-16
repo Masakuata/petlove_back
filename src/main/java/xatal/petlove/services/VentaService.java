@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
+import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.repositories.AbonoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.VentaRepository;
+import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewAbono;
 import xatal.petlove.structures.NewVenta;
 import xatal.petlove.structures.PublicAbono;
@@ -34,17 +36,19 @@ public class VentaService {
 	private final AbonoRepository abonoRepository;
 	private final ClienteService clienteService;
 	private final ProductoService productoService;
+	private final UsuarioService usuarioService;
 
 	public VentaService(
 		VentaRepository ventaRepository,
 		ProductoVentaRepository productoVentaRepository, AbonoRepository abonoRepository,
-		ClienteService clienteService, ProductoService productoService
+		ClienteService clienteService, ProductoService productoService, UsuarioService usuarioService
 	) {
 		this.ventaRepository = ventaRepository;
 		this.productoVentaRepository = productoVentaRepository;
 		this.abonoRepository = abonoRepository;
 		this.clienteService = clienteService;
 		this.productoService = productoService;
+		this.usuarioService = usuarioService;
 	}
 
 	public List<Venta> getAll() {
@@ -309,6 +313,18 @@ public class VentaService {
 			.collect(Collectors.toMap(ProductoVenta::getProducto, ProductoVenta::getCantidad));
 		productos.forEach(producto -> producto.setCantidad(productQuantities.get(producto.getId())));
 		return productos;
+	}
+
+	public Optional<FullVenta> getFullVenta(long idVenta) {
+		Optional<Venta> optionalVenta = this.getById(idVenta);
+		if (optionalVenta.isEmpty()) {
+			return Optional.empty();
+		}
+		Venta venta = optionalVenta.get();
+		FullVenta fullVenta = new FullVenta(venta);
+		fullVenta.productos = this.getProductosByVentaReplaceCantidad(venta);
+		fullVenta.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
+		return Optional.of(fullVenta);
 	}
 
 	private float getCostoTotalByVenta(Venta venta) {

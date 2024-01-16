@@ -22,6 +22,7 @@ import xatal.petlove.reports.VentasReports;
 import xatal.petlove.security.TokenUtils;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.services.VentaService;
+import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewAbono;
 import xatal.petlove.structures.NewVenta;
 import xatal.petlove.structures.PublicAbono;
@@ -112,6 +113,15 @@ public class VentaController {
 		return optionalVenta
 			.map(ResponseEntity::ok)
 			.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
+	@GetMapping("/{id_venta}/details")
+	public ResponseEntity getVentaDetails(@PathVariable("id_venta") Long idVenta) {
+		Optional<FullVenta> optionalVenta = this.ventaService.getFullVenta(idVenta);
+		if (optionalVenta.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(optionalVenta.get());
 	}
 
 	@PutMapping("/{id_venta}")

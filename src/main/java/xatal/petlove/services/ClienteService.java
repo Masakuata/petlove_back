@@ -1,6 +1,7 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Direccion;
@@ -17,22 +18,10 @@ import java.util.stream.Collectors;
 public class ClienteService {
 	private final ClienteRepository clienteRepository;
 	private final DireccionRepository direcciones;
-	private List<Cliente> clientesCache = null;
 
 	public ClienteService(ClienteRepository clientes, DireccionRepository direcciones) {
 		this.clienteRepository = clientes;
 		this.direcciones = direcciones;
-		this.ensureClientesCacheLoaded();
-	}
-
-	private void ensureClientesCacheLoaded() {
-		if (this.clientesCache == null) {
-			this.clientesCache = this.clienteRepository.getAll();
-		}
-	}
-
-	private void refreshClientesCacheAsync() {
-		new Thread(() -> this.clientesCache = this.clienteRepository.getAll()).start();
 	}
 
 	public List<Cliente> getAll() {
@@ -52,13 +41,11 @@ public class ClienteService {
 	}
 
 	public List<Cliente> searchByName(String nombre, int size) {
-		this.ensureClientesCacheLoaded();
-		String lowercaseNombre = nombre.toLowerCase();
-		return this.clientesCache
+		Specification<Cliente> spec = this.addNombreSpecification(nombre, Specification.where(null));
+		return this.clienteRepository.findAll(spec)
 			.stream()
-			.filter(cliente -> cliente.getNombre().toLowerCase().contains(lowercaseNombre))
 			.limit(size)
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	public List<PublicCliente> searchByNamePublic(String nombre, int size) {
@@ -70,9 +57,7 @@ public class ClienteService {
 
 	public Cliente saveCliente(Cliente cliente) {
 		this.saveClienteDirecciones(cliente);
-		Cliente savedCliente = this.clienteRepository.save(cliente);
-		this.refreshClientesCacheAsync();
-		return savedCliente;
+		return this.clienteRepository.save(cliente);
 	}
 
 	public Cliente saveCliente(PublicCliente cliente) {
@@ -92,7 +77,6 @@ public class ClienteService {
 	@Transactional
 	public void removeById(int id) {
 		this.clienteRepository.deleteById((long) id);
-		this.refreshClientesCacheAsync();
 	}
 
 	public boolean isIdRegistered(int id) {
@@ -100,9 +84,14 @@ public class ClienteService {
 	}
 
 	public boolean isEmailUsed(String email) {
-		if (email == null || email.isEmpty()) {
-			return false;
+		return email != null && !email.isEmpty() && this.clienteRepository.countByEmail(email) > 0;
+	}
+
+	private Specification<Cliente> addNombreSpecification(String nombre, Specification<Cliente> spec) {
+		if (nombre != null && !nombre.isEmpty()) {
+			spec = spec.and(((root, query, builder) ->
+				builder.like(builder.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%")));
 		}
-		return this.clienteRepository.countByEmail(email) > 0;
+		return spec;
 	}
 }
