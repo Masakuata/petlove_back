@@ -46,6 +46,15 @@ public class ClienteController {
                 .orElse(getMinimalClientes(size, this.clienteService::getMinimal));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity getAll() {
+        List<PublicCliente> clientes = this.clienteService.getAllPublic();
+        if (clientes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(clientes);
+    }
+
     private <T> ResponseEntity getClientes(String name, int size, BiFunction<String, Integer, List<T>> fetcher) {
         return Optional.of(fetcher.apply(name, size))
                 .filter(clients -> !clients.isEmpty())
