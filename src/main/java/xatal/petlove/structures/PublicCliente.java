@@ -14,7 +14,7 @@ public class PublicCliente {
     public String RFC = "";
     public List<String> direcciones = new LinkedList<>();
     public String telefono = "";
-    public int tipoCliente = 0;
+    public int tipoCliente = 1;
 
     public PublicCliente() {
     }
