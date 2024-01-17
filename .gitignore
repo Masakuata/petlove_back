@@ -1,0 +1,8 @@
+*.pdf
+migration
+.gradle
+.idea
+build
+gradle
+gradlew
+gradlew.bat

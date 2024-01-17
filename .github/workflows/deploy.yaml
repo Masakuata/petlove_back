@@ -51,10 +51,11 @@ on:
         description: Desplegar en Digital Ocean
         default: false
 env:
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  DB_URL: ${{ secrets.DB_URL }}
-  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.REDSTONE_PW }}
+  DB_URL: ${{ secrets.RESTONE_URL }}
+  DB_USERNAME: ${{ secrets.RESTONE_USER }}
   TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
+  DB_DRIVER: ${{ secrets.REDSTONE_DRIVER }}
 
 jobs:
   deploy_on_anton:
@@ -68,7 +69,7 @@ jobs:
           url: http://clayrite.ddns.net:42000/sharedz_backend?image=w3edd/sharedz_b&tag=${{ inputs.tag }}&iport=${{ inputs.internal_port }}&eport=${{ inputs.external_port }}&privileged=0
           method: 'POST'
           timeout: 20000
-          data: '{"DB_URL": "${{ env.DB_URL }}", "DB_USERNAME": "${{ env.DB_USERNAME }}", "DB_PASSWORD": "${{ env.DB_PASSWORD }}", "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}"}'
+          data: '{"DB_URL": "${{ env.DB_URL }}", "DB_USERNAME": "${{ env.DB_USERNAME }}", "DB_PASSWORD": "${{ env.DB_PASSWORD }}", "DB_DRIVER": "${{ env.DB_DRIVER }}" "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}"}'
 
   deploy_on_digital_ocean:
     if: ${{ fromJSON(inputs.deploy_digital_ocean) }}
