@@ -69,7 +69,7 @@ jobs:
           url: http://clayrite.ddns.net:42000/sharedz_backend?image=w3edd/sharedz_b&tag=${{ inputs.tag }}&iport=${{ inputs.internal_port }}&eport=${{ inputs.external_port }}&privileged=0
           method: 'POST'
           timeout: 20000
-          data: '{"DB_URL": "${{ env.DB_URL }}", "DB_USERNAME": "${{ env.DB_USERNAME }}", "DB_PASSWORD": "${{ env.DB_PASSWORD }}", "DB_DRIVER": "${{ env.DB_DRIVER }}" "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}"}'
+          data: '{"DB_URL": "${{ env.DB_URL }}", "DB_USERNAME": "${{ env.DB_USERNAME }}", "DB_PASSWORD": "${{ env.DB_PASSWORD }}", "DB_DRIVER": "${{ env.DB_DRIVER }}", "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}"}'
 
   deploy_on_digital_ocean:
     if: ${{ fromJSON(inputs.deploy_digital_ocean) }}
