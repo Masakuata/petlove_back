@@ -1,6 +1,7 @@
 package xatal.petlove.repositories;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import xatal.petlove.entities.Producto;
@@ -19,6 +20,7 @@ public interface ProductoRepository extends CrudRepository<Producto, Long>, JpaS
 		nativeQuery = true)
 	List<Producto> findByIdIn(List<Long> ids);
 
+	@Modifying
 	@Query(value = "UPDATE producto SET cantidad = (cantidad + :retorno) WHERE id = :idProducto",
 		nativeQuery = true)
 	void returnStock(long idProducto, int retorno);

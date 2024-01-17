@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
+import xatal.petlove.entities.StockOperation;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
+import xatal.petlove.repositories.StockOperationRepository;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
@@ -29,11 +31,13 @@ public class ProductoService {
 	private final ProductoRepository productoRepository;
 	private final ProductoVentaRepository productoVenta;
 	private final PrecioRepository precioRepository;
+	private final StockOperationRepository stockOperationRepository;
 
-	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, PrecioRepository precioRepository) {
+	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, PrecioRepository precioRepository, StockOperationRepository stockOperationRepository) {
 		this.productoRepository = productoRepository;
 		this.productoVenta = productoVenta;
 		this.precioRepository = precioRepository;
+		this.stockOperationRepository = stockOperationRepository;
 	}
 
 	public void cargarProductos(List<ProductoLoad> newProductos) {
@@ -162,14 +166,24 @@ public class ProductoService {
 		this.productoRepository.saveAll(updated);
 	}
 
+	@Transactional
 	public void returnStock(long idProducto, int cantidad) {
 		this.productoRepository.returnStock(idProducto, cantidad);
+		this.stockOperationRepository.save(new StockOperation(idProducto, cantidad));
 	}
 
 	public Producto saveProducto(MultiPrecioProducto newProducto) {
 		Producto savedProducto = this.productoRepository.save(new Producto(newProducto));
 		this.savePreciosById(Math.toIntExact(savedProducto.getId()), newProducto.precios);
 		return savedProducto;
+	}
+
+	public MultiPrecioProducto updateProducto(MultiPrecioProducto newProducto, long idProducto) {
+		Producto aux = new Producto(newProducto);
+		aux.setId(idProducto);
+		this.productoRepository.save(aux);
+		this.savePreciosById((int) idProducto, newProducto.precios);
+		return newProducto;
 	}
 
 	public Producto saveProducto(Producto producto) {
@@ -180,6 +194,12 @@ public class ProductoService {
 		return this.productoRepository.findAll(this.productoInIdsSpecification(idProductos))
 			.stream()
 			.collect(Collectors.toMap(Producto::getId, Producto::getCantidad));
+	}
+
+	@Transactional
+	public void updateStockWithDelta(long idProducto, int stockDelta) {
+		this.productoRepository.returnStock(idProducto, stockDelta);
+
 	}
 
 	public boolean isProductoRegistered(PublicProducto producto) {

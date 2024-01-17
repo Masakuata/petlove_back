@@ -72,22 +72,21 @@ public class ProductoController {
 	@GetMapping("/precio")
 	public ResponseEntity getWithPrecios() {
 		List<MultiPrecioProducto> productos = this.productoService.getWithPrecios();
-    	if (productos.isEmpty()) {
-    		return ResponseEntity.noContent().build();
-    	}
-    	return ResponseEntity.ok(productos);
+		if (productos.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(productos);
 	}
 
 	@PutMapping("/{id_producto}")
 	public ResponseEntity updateProducto(
 		@PathVariable("id_producto") long idProducto,
-		@RequestBody Producto producto
+		@RequestBody MultiPrecioProducto producto
 	) {
 		if (!this.productoService.isIdRegistered(idProducto)) {
 			return ResponseEntity.notFound().build();
 		}
-		producto.setId(idProducto);
-		return ResponseEntity.ok(this.productoService.saveProducto(producto));
+		return ResponseEntity.ok(this.productoService.updateProducto(producto, idProducto));
 	}
 
 	@PostMapping("/{id_producto}/precio")
@@ -121,5 +120,14 @@ public class ProductoController {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.ok(productos);
+	}
+
+	@PutMapping("/{id_producto}/stock")
+	public ResponseEntity updateStock(
+		@PathVariable("id_producto") long idProducto,
+		@RequestParam(name = "cant") int stockDelta
+	) {
+		this.productoService.updateStockWithDelta(idProducto, stockDelta);
+		return ResponseEntity.ok().build();
 	}
 }
