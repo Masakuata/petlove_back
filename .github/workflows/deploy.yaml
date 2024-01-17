@@ -52,8 +52,8 @@ on:
         default: false
 env:
   DB_PASSWORD: ${{ secrets.REDSTONE_PW }}
-  DB_URL: ${{ secrets.RESTONE_URL }}
-  DB_USERNAME: ${{ secrets.RESTONE_USER }}
+  DB_URL: ${{ secrets.REDSTONE_URL }}
+  DB_USERNAME: ${{ secrets.REDSTONE_USER }}
   TOKEN_SECRET: ${{ secrets.TOKEN_SECRET }}
   DB_DRIVER: ${{ secrets.REDSTONE_DRIVER }}
 
