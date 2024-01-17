@@ -13,10 +13,33 @@ import java.util.List;
 public class SharedzApplication {
 
 	public static void main(String[] args) {
-        SpringApplication.run(SharedzApplication.class, args);
-//		Prueba prueba = new Prueba();
-//		prueba.setPrueba(new Prueba());
-//		printValor(prueba);
+		SpringApplication.run(SharedzApplication.class, args);
+//		String pdfPath = "file.pdf";
+//		try (PdfWriter writer = new PdfWriter(pdfPath)) {
+//			Document document = new Document(new PdfDocument(writer), PageSize.LETTER);
+//			Table table = new Table(2);
+//			table.setWidth(UnitValue.createPercentValue(100));
+//			Cell headCliente = new Cell();
+//			headCliente.add(new Paragraph("Cliente"));
+//
+//			Cell headTotal = new Cell();
+//			headTotal.add(new Paragraph("Total"));
+//
+//			Cell valueCliente = new Cell();
+//			valueCliente.add(new Paragraph("Edson"));
+//
+//			Cell valueTotal = new Cell();
+//			valueTotal.add(new Paragraph("$200"));
+//
+//			table.addHeaderCell(headCliente);
+//			table.addHeaderCell(headTotal);
+//			table.addCell(valueCliente);
+//			table.addCell(valueTotal);
+//			document.add(table);
+//			document.close();
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		}
 	}
 
 	private static void printValor(Object reportable) {

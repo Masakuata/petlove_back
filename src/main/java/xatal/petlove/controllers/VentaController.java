@@ -18,8 +18,10 @@ import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.reports.VentasReports;
 import xatal.petlove.security.TokenUtils;
+import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.services.VentaService;
 import xatal.petlove.structures.FullVenta;
@@ -39,11 +41,13 @@ public class VentaController {
 	private final VentaService ventaService;
 	private final UsuarioService usuarioService;
 	private final VentasReports reportService;
+	private final ProductoService productoService;
 
-	public VentaController(VentaService ventaService, UsuarioService usuarioService, VentasReports reportService) {
+	public VentaController(VentaService ventaService, UsuarioService usuarioService, VentasReports reportService, ProductoService productoService) {
 		this.ventaService = ventaService;
 		this.usuarioService = usuarioService;
 		this.reportService = reportService;
+		this.productoService = productoService;
 	}
 
 	@GetMapping
@@ -81,7 +85,9 @@ public class VentaController {
 		}
 		if (enviar.isPresent() && enviar.get()) {
 			Claims claims = TokenUtils.getTokenClaims(token);
-			this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
+//			this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
+			PDFVentaReports reports = new PDFVentaReports(this.productoService);
+			reports.generateReportsFrom(ventas);
 			return new ResponseEntity(HttpStatus.CREATED);
 		} else {
 			return ResponseEntity.ok(ventas);

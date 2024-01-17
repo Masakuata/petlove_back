@@ -77,6 +77,20 @@ public class ProductoService {
 		return multiPrecioMap.values().stream().toList();
 	}
 
+	public Optional<MultiPrecioProducto> getWithPreciosById(long idProducto) {
+		Optional<Producto> optionalProducto = this.productoRepository.findById(idProducto);
+		if (optionalProducto.isEmpty()) {
+			return Optional.empty();
+		}
+		List<PublicPrecio> precios = this.precioRepository.findByProducto(idProducto)
+			.stream()
+			.map(PublicPrecio::new)
+			.toList();
+		MultiPrecioProducto producto = new MultiPrecioProducto(optionalProducto.get());
+		producto.precios = precios;
+		return Optional.of(producto);
+	}
+
 	public List<Producto> search(
 		String nombre,
 		Integer tipoCliente,

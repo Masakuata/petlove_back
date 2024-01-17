@@ -21,10 +21,4 @@ public class PublicProducto {
         this.precio = producto.getPrecio();
         this.cantidad = producto.getCantidad();
     }
-
-    public boolean isValid() {
-        return this.nombre != null && !this.nombre.isEmpty()
-                && this.presentacion != null && !this.presentacion.isEmpty()
-                && this.tipoMascota != null && !this.tipoMascota.isEmpty();
-    }
 }

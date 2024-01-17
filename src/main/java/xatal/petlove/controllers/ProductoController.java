@@ -48,6 +48,15 @@ public class ProductoController {
 		return ResponseEntity.ok(productos);
 	}
 
+	@GetMapping("/{id_producto}")
+	public ResponseEntity getFullProducto(@PathVariable("id_producto") long idProducto) {
+		Optional<MultiPrecioProducto> optionalProducto = this.productoService.getWithPreciosById(idProducto);
+		if (optionalProducto.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(optionalProducto.get());
+	}
+
 	@PostMapping()
 	public ResponseEntity registerProducto(@RequestBody MultiPrecioProducto newProducto) {
 		if (this.productoService.isProductoRegistered(newProducto)) {
