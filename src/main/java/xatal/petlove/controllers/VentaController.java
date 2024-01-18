@@ -108,7 +108,8 @@ public class VentaController {
 		if (optionalUsuario.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		return this.ventaService.saveNewVenta(venta, optionalUsuario.get().getId())
+		venta.vendedor = optionalUsuario.get().getId();
+		return this.ventaService.saveNewVenta(venta)
 			.map(value -> new ResponseEntity(new PublicVenta(value), HttpStatus.CREATED))
 			.orElseGet(() -> new ResponseEntity(HttpStatus.CONFLICT));
 	}

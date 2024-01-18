@@ -1,7 +1,6 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
-import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.repositories.AbonoRepository;
@@ -24,7 +22,6 @@ import xatal.petlove.structures.PublicVenta;
 import xatal.petlove.util.Util;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,8 +79,8 @@ public class VentaService {
 		return this.ventaRepository.findAll(spec, pageable).stream().toList();
 	}
 
-	public Optional<Venta> saveNewVenta(NewVenta newVenta, Long idVendedor) {
-		Pair<Venta, Float> pair = this.buildFromNewVenta(newVenta);
+	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
+		Venta venta = this.publicVentaToVenta(newVenta);
 		List<Long> productosId = newVenta.productos
 			.stream()
 			.map(productoVenta -> productoVenta.producto)
@@ -93,26 +90,14 @@ public class VentaService {
 			return Optional.empty();
 		}
 
-		Venta ventaToSave = pair.a;
-		ventaToSave.setVendedor(idVendedor);
-		ventaToSave.setAbonado(pair.b);
+		venta.setTotal(this.getCostoTotalByVenta(venta));
+		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 
-		ventaToSave.setTotal(this.getCostoTotalByVenta(ventaToSave));
-		ventaToSave.setPagado(ventaToSave.getAbonado() >= ventaToSave.getTotal());
-
-		Venta savedVenta = this.saveVentaWithProductos(ventaToSave);
-		this.abonoRepository.save(new Abono(savedVenta.getId().intValue(), ventaToSave.getAbonado(), new Date()));
-		this.updateStocks(savedVenta);
-
-		new Thread(() -> {
-			try {
-				this.ventaReports.generateReportAndSend(savedVenta);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}).start();
-
-		return Optional.of(savedVenta);
+		venta = this.saveVentaWithProductos(venta);
+		this.abonoRepository.save(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
+		this.productoService.updateStockFromVenta(venta);
+		this.generateReport(venta);
+		return Optional.of(venta);
 	}
 
 	public Venta saveVentaWithProductos(Venta venta) {
@@ -133,7 +118,7 @@ public class VentaService {
 			newAbono.cantidad = venta.getTotal() - venta.getAbonado();
 			venta.setPagado(true);
 		} else {
-			this.setPagadoOnVenta(venta);
+			this.setVentaPagado(venta);
 		}
 		venta.setAbonado(venta.getAbonado() + newAbono.cantidad);
 		if (Util.isFechaDefault(newAbono.fecha)) {
@@ -187,7 +172,7 @@ public class VentaService {
 		return this.ventaRepository.save(storedVenta);
 	}
 
-	public Venta buildFromPublicVenta(PublicVenta publicVenta) {
+	public Venta publicVentaToVenta(PublicVenta publicVenta) {
 		Venta aux = new Venta();
 		aux.setCliente(this.clienteService.getById(publicVenta.cliente));
 		aux.setPagado(publicVenta.pagado);
@@ -196,10 +181,6 @@ public class VentaService {
 		aux.setAbonado(publicVenta.abonado);
 		aux.setTotal(publicVenta.total);
 		return aux;
-	}
-
-	public Pair<Venta, Float> buildFromNewVenta(NewVenta newVenta) {
-		return new Pair<>(this.buildFromPublicVenta(newVenta), newVenta.abono);
 	}
 
 	public List<PublicVenta> publicFromVentas(List<Venta> ventas) {
@@ -216,9 +197,11 @@ public class VentaService {
 
 		newVenta.productos.forEach(productoVenta -> {
 			if (!stock.containsKey(productoVenta.producto)) {
-				unavailable.add(new PublicProductoVenta(productoVenta.producto, productoVenta.cantidad));
+				unavailable.add(
+					new PublicProductoVenta(productoVenta.producto, productoVenta.cantidad, productoVenta.precio));
 			} else if (stock.get(productoVenta.producto) < productoVenta.cantidad) {
-				unavailable.add(new PublicProductoVenta(productoVenta.producto, stock.get(productoVenta.producto)));
+				unavailable.add(
+					new PublicProductoVenta(productoVenta.producto, stock.get(productoVenta.producto), productoVenta.precio));
 			}
 		});
 		return unavailable;
@@ -298,19 +281,6 @@ public class VentaService {
 			.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
 	}
 
-	private Specification<Abono> addSumAbonosByVentasSpecification(List<Venta> ventas, Specification<Abono> spec) {
-		if (ventas != null && !ventas.isEmpty()) {
-			List<Long> idVentas = ventas.stream().map(Venta::getId).toList();
-			spec = spec.and((root, query, builder) -> {
-				query.multiselect(root.get("venta"), builder.sum(root.get("cantidad")))
-					.where(builder.in(root.get("venta")).value(idVentas))
-					.groupBy(root.get("venta"));
-				return query.getRestriction();
-			});
-		}
-		return spec;
-	}
-
 	private List<Producto> getProductosByVenta(Venta venta) {
 		List<Integer> productosId = venta.getProductos()
 			.stream()
@@ -353,11 +323,7 @@ public class VentaService {
 			.reduce(CERO, Float::sum);
 	}
 
-	private void updateStocks(Venta venta) {
-		this.productoService.updateStockFromVenta(venta);
-	}
-
-	private void setPagadoOnVenta(Venta venta) {
+	private void setVentaPagado(Venta venta) {
 		float total = this.getCostoTotalByVenta(venta);
 		float abonos = this.getTotalAbonosByVentaId(Math.toIntExact(venta.getId()));
 		venta.setAbonado(abonos);
@@ -372,5 +338,15 @@ public class VentaService {
 				stock.containsKey(productoVenta.producto)
 					&& stock.get(productoVenta.producto) >= productoVenta.cantidad
 			);
+	}
+
+	private void generateReport(Venta venta) {
+		new Thread(() -> {
+			try {
+				this.ventaReports.generateReportAndSend(venta);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}).start();
 	}
 }

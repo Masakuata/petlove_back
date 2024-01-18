@@ -20,12 +20,16 @@ public class ProductoVenta {
     @Column(name = "cantidad", nullable = false)
     private int cantidad;
 
+    @Column(name = "precio", nullable = false)
+    private float precio;
+
     public ProductoVenta() {
     }
 
     public ProductoVenta(PublicProductoVenta productoVenta) {
         this.producto = productoVenta.producto;
         this.cantidad = productoVenta.cantidad;
+        this.precio = productoVenta.precio;
     }
 
     public void setId(Long id) {
@@ -50,5 +54,13 @@ public class ProductoVenta {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public float getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(float precio) {
+        this.precio = precio;
     }
 }

@@ -2,7 +2,6 @@ package xatal.petlove.structures;
 
 import xatal.petlove.entities.Producto;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

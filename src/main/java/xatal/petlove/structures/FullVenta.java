@@ -1,6 +1,5 @@
 package xatal.petlove.structures;
 
-import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.util.Util;
