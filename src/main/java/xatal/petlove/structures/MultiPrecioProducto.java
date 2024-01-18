@@ -3,10 +3,11 @@ package xatal.petlove.structures;
 import xatal.petlove.entities.Producto;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MultiPrecioProducto extends PublicProducto {
-	public List<PublicPrecio> precios = new ArrayList<>();
+	public List<PublicPrecio> precios = new LinkedList<>();
 
 	public MultiPrecioProducto() {
 	}

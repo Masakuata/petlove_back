@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
 import xatal.petlove.structures.ProductoLoad;
@@ -50,7 +51,7 @@ public class ProductoController {
 
 	@GetMapping("/{id_producto}")
 	public ResponseEntity getFullProducto(@PathVariable("id_producto") long idProducto) {
-		Optional<MultiPrecioProducto> optionalProducto = this.productoService.getWithPreciosById(idProducto);
+		Optional<MultiDetailedPrecioProducto> optionalProducto = this.productoService.getWithPreciosAndTipoClienteById(idProducto);
 		if (optionalProducto.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}

@@ -1,17 +1,18 @@
 package xatal.petlove.structures;
 
 public enum MIMEType {
-    TEXT_CSV("text/csv"),
-    APPLICATION_JSON("application/json");
+	TEXT_CSV("text/csv"),
+	APPLICATION_JSON("application/json"),
+	APPLICATION_PDF("application/pdf");
 
-    private final String text;
+	private final String text;
 
-    MIMEType(final String text) {
-        this.text = text;
-    }
+	MIMEType(final String text) {
+		this.text = text;
+	}
 
-    @Override
-    public String toString() {
-        return text;
-    }
+	@Override
+	public String toString() {
+		return text;
+	}
 }

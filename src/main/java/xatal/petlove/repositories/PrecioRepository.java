@@ -20,4 +20,6 @@ public interface PrecioRepository extends CrudRepository<Precio, Long>, JpaSpeci
     Optional<Precio> findByProductoAndCliente(Long producto, Long cliente);
 
     List<Precio> findByProducto(Long producto);
+
+    void deleteByProducto(Long producto);
 }

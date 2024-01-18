@@ -17,6 +17,8 @@ import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
 import xatal.petlove.repositories.TipoClienteRepository;
+import xatal.petlove.structures.DetailedPrecio;
+import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
@@ -96,6 +98,16 @@ public class ProductoService {
 			.toList();
 		MultiPrecioProducto producto = new MultiPrecioProducto(optionalProducto.get());
 		producto.precios = precios;
+		return Optional.of(producto);
+	}
+
+	public Optional<MultiDetailedPrecioProducto> getWithPreciosAndTipoClienteById(long idProducto) {
+		Optional<MultiPrecioProducto> optionalProducto = this.getWithPreciosById(idProducto);
+		if (optionalProducto.isEmpty()) {
+			return Optional.empty();
+		}
+		MultiDetailedPrecioProducto producto = new MultiDetailedPrecioProducto(optionalProducto.get());
+		producto.precios = this.preciosToDetailed(optionalProducto.get().precios);
 		return Optional.of(producto);
 	}
 
@@ -182,10 +194,12 @@ public class ProductoService {
 		return savedProducto;
 	}
 
+	@Transactional
 	public MultiPrecioProducto updateProducto(MultiPrecioProducto newProducto, long idProducto) {
 		Producto aux = new Producto(newProducto);
 		aux.setId(idProducto);
 		this.productoRepository.save(aux);
+		this.precioRepository.deleteByProducto(idProducto);
 		this.savePreciosById((int) idProducto, newProducto.precios);
 		return newProducto;
 	}
@@ -277,6 +291,26 @@ public class ProductoService {
 				preciosMap.put(newPrecio.id, new Precio(idProducto, newPrecio.id, newPrecio.precio));
 			}
 		});
+	}
+
+	private List<DetailedPrecio> preciosToDetailed(List<PublicPrecio> publicPrecios) {
+		Map<Long, TipoCliente> tipoClienteMap = this.tipoClienteMap();
+		return publicPrecios
+			.stream()
+			.map(publicPrecio -> {
+				DetailedPrecio aux = new DetailedPrecio(publicPrecio);
+				if (tipoClienteMap.containsKey((long) aux.id)) {
+					aux.tipoCliente = tipoClienteMap.get((long) aux.id).getTipoCliente();
+				}
+				return aux;
+			})
+			.toList();
+	}
+
+	private Map<Long, TipoCliente> tipoClienteMap() {
+		return this.tipoClienteRepository.getAll()
+			.stream()
+			.collect(Collectors.toMap(TipoCliente::getId, tipoCliente -> tipoCliente));
 	}
 
 	private Specification<Producto> productoInIdsSpecification(List<Long> productosId) {

@@ -11,6 +11,7 @@ import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.repositories.AbonoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.VentaRepository;
@@ -22,6 +23,8 @@ import xatal.petlove.structures.PublicProductoVenta;
 import xatal.petlove.structures.PublicVenta;
 import xatal.petlove.util.Util;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +40,7 @@ public class VentaService {
 	private final ClienteService clienteService;
 	private final ProductoService productoService;
 	private final UsuarioService usuarioService;
+	private final PDFVentaReports ventaReports;
 
 	public VentaService(
 		VentaRepository ventaRepository,
@@ -49,6 +53,7 @@ public class VentaService {
 		this.clienteService = clienteService;
 		this.productoService = productoService;
 		this.usuarioService = usuarioService;
+		this.ventaReports = new PDFVentaReports(this.productoService);
 	}
 
 	public List<Venta> getAll() {
@@ -98,6 +103,15 @@ public class VentaService {
 		Venta savedVenta = this.saveVentaWithProductos(ventaToSave);
 		this.abonoRepository.save(new Abono(savedVenta.getId().intValue(), ventaToSave.getAbonado(), new Date()));
 		this.updateStocks(savedVenta);
+
+		new Thread(() -> {
+			try {
+				this.ventaReports.generateReportAndSend(savedVenta);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}).start();
+
 		return Optional.of(savedVenta);
 	}
 
