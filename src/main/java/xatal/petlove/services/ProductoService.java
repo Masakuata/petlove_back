@@ -10,11 +10,13 @@ import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.StockOperation;
+import xatal.petlove.entities.TipoCliente;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
+import xatal.petlove.repositories.TipoClienteRepository;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
@@ -31,12 +33,14 @@ public class ProductoService {
 	private final ProductoRepository productoRepository;
 	private final ProductoVentaRepository productoVenta;
 	private final PrecioRepository precioRepository;
+	private final TipoClienteRepository tipoClienteRepository;
 	private final StockOperationRepository stockOperationRepository;
 
-	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, PrecioRepository precioRepository, StockOperationRepository stockOperationRepository) {
+	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, PrecioRepository precioRepository, TipoClienteRepository tipoClienteRepository, StockOperationRepository stockOperationRepository) {
 		this.productoRepository = productoRepository;
 		this.productoVenta = productoVenta;
 		this.precioRepository = precioRepository;
+		this.tipoClienteRepository = tipoClienteRepository;
 		this.stockOperationRepository = stockOperationRepository;
 	}
 
@@ -226,6 +230,10 @@ public class ProductoService {
 		}
 		return false;
 		// TODO Check if producto is used on another table
+	}
+
+	public List<TipoCliente> getTiposCliente() {
+		return this.tipoClienteRepository.getAll();
 	}
 
 	private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {

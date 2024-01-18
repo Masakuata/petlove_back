@@ -19,9 +19,22 @@ public class ClienteService {
 	private final ClienteRepository clienteRepository;
 	private final DireccionRepository direcciones;
 
+	private List<Cliente> clientesCache = null;
+
 	public ClienteService(ClienteRepository clientes, DireccionRepository direcciones) {
 		this.clienteRepository = clientes;
 		this.direcciones = direcciones;
+		this.ensureCache();
+	}
+
+	private void loadClientesCache() {
+		this.clientesCache = this.clienteRepository.getAll();
+	}
+
+	private void ensureCache() {
+		if (this.clientesCache == null) {
+			this.loadClientesCache();
+		}
 	}
 
 	public List<Cliente> getAll() {
@@ -41,11 +54,16 @@ public class ClienteService {
 	}
 
 	public List<Cliente> searchByName(String nombre, int size) {
-		Specification<Cliente> spec = this.addNombreSpecification(nombre, Specification.where(null));
-		return this.clienteRepository.findAll(spec)
+//		Specification<Cliente> spec = this.addNombreSpecification(nombre, Specification.where(null));
+		return this.clientesCache
 			.stream()
+			.filter(cliente -> cliente.getNombre().equalsIgnoreCase(nombre))
 			.limit(size)
 			.toList();
+//		return this.clienteRepository.findAll(spec)
+//			.stream()
+//			.limit(size)
+//			.toList();
 	}
 
 	public List<PublicCliente> searchByNamePublic(String nombre, int size) {
@@ -57,17 +75,21 @@ public class ClienteService {
 
 	public Cliente saveCliente(Cliente cliente) {
 		this.saveClienteDirecciones(cliente);
+		this.loadClientesCache();
 		return this.clienteRepository.save(cliente);
 	}
 
 	public Cliente saveCliente(PublicCliente cliente) {
-		return this.saveCliente(new Cliente(cliente));
+		Cliente aux = this.saveCliente(new Cliente(cliente));
+		this.loadClientesCache();
+		return aux;
 	}
 
 	private void saveClienteDirecciones(Cliente cliente) {
 		List<Direccion> direcciones = new LinkedList<>();
 		this.direcciones.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
 		cliente.setDirecciones(direcciones);
+		this.loadClientesCache();
 	}
 
 	public Cliente getById(Long id) {
@@ -77,6 +99,7 @@ public class ClienteService {
 	@Transactional
 	public void removeById(int id) {
 		this.clienteRepository.deleteById((long) id);
+		this.loadClientesCache();
 	}
 
 	public boolean isIdRegistered(int id) {
