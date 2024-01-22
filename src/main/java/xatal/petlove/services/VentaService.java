@@ -180,6 +180,7 @@ public class VentaService {
 		aux.setProductos(publicVenta.productos.stream().map(ProductoVenta::new).toList());
 		aux.setAbonado(publicVenta.abonado);
 		aux.setTotal(publicVenta.total);
+		aux.setVendedor(publicVenta.vendedor);
 		return aux;
 	}
 
