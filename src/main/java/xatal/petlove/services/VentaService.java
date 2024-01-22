@@ -282,17 +282,18 @@ public class VentaService {
 		if (producto == null) {
 			return ventas;
 		}
+		List<Venta> filteredVentas = new LinkedList<>();
 		List<ProductoVenta> productoVenta = this.getProductoVentaByProducto(Long.valueOf(producto));
 		Map<Long, ProductoVenta> productosMap = this.mapProductoVenta(productoVenta);
 		ventas.forEach(venta -> {
 			boolean match = venta.getProductos()
 				.stream()
 				.anyMatch(productoVenta1 -> productosMap.containsKey(productoVenta1.getId()));
-			if (!match) {
-				ventas.remove(venta);
+			if (match) {
+				filteredVentas.add(venta);
 			}
 		});
-		return ventas;
+		return filteredVentas;
 	}
 
 	private List<Producto> getProductosByVenta(Venta venta) {
