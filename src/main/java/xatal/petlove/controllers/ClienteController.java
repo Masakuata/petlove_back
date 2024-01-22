@@ -93,7 +93,7 @@ public class ClienteController {
         if (cliente == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(cliente);
+        return ResponseEntity.ok(new PublicCliente(cliente));
     }
 
     @PutMapping("/{cliente_id}")
