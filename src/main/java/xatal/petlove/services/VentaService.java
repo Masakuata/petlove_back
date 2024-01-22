@@ -69,14 +69,14 @@ public class VentaService {
 	) {
 		Specification<Venta> spec = Specification.where(null);
 		spec = this.addNombreClienteSpecification(nombreCliente, spec);
-		spec = this.addProductoSpecification(producto, spec);
 		spec = this.addYearSpecification(year, spec);
 		spec = this.addMonthSpecification(month, spec);
 		spec = this.addDaySpecification(day, spec);
 		spec = this.addPagadoSpecification(pagado, spec);
 		spec = this.orderByNewer(spec);
 		Pageable pageable = PageRequest.of(pag, size);
-		return this.ventaRepository.findAll(spec, pageable).stream().toList();
+		List<Venta> ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
+		return this.filterByProducto(ventas, producto);
 	}
 
 	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
@@ -215,6 +215,10 @@ public class VentaService {
 		return this.ventaRepository.countById(id) > 0;
 	}
 
+	public List<ProductoVenta> getProductoVentaByProducto(Long idProducto) {
+		return this.productoVentaRepository.findByProducto(idProducto);
+	}
+
 	@Transactional
 	public void deleteById(Long idVenta) {
 		Optional<Venta> optionalVenta = this.getById(idVenta);
@@ -234,13 +238,6 @@ public class VentaService {
 			spec = spec.and((root, query, builder) ->
 				builder.like(builder.lower(root.get("cliente").get("nombre")),
 					"%" + nombreCliente.toLowerCase() + "%"));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addProductoSpecification(Integer producto, Specification<Venta> spec) {
-		if (producto != null) {
-			spec = spec.and((root, query, builder) -> builder.equal(root.get("productos").get("producto"), producto));
 		}
 		return spec;
 	}
@@ -279,6 +276,23 @@ public class VentaService {
 	private Specification<Venta> orderByNewer(Specification<Venta> spec) {
 		return spec
 			.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
+	}
+
+	private List<Venta> filterByProducto(List<Venta> ventas, Integer producto) {
+		if (producto == null) {
+			return ventas;
+		}
+		List<ProductoVenta> productoVenta = this.getProductoVentaByProducto(Long.valueOf(producto));
+		Map<Long, ProductoVenta> productosMap = this.mapProductoVenta(productoVenta);
+		ventas.forEach(venta -> {
+			boolean match = venta.getProductos()
+				.stream()
+				.anyMatch(productoVenta1 -> productosMap.containsKey(productoVenta1.getId()));
+			if (!match) {
+				ventas.remove(venta);
+			}
+		});
+		return ventas;
 	}
 
 	private List<Producto> getProductosByVenta(Venta venta) {
@@ -329,6 +343,12 @@ public class VentaService {
 		venta.setAbonado(abonos);
 		venta.setTotal(total);
 		venta.setPagado(abonos >= total);
+	}
+
+	private Map<Long, ProductoVenta> mapProductoVenta(List<ProductoVenta> productoVenta) {
+		return productoVenta
+			.stream()
+			.collect(Collectors.toMap(ProductoVenta::getId, productoVenta1 -> productoVenta1));
 	}
 
 	private boolean productsOnStock(List<PublicProductoVenta> productos, Map<Long, Integer> stock) {
