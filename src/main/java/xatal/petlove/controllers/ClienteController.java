@@ -21,8 +21,8 @@ import xatal.petlove.structures.PublicCliente;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @CrossOrigin
 @RestController
@@ -36,18 +36,18 @@ public class ClienteController {
     }
 
     @GetMapping()
-    public ResponseEntity getClientes(
+    public ResponseEntity<?> getClientes(
             @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
             @RequestParam(name = "cant", required = false, defaultValue = "10") int size
     ) {
         return Optional.of(nombreQuery)
                 .filter(nombre -> !nombre.isEmpty())
                 .map(n -> getClientes(nombreQuery, size, this.clienteService::searchByNamePublic))
-                .orElse(getMinimalClientes(size, this.clienteService::getMinimal));
+                .orElse(this.getMinimalClientes(size, this.clienteService::getMinimal));
     }
 
     @GetMapping("/all")
-    public ResponseEntity getAll() {
+    public ResponseEntity<?> getAll() {
         List<PublicCliente> clientes = this.clienteService.getAllPublic();
         if (clientes.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -55,19 +55,16 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
-    private <T> ResponseEntity getClientes(String name, int size, BiFunction<String, Integer, List<T>> fetcher) {
+    private <T> ResponseEntity<?> getClientes(String name, int size, BiFunction<String, Integer, List<T>> fetcher) {
         return Optional.of(fetcher.apply(name, size))
                 .filter(clients -> !clients.isEmpty())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    private <T> ResponseEntity getMinimalClientes(int size, Callable<List<ClienteMinimal>> fetcher) {
+    private <T> ResponseEntity getMinimalClientes(int size, Function<Integer, List<ClienteMinimal>> fetcher) {
         try {
-            List<ClienteMinimal> clientes = fetcher.call()
-                    .stream()
-                    .limit(size)
-                    .toList();
+            List<ClienteMinimal> clientes = fetcher.apply(size);
             if (clientes.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }

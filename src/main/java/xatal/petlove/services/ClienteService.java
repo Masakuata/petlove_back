@@ -13,6 +13,7 @@ import xatal.petlove.structures.PublicCliente;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ClienteService {
@@ -35,9 +36,13 @@ public class ClienteService {
 			.collect(Collectors.toList());
 	}
 
-	public List<ClienteMinimal> getMinimal() {
-		return this.clienteRepository.getMinimal()
-			.stream().toList();
+	public List<ClienteMinimal> getMinimal(Integer size) {
+		Stream<ClienteMinimal> clientes = this.clienteRepository.getMinimal()
+			.stream();
+		if (size != null) {
+			clientes = clientes.limit(size);
+		}
+		return clientes.toList();
 	}
 
 	public List<Cliente> searchByName(String nombre, int size) {
