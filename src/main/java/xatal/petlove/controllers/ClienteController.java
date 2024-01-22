@@ -86,6 +86,16 @@ public class ClienteController {
         return new ResponseEntity(this.clienteService.saveCliente(cliente), HttpStatus.CREATED);
     }
 
+
+    @GetMapping("/{cliente_id}")
+    public ResponseEntity<?> getCliente(@PathVariable("cliente_id") long idCliente) {
+        Cliente cliente = this.clienteService.getById(idCliente);
+        if (cliente == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(cliente);
+    }
+
     @PutMapping("/{cliente_id}")
     public ResponseEntity updateCliente(
             @PathVariable("cliente_id") int clienteId,
