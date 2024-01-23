@@ -66,8 +66,7 @@ public class ClienteService {
 	}
 
 	public Cliente saveCliente(PublicCliente cliente) {
-		Cliente aux = this.saveCliente(new Cliente(cliente));
-		return aux;
+		return this.saveCliente(new Cliente(cliente));
 	}
 
 	private void saveClienteDirecciones(Cliente cliente) {

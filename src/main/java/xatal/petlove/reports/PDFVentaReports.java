@@ -19,7 +19,6 @@ import xatal.petlove.services.ProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
-import xatal.petlove.util.XEmail;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,7 +31,7 @@ import java.util.Optional;
 
 import static java.util.Arrays.stream;
 
-public class PDFVentaReports {
+public class PDFVentaReports extends XReport {
 	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
 	private static final float TITLE_FONT_SIZE = 20F;
 	private static final float DEFAULT_FONT_SIZE = 10F;
@@ -267,21 +266,5 @@ public class PDFVentaReports {
 			}
 		});
 		return list;
-	}
-
-	void sendEmailWithAttachment(
-		final String title,
-		final String message,
-		final String recipientName,
-		final String recipientEmail,
-		final Attachment attachment
-	) {
-		XEmail email = new XEmail();
-		email.setFrom(XReport.SENDER_EMAIL);
-		email.setSubject(title);
-		email.addRecipient(recipientName, recipientEmail);
-		email.setMessage(message);
-		email.addAttachment(attachment.getFilename(), attachment.getBytes(), attachment.getMimeType());
-		email.send();
 	}
 }

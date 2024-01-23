@@ -49,7 +49,7 @@ public class VentaController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?>getVentas() {
+	public ResponseEntity<?> getVentas() {
 		List<Venta> ventas = this.ventaService.getAll();
 		if (ventas.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -58,7 +58,7 @@ public class VentaController {
 	}
 
 	@GetMapping("/buscar")
-	public ResponseEntity<?>searchVentas(
+	public ResponseEntity<?> searchVentas(
 		@RequestHeader("Token") String token,
 		@RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
 		@RequestParam(name = "producto", required = false) Optional<Integer> producto,
@@ -97,7 +97,7 @@ public class VentaController {
 		@RequestHeader("Token") String token,
 		@RequestBody NewVenta venta
 	) {
-		List<PublicProductoVenta> notInStock = this.ventaService.notInStock(venta);
+		List<PublicProductoVenta> notInStock = this.ventaService.getUnavailableProducts(venta);
 		if (!notInStock.isEmpty()) {
 			return new ResponseEntity<>(notInStock, HttpStatus.CONFLICT);
 		}
@@ -121,7 +121,7 @@ public class VentaController {
 	}
 
 	@GetMapping("/{id_venta}/details")
-	public ResponseEntity<?>getVentaDetails(@PathVariable("id_venta") Long idVenta) {
+	public ResponseEntity<?> getVentaDetails(@PathVariable("id_venta") Long idVenta) {
 		Optional<FullVenta> optionalVenta = this.ventaService.getFullVenta(idVenta);
 		if (optionalVenta.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -130,7 +130,7 @@ public class VentaController {
 	}
 
 	@PutMapping("/{id_venta}")
-	public ResponseEntity<?>updateVenta(
+	public ResponseEntity<?> updateVenta(
 		@PathVariable("id_venta") Long ventaId,
 		@RequestBody PublicVenta venta
 	) {
@@ -143,7 +143,7 @@ public class VentaController {
 	}
 
 	@DeleteMapping("/{id_venta}")
-	public ResponseEntity<?>deleteVenta(@PathVariable("id_venta") Long ventaId) {
+	public ResponseEntity<?> deleteVenta(@PathVariable("id_venta") Long ventaId) {
 		if (!this.ventaService.isIdRegistered(ventaId)) {
 			return ResponseEntity.notFound().build();
 		}
@@ -152,7 +152,7 @@ public class VentaController {
 	}
 
 	@GetMapping("/{idVenta}/abono")
-	public ResponseEntity<?>getAbonos(@PathVariable("idVenta") Long idVenta) {
+	public ResponseEntity<?> getAbonos(@PathVariable("idVenta") Long idVenta) {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
 		}
@@ -164,7 +164,7 @@ public class VentaController {
 	}
 
 	@PostMapping("/{idVenta}/abono")
-	public ResponseEntity<?>addAbono(
+	public ResponseEntity<?> addAbono(
 		@PathVariable("idVenta") Long idVenta,
 		@RequestBody NewAbono abono
 	) {
@@ -179,7 +179,7 @@ public class VentaController {
 	}
 
 	@PutMapping("/{idVenta}/abono/{idAbono}")
-	public ResponseEntity<?>updateAbono(
+	public ResponseEntity<?> updateAbono(
 		@PathVariable("idVenta") Long idVenta,
 		@PathVariable("idAbono") Long idAbono,
 		@RequestBody PublicAbono abono
@@ -189,12 +189,11 @@ public class VentaController {
 		}
 		Abono savedAbono = new Abono(abono);
 		savedAbono.setId(idAbono);
-		this.ventaService.updateAbono(abono, idAbono);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(this.ventaService.updateAbono(abono, idAbono));
 	}
 
 	@GetMapping("/{idVenta}/productos")
-	public ResponseEntity<?>getProductos(@PathVariable("idVenta") Long idVenta) {
+	public ResponseEntity<?> getProductos(@PathVariable("idVenta") Long idVenta) {
 		Optional<Venta> optionalVenta = this.ventaService.getById(idVenta);
 		if (optionalVenta.isEmpty()) {
 			return ResponseEntity.notFound().build();

@@ -191,7 +191,7 @@ public class VentaService {
 			.toList();
 	}
 
-	public List<PublicProductoVenta> notInStock(NewVenta newVenta) {
+	public List<PublicProductoVenta> getUnavailableProducts(NewVenta newVenta) {
 		List<PublicProductoVenta> unavailable = new LinkedList<>();
 		List<Long> idProductos = newVenta.productos.stream().map(productoVenta -> productoVenta.producto).toList();
 		Map<Long, Integer> stock = this.productoService.getStockByProductos(idProductos);
@@ -283,18 +283,15 @@ public class VentaService {
 		if (producto == null) {
 			return ventas;
 		}
-		List<Venta> filteredVentas = new LinkedList<>();
-		List<ProductoVenta> productoVenta = this.getProductoVentaByProducto(Long.valueOf(producto));
-		Map<Long, ProductoVenta> productosMap = this.mapProductoVenta(productoVenta);
-		ventas.forEach(venta -> {
-			boolean match = venta.getProductos()
-				.stream()
-				.anyMatch(productoVenta1 -> productosMap.containsKey(productoVenta1.getId()));
-			if (match) {
-				filteredVentas.add(venta);
-			}
-		});
-		return filteredVentas;
+		Long idProducto = Long.valueOf(producto);
+		Map<Long, ProductoVenta> productosMap = this.mapProductoVenta(this.getProductoVentaByProducto(idProducto));
+		return ventas
+			.stream()
+			.filter(venta ->
+				venta.getProductos()
+					.stream()
+					.anyMatch(productoVenta -> productosMap.containsKey(productoVenta.getId())))
+			.toList();
 	}
 
 	private List<Producto> getProductosByVenta(Venta venta) {

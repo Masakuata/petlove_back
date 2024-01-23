@@ -42,7 +42,7 @@ public class ClienteController {
     ) {
         return Optional.of(nombreQuery)
                 .filter(nombre -> !nombre.isEmpty())
-                .map(n -> getClientes(nombreQuery, size, this.clienteService::searchByNamePublic))
+                .map(n -> this.getClientes(nombreQuery, size, this.clienteService::searchByNamePublic))
                 .orElse(this.getMinimalClientes(size, this.clienteService::getMinimal));
     }
 
@@ -62,7 +62,7 @@ public class ClienteController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    private <T> ResponseEntity getMinimalClientes(int size, Function<Integer, List<ClienteMinimal>> fetcher) {
+    private ResponseEntity getMinimalClientes(int size, Function<Integer, List<ClienteMinimal>> fetcher) {
         try {
             List<ClienteMinimal> clientes = fetcher.apply(size);
             if (clientes.isEmpty()) {
@@ -96,14 +96,14 @@ public class ClienteController {
     @PutMapping("/{cliente_id}")
     public ResponseEntity updateCliente(
             @PathVariable("cliente_id") int clienteId,
-            @RequestBody Cliente cliente
+            @RequestBody PublicCliente cliente
     ) {
         if (!this.clienteService.isIdRegistered(clienteId)) {
             return ResponseEntity.notFound().build();
         }
-        cliente.setId((long) clienteId);
-        cliente = this.clienteService.saveCliente(cliente);
-        if (cliente == null) {
+        cliente.id = clienteId;
+        Cliente savedCliente = this.clienteService.saveCliente(cliente);
+        if (savedCliente == null) {
             return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok(cliente);
