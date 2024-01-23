@@ -60,6 +60,7 @@ public class VentaController {
 	@GetMapping("/buscar")
 	public ResponseEntity<?> searchVentas(
 		@RequestHeader("Token") String token,
+		@RequestParam(name = "id_cliente", required = false) Optional<Integer> idCliente,
 		@RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
 		@RequestParam(name = "producto", required = false) Optional<Integer> producto,
 		@RequestParam(name = "anio", required = false) Optional<Integer> anio,
@@ -71,6 +72,7 @@ public class VentaController {
 		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
 	) {
 		List<Venta> ventas = this.ventaService.searchVentas(
+			idCliente.orElse(null),
 			clienteNombre.orElse(null),
 			producto.orElse(null),
 			anio.orElse(null),

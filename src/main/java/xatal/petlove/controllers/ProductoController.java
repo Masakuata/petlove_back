@@ -32,12 +32,14 @@ public class ProductoController {
 
 	@GetMapping()
 	public ResponseEntity getProductos(
+		@RequestParam(name = "id_producto", required = false, defaultValue = "") Optional<Integer> idProducto,
 		@RequestParam(name = "nombre", required = false, defaultValue = "") Optional<String> nombreQuery,
 		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") Optional<Integer> tipoCliente,
 		@RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
 		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag
 	) {
 		List<Producto> productos = this.productoService.search(
+			idProducto.orElse(null),
 			nombreQuery.orElse(null),
 			tipoCliente.orElse(null),
 			size,
@@ -107,10 +109,7 @@ public class ProductoController {
 		if (!this.productoService.isIdRegistered(idProducto)) {
 			return new ResponseEntity(HttpStatus.NOT_FOUND);
 		}
-		if (this.productoService.isReferenced(idProducto)) {
-			return new ResponseEntity(HttpStatus.CONFLICT);
-		}
-		this.productoService.deleteById(idProducto);
+		this.productoService.deactivateProducto(idProducto);
 		return ResponseEntity.ok().build();
 	}
 

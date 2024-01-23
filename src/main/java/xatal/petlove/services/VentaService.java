@@ -58,6 +58,7 @@ public class VentaService {
 	}
 
 	public List<Venta> searchVentas(
+		Integer idCliente,
 		String nombreCliente,
 		Integer producto,
 		Integer year,
@@ -68,6 +69,7 @@ public class VentaService {
 		Integer pag
 	) {
 		Specification<Venta> spec = Specification.where(null);
+		spec = this.addIdClienteSpecification(idCliente, spec);
 		spec = this.addNombreClienteSpecification(nombreCliente, spec);
 		spec = this.addYearSpecification(year, spec);
 		spec = this.addMonthSpecification(month, spec);
@@ -232,6 +234,13 @@ public class VentaService {
 		this.abonoRepository.deleteAbonosByVenta(idVenta);
 		this.productoVentaRepository.deleteAll(venta.getProductos());
 		this.ventaRepository.deleteById(idVenta);
+	}
+
+	private Specification<Venta> addIdClienteSpecification(Integer id, Specification<Venta> spec) {
+		if (id != null) {
+			spec = spec.and(((root, query, builder) -> builder.equal(root.get("cliente").get("id"), id)));
+		}
+		return spec;
 	}
 
 	private Specification<Venta> addNombreClienteSpecification(String nombreCliente, Specification<Venta> spec) {

@@ -28,93 +28,81 @@ import java.util.function.Function;
 @RestController
 @RequestMapping("/cliente")
 public class ClienteController {
-    private final Logger logger = LoggerFactory.getLogger(ClienteController.class);
-    private final ClienteService clienteService;
+	private final Logger logger = LoggerFactory.getLogger(ClienteController.class);
+	private final ClienteService clienteService;
 
-    public ClienteController(ClienteService clienteService) {
-        this.clienteService = clienteService;
-    }
+	public ClienteController(ClienteService clienteService) {
+		this.clienteService = clienteService;
+	}
 
-    @GetMapping()
-    public ResponseEntity<?> getClientes(
-            @RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
-            @RequestParam(name = "cant", required = false, defaultValue = "10") int size
-    ) {
-        return Optional.of(nombreQuery)
-                .filter(nombre -> !nombre.isEmpty())
-                .map(n -> this.getClientes(nombreQuery, size, this.clienteService::searchByNamePublic))
-                .orElse(this.getMinimalClientes(size, this.clienteService::getMinimal));
-    }
+	@GetMapping()
+	public ResponseEntity<?> getClientes(
+		@RequestParam(name = "id_cliente", required = false, defaultValue = "") Optional<Integer> idCliente,
+		@RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
+		@RequestParam(name = "cant", required = false, defaultValue = "10") int size,
+		@RequestParam(name = "pag", required = false, defaultValue = "0") int pag
+	) {
+		List<PublicCliente> clientes = this.clienteService.toPublicCliente(this.clienteService.search(
+			idCliente.orElse(null),
+			nombreQuery,
+			size,
+			pag
+		));
+		if (clientes.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(clientes);
+	}
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAll() {
-        List<PublicCliente> clientes = this.clienteService.getAllPublic();
-        if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(clientes);
-    }
+	@GetMapping("/all")
+	public ResponseEntity<?> getAll() {
+		List<PublicCliente> clientes = this.clienteService.getAllPublic();
+		if (clientes.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(clientes);
+	}
 
-    private <T> ResponseEntity<?> getClientes(String name, int size, BiFunction<String, Integer, List<T>> fetcher) {
-        return Optional.of(fetcher.apply(name, size))
-                .filter(clients -> !clients.isEmpty())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
-    }
-
-    private ResponseEntity getMinimalClientes(int size, Function<Integer, List<ClienteMinimal>> fetcher) {
-        try {
-            List<ClienteMinimal> clientes = fetcher.apply(size);
-            if (clientes.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(clientes);
-        } catch (Exception e) {
-            this.logger.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PostMapping()
-    public ResponseEntity addCliente(@RequestBody PublicCliente cliente) {
-        if (this.clienteService.isEmailUsed(cliente.email)) {
-            return new ResponseEntity(HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity(this.clienteService.saveCliente(cliente), HttpStatus.CREATED);
-    }
+	@PostMapping()
+	public ResponseEntity addCliente(@RequestBody PublicCliente cliente) {
+		if (this.clienteService.isEmailUsed(cliente.email)) {
+			return new ResponseEntity(HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity(this.clienteService.saveCliente(cliente), HttpStatus.CREATED);
+	}
 
 
-    @GetMapping("/{cliente_id}")
-    public ResponseEntity<?> getCliente(@PathVariable("cliente_id") long idCliente) {
-        Cliente cliente = this.clienteService.getById(idCliente);
-        if (cliente == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(new PublicCliente(cliente));
-    }
+	@GetMapping("/{cliente_id}")
+	public ResponseEntity<?> getCliente(@PathVariable("cliente_id") long idCliente) {
+		Cliente cliente = this.clienteService.getById(idCliente);
+		if (cliente == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(new PublicCliente(cliente));
+	}
 
-    @PutMapping("/{cliente_id}")
-    public ResponseEntity updateCliente(
-            @PathVariable("cliente_id") int clienteId,
-            @RequestBody PublicCliente cliente
-    ) {
-        if (!this.clienteService.isIdRegistered(clienteId)) {
-            return ResponseEntity.notFound().build();
-        }
-        cliente.id = clienteId;
-        Cliente savedCliente = this.clienteService.saveCliente(cliente);
-        if (savedCliente == null) {
-            return ResponseEntity.internalServerError().build();
-        }
-        return ResponseEntity.ok(cliente);
-    }
+	@PutMapping("/{cliente_id}")
+	public ResponseEntity updateCliente(
+		@PathVariable("cliente_id") int clienteId,
+		@RequestBody PublicCliente cliente
+	) {
+		if (!this.clienteService.isIdRegistered(clienteId)) {
+			return ResponseEntity.notFound().build();
+		}
+		cliente.id = clienteId;
+		Cliente savedCliente = this.clienteService.saveCliente(cliente);
+		if (savedCliente == null) {
+			return ResponseEntity.internalServerError().build();
+		}
+		return ResponseEntity.ok(cliente);
+	}
 
-    @DeleteMapping("/{cliente_id}")
-    public ResponseEntity deleteCliente(@PathVariable("cliente_id") int clienteId) {
-        if (!this.clienteService.isIdRegistered(clienteId)) {
-            return ResponseEntity.notFound().build();
-        }
-        this.clienteService.removeById(clienteId);
-        return ResponseEntity.ok().build();
-    }
+	@DeleteMapping("/{cliente_id}")
+	public ResponseEntity deleteCliente(@PathVariable("cliente_id") int clienteId) {
+		if (!this.clienteService.isIdRegistered(clienteId)) {
+			return ResponseEntity.notFound().build();
+		}
+		this.clienteService.removeById(clienteId);
+		return ResponseEntity.ok().build();
+	}
 }

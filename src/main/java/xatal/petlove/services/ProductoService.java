@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
@@ -112,13 +113,16 @@ public class ProductoService {
 	}
 
 	public List<Producto> search(
+		Integer idProducto,
 		String nombre,
 		Integer tipoCliente,
 		Integer size,
 		Integer pag
 	) {
 		Specification<Producto> spec = Specification.where(null);
+		spec = this.addIdProductoSpec(idProducto, spec);
 		spec = this.addSpecNombreInProducto(nombre, spec);
+		spec = this.addActiveProducto(spec);
 		Pageable pageable = PageRequest.of(pag, size);
 		List<Producto> productos = this.productoRepository.findAll(spec, pageable).stream().toList();
 		if (tipoCliente != null) {
@@ -246,6 +250,11 @@ public class ProductoService {
 		// TODO Check if producto is used on another table
 	}
 
+	@Transactional
+	public void deactivateProducto(int idProducto) {
+		this.productoRepository.deactivateProducto(idProducto);
+	}
+
 	public List<TipoCliente> getTiposCliente() {
 		return this.tipoClienteRepository.getAll();
 	}
@@ -317,6 +326,13 @@ public class ProductoService {
 		return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
 	}
 
+	private Specification<Producto> addIdProductoSpec(Integer id, Specification<Producto> spec) {
+		if (id != null) {
+			spec = spec.and(((root, query, builder) -> builder.equal(root.get("id"), id)));
+		}
+		return spec;
+	}
+
 	private Specification<Producto> addSpecNombreInProducto(String nombre, Specification<Producto> spec) {
 		if (nombre != null && !nombre.isEmpty()) {
 			spec = spec.and(((root, query, builder) ->
@@ -324,5 +340,9 @@ public class ProductoService {
 					"%" + nombre.toLowerCase() + "%")));
 		}
 		return spec;
+	}
+
+	private Specification<Producto> addActiveProducto(Specification<Producto> spec) {
+		return spec.and(((root, query, builder) -> builder.equal(root.get("status"), true)));
 	}
 }

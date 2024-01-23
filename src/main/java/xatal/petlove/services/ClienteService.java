@@ -1,19 +1,19 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Direccion;
 import xatal.petlove.repositories.ClienteRepository;
 import xatal.petlove.repositories.DireccionRepository;
-import xatal.petlove.structures.ClienteMinimal;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class ClienteService {
@@ -36,28 +36,18 @@ public class ClienteService {
 			.collect(Collectors.toList());
 	}
 
-	public List<ClienteMinimal> getMinimal(Integer size) {
-		Stream<ClienteMinimal> clientes = this.clienteRepository.getMinimal()
-			.stream();
-		if (size != null) {
-			clientes = clientes.limit(size);
-		}
-		return clientes.toList();
-	}
+	public List<Cliente> search(
+		Integer id,
+		String nombre,
+		int size,
+		int pag
+	) {
+		Specification<Cliente> spec = Specification.where(null);
+		spec = this.addIdClienteSpec(id, spec);
+		spec = this.addNombreSpecification(nombre, spec);
 
-	public List<Cliente> searchByName(String nombre, int size) {
-		Specification<Cliente> spec = this.addNombreSpecification(nombre, Specification.where(null));
-		return this.clienteRepository.findAll(spec)
-			.stream()
-			.limit(size)
-			.toList();
-	}
-
-	public List<PublicCliente> searchByNamePublic(String nombre, int size) {
-		return this.searchByName(nombre, size)
-			.stream()
-			.map(PublicCliente::new)
-			.collect(Collectors.toList());
+		Pageable pageable = PageRequest.of(pag, size);
+		return this.clienteRepository.findAll(spec, pageable).stream().toList();
 	}
 
 	public Cliente saveCliente(Cliente cliente) {
@@ -67,6 +57,13 @@ public class ClienteService {
 
 	public Cliente saveCliente(PublicCliente cliente) {
 		return this.saveCliente(new Cliente(cliente));
+	}
+
+	public List<PublicCliente> toPublicCliente(List<Cliente> clientes) {
+		return clientes
+			.stream()
+			.map(PublicCliente::new)
+			.toList();
 	}
 
 	private void saveClienteDirecciones(Cliente cliente) {
@@ -90,6 +87,13 @@ public class ClienteService {
 
 	public boolean isEmailUsed(String email) {
 		return email != null && !email.isEmpty() && this.clienteRepository.countByEmail(email) > 0;
+	}
+
+	private Specification<Cliente> addIdClienteSpec(Integer id, Specification<Cliente> spec) {
+		if (id != null) {
+			spec = spec.and(((root, query, builder) -> builder.equal(root.get("id"), id)));
+		}
+		return spec;
 	}
 
 	private Specification<Cliente> addNombreSpecification(String nombre, Specification<Cliente> spec) {
