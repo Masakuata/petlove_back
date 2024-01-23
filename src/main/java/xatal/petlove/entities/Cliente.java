@@ -42,6 +42,7 @@ public class Cliente {
     }
 
     public Cliente(PublicCliente cliente) {
+        this.id = (long) cliente.id;
         this.tipoCliente = cliente.tipoCliente;
         this.nombre = cliente.nombre;
         this.email = cliente.email;
