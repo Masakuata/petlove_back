@@ -15,102 +15,112 @@ import java.util.stream.Collectors;
 
 @Entity
 public class Cliente {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
+	private Long id;
 
-    @Column(name = "tipoCliente", nullable = false)
-    private Integer tipoCliente;
+	@Column(name = "tipoCliente", nullable = false)
+	private Integer tipoCliente;
 
-    @Column(name = "nombre", nullable = false)
-    private String nombre;
+	@Column(name = "nombre", nullable = false)
+	private String nombre;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+	@Column(name = "email", nullable = false)
+	private String email;
 
-    @Column(name = "RFC")
-    private String RFC;
+	@Column(name = "RFC")
+	private String RFC;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Direccion> direcciones;
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<Direccion> direcciones;
 
-    @Column(name = "telefono", nullable = false)
-    private String telefono;
+	@Column(name = "telefono", nullable = false)
+	private String telefono;
 
-    public Cliente() {
-    }
+	public Cliente() {
+	}
 
-    public Cliente(PublicCliente cliente) {
-        this.id = (long) cliente.id;
-        this.tipoCliente = cliente.tipoCliente;
-        this.nombre = cliente.nombre;
-        this.email = cliente.email;
-        this.RFC = cliente.RFC;
-        this.telefono = cliente.telefono;
-        this.direcciones = cliente.direcciones
-                .stream()
-                .map(s -> {
-                    Direccion aux = new Direccion();
-                    aux.setDireccion(s);
-                    return aux;
-                })
-                .collect(Collectors.toList());
-    }
+	public Cliente(PublicCliente cliente) {
+		this.id = (long) cliente.id;
+		this.tipoCliente = cliente.tipoCliente;
+		this.nombre = cliente.nombre;
+		this.email = cliente.email;
+		this.RFC = cliente.RFC;
+		this.telefono = cliente.telefono;
+		this.direcciones = cliente.direcciones
+			.values()
+			.stream()
+			.map(s -> {
+				Direccion aux = new Direccion();
+				aux.setDireccion(s);
+				return aux;
+			})
+			.collect(Collectors.toList());
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public int getTipoCliente() {
-        return tipoCliente;
-    }
+	public int getTipoCliente() {
+		return tipoCliente;
+	}
 
-    public void setTipoCliente(int tipoCliente) {
-        this.tipoCliente = tipoCliente;
-    }
+	public void setTipoCliente(int tipoCliente) {
+		this.tipoCliente = tipoCliente;
+	}
 
-    public String getNombre() {
-        return nombre;
-    }
+	public String getNombre() {
+		return nombre;
+	}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getRFC() {
-        return RFC;
-    }
+	public String getRFC() {
+		return RFC;
+	}
 
-    public void setRFC(String RFC) {
-        this.RFC = RFC;
-    }
+	public void setRFC(String RFC) {
+		this.RFC = RFC;
+	}
 
-    public List<Direccion> getDirecciones() {
-        return direcciones;
-    }
+	public List<Direccion> getDirecciones() {
+		return direcciones;
+	}
 
-    public void setDirecciones(List<Direccion> direcciones) {
-        this.direcciones = direcciones;
-    }
+	public void setDirecciones(List<Direccion> direcciones) {
+		this.direcciones = direcciones;
+	}
 
-    public String getTelefono() {
-        return telefono;
-    }
+	public String getTelefono() {
+		return telefono;
+	}
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
+	}
+
+	public int getDireccionIndex(String direccion) {
+		return this.direcciones
+			.stream()
+			.filter(dir -> dir.getDireccion().equalsIgnoreCase(direccion))
+			.findFirst()
+			.map(dir -> Math.toIntExact(dir.getId()))
+			.orElse(-1);
+	}
 }

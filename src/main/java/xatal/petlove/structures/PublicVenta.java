@@ -1,8 +1,5 @@
 package xatal.petlove.structures;
 
-import xatal.petlove.entities.Venta;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,20 +12,9 @@ public class PublicVenta {
 	public boolean facturado = false;
 	public float abonado = 0F;
 	public float total = 0F;
+	public String direccion;
 	public List<PublicProductoVenta> productos = new ArrayList<>();
 
 	public PublicVenta() {
-	}
-
-	public PublicVenta(Venta venta) {
-		this.id = venta.getId();
-		this.cliente = venta.getCliente().getId();
-		this.vendedor = venta.getVendedor();
-		this.pagado = venta.isPagado();
-		this.fecha = new SimpleDateFormat("dd/MM/yyyy").format(venta.getFecha());
-		this.facturado = venta.isFacturado();
-		this.abonado = venta.getAbonado();
-		this.total = venta.getTotal();
-		venta.getProductos().forEach(producto -> this.productos.add(new PublicProductoVenta(producto)));
 	}
 }

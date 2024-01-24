@@ -54,7 +54,7 @@ public class VentaController {
 		if (ventas.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(this.ventaService.publicFromVentas(ventas));
+		return ResponseEntity.ok(this.ventaService.ventaToPublic(ventas));
 	}
 
 	@GetMapping("/buscar")
@@ -110,7 +110,7 @@ public class VentaController {
 		}
 		venta.vendedor = optionalUsuario.get().getId();
 		return this.ventaService.saveNewVenta(venta)
-			.map(value -> new ResponseEntity<>(new PublicVenta(value), HttpStatus.CREATED))
+			.map(value -> new ResponseEntity<>(this.ventaService.ventaToPublic(value), HttpStatus.CREATED))
 			.orElseGet(() -> new ResponseEntity<>(HttpStatus.CONFLICT));
 	}
 

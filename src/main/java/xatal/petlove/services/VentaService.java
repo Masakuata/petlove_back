@@ -94,6 +94,7 @@ public class VentaService {
 
 		venta.setTotal(this.getCostoTotalByVenta(venta));
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
+		venta.setDireccion(newVenta.direccion);
 
 		venta = this.saveVentaWithProductos(venta);
 		this.abonoRepository.save(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
@@ -183,14 +184,52 @@ public class VentaService {
 		aux.setAbonado(publicVenta.abonado);
 		aux.setTotal(publicVenta.total);
 		aux.setVendedor(publicVenta.vendedor);
+		aux.setDireccion(aux.getCliente().getDireccionIndex(publicVenta.direccion));
 		return aux;
 	}
 
-	public List<PublicVenta> publicFromVentas(List<Venta> ventas) {
+	public PublicVenta ventaToPublic(Venta venta) {
+		PublicVenta aux = new PublicVenta();
+		aux.id = venta.getId();
+		aux.cliente = venta.getCliente().getId();
+		aux.vendedor = venta.getVendedor();
+		aux.pagado = venta.isPagado();
+		aux.fecha = Util.dateToString(venta.getFecha());
+		aux.facturado = venta.isFacturado();
+		aux.abonado = venta.getAbonado();
+		aux.total = venta.getTotal();
+		aux.direccion = venta.getCliente().getDirecciones().get((int) venta.getDireccion()).getDireccion();
+		aux.productos = venta.getProductos()
+			.stream()
+			.map(PublicProductoVenta::new)
+			.toList();
+		return aux;
+	}
+
+	public List<PublicVenta> ventaToPublic(List<Venta> ventas) {
 		return ventas
 			.stream()
-			.map(PublicVenta::new)
+			.map(this::ventaToPublic)
 			.toList();
+	}
+
+	public FullVenta ventaToFull(Venta venta) {
+		FullVenta aux = new FullVenta();
+		aux.cliente = this.clienteService.toPublicCliente(venta.getCliente());
+		aux.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
+		aux.pagado = venta.isPagado();
+		aux.fecha = Util.dateToString(venta.getFecha());
+		aux.facturado = venta.isFacturado();
+		aux.abonado = venta.getAbonado();
+		aux.total = venta.getTotal();
+		aux.direccion = venta.getCliente().getDirecciones().get((int) venta.getDireccion()).getDireccion();
+		List<Integer> idProductos = venta.getProductos()
+			.stream()
+			.map(productoVenta -> productoVenta.getId().intValue())
+			.toList();
+
+		aux.productos = this.productoService.searchByIdsAndTipoCliente(idProductos, venta.getCliente().getTipoCliente());
+		return aux;
 	}
 
 	public List<PublicProductoVenta> getUnavailableProducts(NewVenta newVenta) {
@@ -327,7 +366,7 @@ public class VentaService {
 			return Optional.empty();
 		}
 		Venta venta = optionalVenta.get();
-		FullVenta fullVenta = new FullVenta(venta);
+		FullVenta fullVenta = this.ventaToFull(venta);
 		fullVenta.productos = this.getProductosByVentaReplaceCantidad(venta);
 		fullVenta.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
 		return Optional.of(fullVenta);

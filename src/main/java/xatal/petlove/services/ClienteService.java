@@ -13,16 +13,17 @@ import xatal.petlove.structures.PublicCliente;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ClienteService {
 	private final ClienteRepository clienteRepository;
-	private final DireccionRepository direcciones;
+	private final DireccionRepository direccionRepository;
 
 	public ClienteService(ClienteRepository clientes, DireccionRepository direcciones) {
 		this.clienteRepository = clientes;
-		this.direcciones = direcciones;
+		this.direccionRepository = direcciones;
 	}
 
 	public List<Cliente> getAll() {
@@ -59,6 +60,10 @@ public class ClienteService {
 		return this.saveCliente(new Cliente(cliente));
 	}
 
+	public PublicCliente toPublicCliente(Cliente cliente) {
+		return new PublicCliente(cliente);
+	}
+
 	public List<PublicCliente> toPublicCliente(List<Cliente> clientes) {
 		return clientes
 			.stream()
@@ -66,11 +71,54 @@ public class ClienteService {
 			.toList();
 	}
 
+	public boolean addDireccion(long idCliente, String newDireccion) {
+		Cliente cliente = this.getById(idCliente);
+		boolean repetida = cliente.getDirecciones()
+			.stream()
+			.anyMatch(direccion -> direccion.getDireccion().equalsIgnoreCase(newDireccion));
+		if (!repetida) {
+			Direccion direccion = new Direccion();
+			direccion.setDireccion(newDireccion);
+			cliente.getDirecciones().add(direccion);
+			this.direccionRepository.save(direccion);
+			this.clienteRepository.save(cliente);
+		}
+		return !repetida;
+	}
+
+	public boolean updateDireccion(long idCliente, long idDireccion, String newDireccion) {
+		Optional<Direccion> optionalDireccion = this.direccionRepository.findById(idDireccion);
+		if (optionalDireccion.isPresent()) {
+			Direccion direccion = optionalDireccion.get();
+			direccion.setDireccion(newDireccion);
+			this.direccionRepository.save(direccion);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isDireccionRegistered(long idDireccion) {
+		return this.direccionRepository.findById(idDireccion).isPresent();
+	}
+
+	public boolean isDireccionReferenced(long idDireccion) {
+		return this.direccionRepository.isReferenced(idDireccion) > 0;
+	}
+
+	public void deleteDireccion(long idDireccion) {
+		this.direccionRepository.findById(idDireccion).ifPresent(this.direccionRepository::delete);
+	}
+
+	public void deactivateDireccion(long idDireccion) {
+		this.direccionRepository.deactivateDireccion(idDireccion);
+	}
+
 	private void saveClienteDirecciones(Cliente cliente) {
 		List<Direccion> direcciones = new LinkedList<>();
-		this.direcciones.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
+		this.direccionRepository.saveAll(cliente.getDirecciones()).forEach(direcciones::add);
 		cliente.setDirecciones(direcciones);
 	}
+
 
 	public Cliente getById(Long id) {
 		return this.clienteRepository.getById(id).orElse(null);

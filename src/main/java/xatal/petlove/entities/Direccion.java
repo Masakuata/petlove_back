@@ -16,6 +16,9 @@ public class Direccion {
     @Column(name = "direccion", nullable = false)
     private String direccion;
 
+    @Column(name = "status", nullable = false)
+    private boolean status = true;
+
     public void setId(Long id) {
         this.id = id;
     }

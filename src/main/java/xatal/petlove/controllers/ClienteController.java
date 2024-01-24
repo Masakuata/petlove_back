@@ -20,6 +20,7 @@ import xatal.petlove.structures.ClienteMinimal;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -64,7 +65,7 @@ public class ClienteController {
 	}
 
 	@PostMapping()
-	public ResponseEntity addCliente(@RequestBody PublicCliente cliente) {
+	public ResponseEntity<?> addCliente(@RequestBody PublicCliente cliente) {
 		if (this.clienteService.isEmailUsed(cliente.email)) {
 			return new ResponseEntity(HttpStatus.CONFLICT);
 		}
@@ -82,7 +83,7 @@ public class ClienteController {
 	}
 
 	@PutMapping("/{cliente_id}")
-	public ResponseEntity updateCliente(
+	public ResponseEntity<?> updateCliente(
 		@PathVariable("cliente_id") int clienteId,
 		@RequestBody PublicCliente cliente
 	) {
@@ -98,11 +99,48 @@ public class ClienteController {
 	}
 
 	@DeleteMapping("/{cliente_id}")
-	public ResponseEntity deleteCliente(@PathVariable("cliente_id") int clienteId) {
+	public ResponseEntity<?> deleteCliente(@PathVariable("cliente_id") int clienteId) {
 		if (!this.clienteService.isIdRegistered(clienteId)) {
 			return ResponseEntity.notFound().build();
 		}
 		this.clienteService.removeById(clienteId);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/{cliente_id}/direccion")
+	public ResponseEntity<?> addDireccion(
+		@PathVariable("cliente_id") Long idCliente,
+		@RequestBody Map<String, String> direccion
+	) {
+		if (!this.clienteService.addDireccion(idCliente, direccion.get("direccion"))) {
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	@PutMapping("/{cliente_id}/direccion/{direccion_id}")
+	public ResponseEntity<?> updateDireccion(
+		@PathVariable("cliente_id") Long idCliente,
+		@PathVariable("direccion_id") Long idDireccion,
+		@RequestBody Map<String, String> direccion
+	) {
+		if (!this.clienteService.updateDireccion(idCliente, idDireccion, direccion.get("direccion"))) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/{cliente_id}/direccion/{direccion_id}")
+	public ResponseEntity<?> deleteDireccion(
+		@PathVariable("direccion_id") Long idDireccion
+	) {
+		if (!this.clienteService.isDireccionRegistered(idDireccion)) {
+			return ResponseEntity.notFound().build();
+		}
+		if (this.clienteService.isDireccionReferenced(idDireccion)) {
+			this.clienteService.deactivateDireccion(idDireccion);
+		}
+		this.clienteService.deleteDireccion(idDireccion);
 		return ResponseEntity.ok().build();
 	}
 }
