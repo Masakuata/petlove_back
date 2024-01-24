@@ -82,7 +82,7 @@ public class VentaService {
 	}
 
 	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
-		Venta venta = this.publicVentaToVenta(newVenta);
+		Venta venta = this.newVentaToVenta(newVenta);
 		List<Long> productosId = newVenta.productos
 			.stream()
 			.map(productoVenta -> productoVenta.producto)
@@ -175,6 +175,19 @@ public class VentaService {
 		return this.ventaRepository.save(storedVenta);
 	}
 
+	public Venta newVentaToVenta(NewVenta newVenta) {
+		Venta aux = new Venta();
+		aux.setCliente(this.clienteService.getById(newVenta.cliente));
+		aux.setPagado(newVenta.pagado);
+		aux.setFecha(Util.dateFromString(newVenta.fecha));
+		aux.setProductos(newVenta.productos.stream().map(ProductoVenta::new).toList());
+		aux.setAbonado(newVenta.abonado);
+		aux.setTotal(newVenta.total);
+		aux.setVendedor(newVenta.vendedor);
+		aux.setDireccion(newVenta.direccion);
+		return aux;
+	}
+
 	public Venta publicVentaToVenta(PublicVenta publicVenta) {
 		Venta aux = new Venta();
 		aux.setCliente(this.clienteService.getById(publicVenta.cliente));
@@ -184,7 +197,9 @@ public class VentaService {
 		aux.setAbonado(publicVenta.abonado);
 		aux.setTotal(publicVenta.total);
 		aux.setVendedor(publicVenta.vendedor);
-		aux.setDireccion(aux.getCliente().getDireccionIndex(publicVenta.direccion));
+		aux.setDireccion(
+			aux.getCliente().getDireccionByString(publicVenta.direccion).getId()
+		);
 		return aux;
 	}
 
@@ -198,7 +213,7 @@ public class VentaService {
 		aux.facturado = venta.isFacturado();
 		aux.abonado = venta.getAbonado();
 		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDirecciones().get((int) venta.getDireccion()).getDireccion();
+		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion()).getDireccion();
 		aux.productos = venta.getProductos()
 			.stream()
 			.map(PublicProductoVenta::new)
@@ -222,7 +237,7 @@ public class VentaService {
 		aux.facturado = venta.isFacturado();
 		aux.abonado = venta.getAbonado();
 		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDirecciones().get((int) venta.getDireccion()).getDireccion();
+		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion()).getDireccion();
 		List<Integer> idProductos = venta.getProductos()
 			.stream()
 			.map(productoVenta -> productoVenta.getId().intValue())

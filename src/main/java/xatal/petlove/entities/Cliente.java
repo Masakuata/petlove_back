@@ -8,10 +8,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 public class Cliente {
@@ -48,15 +48,24 @@ public class Cliente {
 		this.email = cliente.email;
 		this.RFC = cliente.RFC;
 		this.telefono = cliente.telefono;
+		this.direcciones = cliente.direcciones;
+	}
+
+	public Cliente(NewCliente cliente) {
+		this.id = (long) cliente.id;
+		this.tipoCliente = cliente.tipoCliente;
+		this.nombre = cliente.nombre;
+		this.email = cliente.email;
+		this.RFC = cliente.RFC;
+		this.telefono = cliente.telefono;
 		this.direcciones = cliente.direcciones
-			.values()
 			.stream()
-			.map(s -> {
+			.map(direccion -> {
 				Direccion aux = new Direccion();
-				aux.setDireccion(s);
+				aux.setDireccion(direccion);
 				return aux;
 			})
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	public void setId(Long id) {
@@ -115,12 +124,19 @@ public class Cliente {
 		this.telefono = telefono;
 	}
 
-	public int getDireccionIndex(String direccion) {
+	public Direccion getDireccionByString(String direccion) {
 		return this.direcciones
 			.stream()
-			.filter(dir -> dir.getDireccion().equalsIgnoreCase(direccion))
+			.filter(direccion1 -> direccion1.getDireccion().equalsIgnoreCase(direccion))
 			.findFirst()
-			.map(dir -> Math.toIntExact(dir.getId()))
-			.orElse(-1);
+			.orElse(null);
+	}
+
+	public Direccion getDireccionById(long id) {
+		return this.direcciones
+			.stream()
+			.filter(direccion -> direccion.getId() == id)
+			.findFirst()
+			.orElse(null);
 	}
 }

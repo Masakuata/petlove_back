@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Cliente;
 import xatal.petlove.services.ClienteService;
-import xatal.petlove.structures.ClienteMinimal;
+import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @CrossOrigin
 @RestController
@@ -65,7 +63,7 @@ public class ClienteController {
 	}
 
 	@PostMapping()
-	public ResponseEntity<?> addCliente(@RequestBody PublicCliente cliente) {
+	public ResponseEntity<?> addCliente(@RequestBody NewCliente cliente) {
 		if (this.clienteService.isEmailUsed(cliente.email)) {
 			return new ResponseEntity(HttpStatus.CONFLICT);
 		}

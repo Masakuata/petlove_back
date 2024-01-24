@@ -13,19 +13,21 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends CrudRepository<Cliente, Long>, JpaSpecificationExecutor<Cliente> {
-    @Query(value = "SELECT * FROM cliente",
-            nativeQuery = true)
-    List<Cliente> getAll();
+	@Query(value = "SELECT * FROM cliente",
+		nativeQuery = true)
+	List<Cliente> getAll();
 
-    @Query(value = "SELECT id, nombre, tipo_cliente, RFC, telefono, email FROM cliente",
-            nativeQuery = true)
-    Collection<ClienteMinimal> getMinimal();
+	@Query(value = "SELECT id, nombre, tipo_cliente, RFC, telefono, email FROM cliente",
+		nativeQuery = true)
+	Collection<ClienteMinimal> getMinimal();
 
-    Optional<Cliente> getById(Long id);
+	@Query(value = "SELECT * FROM petlove.cliente WHERE id = :id",
+		nativeQuery = true)
+	Optional<Cliente> getById(Long id);
 
-    Long countByEmail(String email);
+	Long countByEmail(String email);
 
-    Long countById(Long id);
+	Long countById(Long id);
 
-    void deleteById(Long id);
+	void deleteById(Long id);
 }

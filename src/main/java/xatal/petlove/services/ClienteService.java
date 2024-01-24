@@ -9,6 +9,7 @@ import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Direccion;
 import xatal.petlove.repositories.ClienteRepository;
 import xatal.petlove.repositories.DireccionRepository;
+import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.LinkedList;
@@ -57,6 +58,10 @@ public class ClienteService {
 	}
 
 	public Cliente saveCliente(PublicCliente cliente) {
+		return this.saveCliente(new Cliente(cliente));
+	}
+
+	public Cliente saveCliente(NewCliente cliente) {
 		return this.saveCliente(new Cliente(cliente));
 	}
 
