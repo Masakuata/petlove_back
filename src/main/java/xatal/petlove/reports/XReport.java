@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class XReport {
-    static final String SENDER_EMAIL = "edsonmanuelcarballovera@gmail.com";
+    static final String SENDER_EMAIL = System.getenv("EMAIL");
 
     void sendEmailWithAttachment(
             final String title,
