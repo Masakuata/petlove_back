@@ -88,11 +88,6 @@ public class VentaService {
 			.map(productoVenta -> productoVenta.producto)
 			.toList();
 
-		if (!this.productsOnStock(newVenta.productos, this.productoService.getStockByProductos(productosId))) {
-			return Optional.empty();
-		}
-
-		venta.setTotal(this.getCostoTotalByVenta(venta));
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
 
@@ -387,7 +382,7 @@ public class VentaService {
 		return Optional.of(fullVenta);
 	}
 
-	private float getCostoTotalByVenta(Venta venta) {
+	public float getCostoTotalByVenta(Venta venta) {
 		final float CERO = 0;
 		Map<Long, Float> productos = this.getProductosByVenta(venta)
 			.stream()
@@ -413,7 +408,12 @@ public class VentaService {
 			.collect(Collectors.toMap(ProductoVenta::getId, productoVenta1 -> productoVenta1));
 	}
 
-	private boolean productsOnStock(List<PublicProductoVenta> productos, Map<Long, Integer> stock) {
+	public boolean productsOnStock(List<PublicProductoVenta> productos) {
+		List<Long> productosId = productos
+			.stream()
+			.map(publicProductoVenta -> publicProductoVenta.producto)
+			.toList();
+		Map<Long, Integer> stock = this.productoService.getStockByProductos(productosId);
 		return productos
 			.stream()
 			.allMatch(productoVenta ->

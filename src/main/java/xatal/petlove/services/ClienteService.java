@@ -76,7 +76,7 @@ public class ClienteService {
 			.toList();
 	}
 
-	public boolean addDireccion(long idCliente, String newDireccion) {
+	public Optional<Direccion> addDireccion(long idCliente, String newDireccion) {
 		Cliente cliente = this.getById(idCliente);
 		boolean repetida = cliente.getDirecciones()
 			.stream()
@@ -87,8 +87,9 @@ public class ClienteService {
 			cliente.getDirecciones().add(direccion);
 			this.direccionRepository.save(direccion);
 			this.clienteRepository.save(cliente);
+			return Optional.of(direccion);
 		}
-		return !repetida;
+		return Optional.empty();
 	}
 
 	public boolean updateDireccion(long idCliente, long idDireccion, String newDireccion) {

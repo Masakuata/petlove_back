@@ -86,7 +86,7 @@ public class Usuario {
     }
 
     public String getToken() {
-        return TokenUtils.createToken(this.username, this.email);
+        return TokenUtils.createToken(this.username, this.email, this.id);
     }
 
     public static boolean isValid(Usuario miembro) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Cliente;
+import xatal.petlove.entities.Direccion;
 import xatal.petlove.services.ClienteService;
 import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
@@ -110,10 +111,11 @@ public class ClienteController {
 		@PathVariable("cliente_id") Long idCliente,
 		@RequestBody Map<String, String> direccion
 	) {
-		if (!this.clienteService.addDireccion(idCliente, direccion.get("direccion"))) {
-			return new ResponseEntity<>(HttpStatus.CONFLICT);
-		}
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		Optional<Direccion> optionalDireccion = this.clienteService.addDireccion(idCliente, direccion.get("direccion"));
+		return optionalDireccion
+			.map(value ->
+				new ResponseEntity(value, HttpStatus.CREATED))
+			.orElseGet(() -> new ResponseEntity<>(HttpStatus.CONFLICT));
 	}
 
 	@PutMapping("/{cliente_id}/direccion/{direccion_id}")

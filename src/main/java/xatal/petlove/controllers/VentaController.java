@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
-import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.reports.VentasReports;
@@ -99,16 +98,18 @@ public class VentaController {
 		@RequestHeader("Token") String token,
 		@RequestBody NewVenta venta
 	) {
+		Claims claims = TokenUtils.getTokenClaims(token);
+		if (claims == null || claims.get("id") == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+		}
 		List<PublicProductoVenta> notInStock = this.ventaService.getUnavailableProducts(venta);
 		if (!notInStock.isEmpty()) {
 			return new ResponseEntity<>(notInStock, HttpStatus.CONFLICT);
 		}
-		Claims claims = TokenUtils.getTokenClaims(token);
-		Optional<Usuario> optionalUsuario = this.usuarioService.getUsuarioFromEmail(claims.getSubject());
-		if (optionalUsuario.isEmpty()) {
-			return ResponseEntity.notFound().build();
+		venta.vendedor = ((Integer) claims.get("id")).longValue();
+		if (this.ventaService.getCostoTotalByVenta(this.ventaService.newVentaToVenta(venta)) != venta.total) {
+			return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		}
-		venta.vendedor = optionalUsuario.get().getId();
 		return this.ventaService.saveNewVenta(venta)
 			.map(value -> new ResponseEntity<>(this.ventaService.ventaToPublic(value), HttpStatus.CREATED))
 			.orElseGet(() -> new ResponseEntity<>(HttpStatus.CONFLICT));

@@ -12,11 +12,12 @@ public class TokenUtils {
     private static final String ACCESS_TOKEN_SECRET = System.getenv("TOKEN_SECRET");
     private final static Long TOKEN_LIFETIME_MILLS = 30L * 24 * 60 * 60 * 1000;
 
-    public static String createToken(String username, String email) {
+    public static String createToken(String username, String email, Long id) {
         Date expirationDate = new Date(System.currentTimeMillis() + TOKEN_LIFETIME_MILLS);
 
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("username", username);
+        claims.put("id", id);
 
         return Jwts.builder()
                 .subject(email)
