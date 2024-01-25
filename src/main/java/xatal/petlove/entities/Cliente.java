@@ -12,6 +12,7 @@ import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
 
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 public class Cliente {
@@ -124,19 +125,17 @@ public class Cliente {
 		this.telefono = telefono;
 	}
 
-	public Direccion getDireccionByString(String direccion) {
+	public Optional<Direccion> getDireccionByString(String direccion) {
 		return this.direcciones
 			.stream()
 			.filter(direccion1 -> direccion1.getDireccion().equalsIgnoreCase(direccion))
-			.findFirst()
-			.orElse(null);
+			.findFirst();
 	}
 
-	public Direccion getDireccionById(long id) {
+	public Optional<Direccion> getDireccionById(long id) {
 		return this.direcciones
 			.stream()
 			.filter(direccion -> direccion.getId() == id)
-			.findFirst()
-			.orElse(null);
+			.findFirst();
 	}
 }

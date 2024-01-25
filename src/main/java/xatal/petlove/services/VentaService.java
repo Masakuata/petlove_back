@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
+import xatal.petlove.entities.Direccion;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
@@ -193,7 +194,9 @@ public class VentaService {
 		aux.setTotal(publicVenta.total);
 		aux.setVendedor(publicVenta.vendedor);
 		aux.setDireccion(
-			aux.getCliente().getDireccionByString(publicVenta.direccion).getId()
+			aux.getCliente().getDireccionByString(publicVenta.direccion)
+				.map(Direccion::getId)
+				.orElse(0L)
 		);
 		return aux;
 	}
@@ -208,7 +211,9 @@ public class VentaService {
 		aux.facturado = venta.isFacturado();
 		aux.abonado = venta.getAbonado();
 		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion()).getDireccion();
+		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion())
+			.map(Direccion::getDireccion)
+			.orElse("");
 		aux.productos = venta.getProductos()
 			.stream()
 			.map(PublicProductoVenta::new)
@@ -232,7 +237,9 @@ public class VentaService {
 		aux.facturado = venta.isFacturado();
 		aux.abonado = venta.getAbonado();
 		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion()).getDireccion();
+		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion())
+			.map(Direccion::getDireccion)
+			.orElse("");
 		List<Integer> idProductos = venta.getProductos()
 			.stream()
 			.map(productoVenta -> productoVenta.getId().intValue())
