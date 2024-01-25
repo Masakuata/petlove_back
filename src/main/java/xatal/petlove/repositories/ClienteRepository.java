@@ -21,7 +21,7 @@ public interface ClienteRepository extends CrudRepository<Cliente, Long>, JpaSpe
 		nativeQuery = true)
 	Collection<ClienteMinimal> getMinimal();
 
-	@Query(value = "SELECT * FROM petlove.cliente WHERE id = :id",
+	@Query(value = "SELECT * FROM cliente WHERE id = :id",
 		nativeQuery = true)
 	Optional<Cliente> getById(Long id);
 
