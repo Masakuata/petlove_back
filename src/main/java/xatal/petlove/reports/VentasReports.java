@@ -1,7 +1,5 @@
 package xatal.petlove.reports;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
@@ -23,8 +21,6 @@ import java.util.stream.Collectors;
 public class VentasReports extends XReport {
 	private static final String VENTA_HEADER = "ID VENTA,CLIENTE,PAGADO,TOTAL,ABONADO,FECHA,FACTURADO\n";
 	private static final String PRODUCTO_HEADER = "NOMBRE,PRESENTACION,TIPO MASCOTA,RAZA,PRECIO\n";
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final ProductoService productoService;
 
 	public VentasReports(ProductoService productoService) {
@@ -67,7 +63,7 @@ public class VentasReports extends XReport {
 					}
 				}
 			} catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-				this.logger.error(e.getMessage());
+				xatal.petlove.util.Logger.sendException(e);
 				return Optional.empty();
 			}
 		}

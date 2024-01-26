@@ -27,15 +27,6 @@ public class XEmail {
 	private final List<Attachment> attachments = new LinkedList<>();
 
 	public XEmail() {
-//        this.mailer = MailerBuilder
-//                .withSMTPServer(
-//                        "smtp.gmail.com",
-//                        587,
-//                        "edsonmanuelcarballovera@gmail.com",
-//                        "ekqu dpsw zsuj kpds"
-//                )
-//                .withTransportStrategy(TransportStrategy.SMTP_TLS)
-//                .buildMailer();
 		this.mailer = MailerBuilder
 			.withSMTPServer(
 				"smtp.gmail.com",
@@ -47,10 +38,20 @@ public class XEmail {
 			.buildMailer();
 	}
 
+	public XEmail(String email, String password) {
+		this.mailer = MailerBuilder
+			.withSMTPServer(
+				"smtp.gmail.com",
+				587,
+				email,
+				password
+			)
+			.withTransportStrategy(TransportStrategy.SMTP_TLS)
+			.buildMailer();
+	}
+
 	public void addRecipient(String name, String email) {
-		if (!this.recipients.containsKey(name)) {
-			this.recipients.put(name, email);
-		}
+		this.recipients.put(name, email);
 	}
 
 	public void removeRecipient(String name) {

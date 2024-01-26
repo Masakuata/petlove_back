@@ -58,6 +58,9 @@ env:
   DB_DRIVER: ${{ secrets.REDSTONE_DRIVER }}
   EMAIL: ${{ secrets.PETLOVE_EMAIL }}
   EMAIL_PASSWORD: ${{ secrets.PETLOVE_PASSWORD }}
+  EXCEPTION_MAILING_LIST: 'edsonmanuelcarballovera@gmail.com,rendon.mtz@xatal.com.mx'
+  EXCEPTION_SENDER: 'edsonmanuelcarballovera@gmail.com'
+  EXCEPTION_SENDER_PASSWORD: ${{ secrets.EDSON_EMAIL_TOKEN }}
 
 jobs:
   deploy_on_anton:
@@ -71,7 +74,19 @@ jobs:
           url: http://clayrite.ddns.net:42000/sharedz_backend?image=w3edd/sharedz_b&tag=${{ inputs.tag }}&iport=${{ inputs.internal_port }}&eport=${{ inputs.external_port }}&privileged=0
           method: 'POST'
           timeout: 20000
-          data: '{"DB_URL": "${{ env.DB_URL }}", "DB_USERNAME": "${{ env.DB_USERNAME }}", "DB_PASSWORD": "${{ env.DB_PASSWORD }}", "DB_DRIVER": "${{ env.DB_DRIVER }}", "EMAIL": "${{ env.EMAIL }}", "EMAIL_PASSWORD": "${{ env.EMAIL_PASSWORD }}", "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}"}'
+          data: >-
+            '{
+              "DB_URL": "${{ env.DB_URL }}",
+              "DB_USERNAME": "${{ env.DB_USERNAME }}",
+              "DB_PASSWORD": "${{ env.DB_PASSWORD }}",
+              "DB_DRIVER": "${{ env.DB_DRIVER }}",
+              "EMAIL": "${{ env.EMAIL }}",
+              "EMAIL_PASSWORD": "${{ env.EMAIL_PASSWORD }}",
+              "TOKEN_SECRET": "${{ env.TOKEN_SECRET }}",
+              "EXCEPTION_MAILING_LIST": "${{ env.EXCEPTION_MAILING_LIST }}",
+              "EXCEPTION_SENDER": "${{ env.EXCEPTION_SENDER }}",
+              "EXCEPTION_SENDER_PASSWORD": "${{ env.EXCEPTION_SENDER_PASSWORD }}"
+            }'
 
   deploy_on_digital_ocean:
     if: ${{ fromJSON(inputs.deploy_digital_ocean) }}

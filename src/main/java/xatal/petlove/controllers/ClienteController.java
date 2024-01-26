@@ -1,7 +1,5 @@
 package xatal.petlove.controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,7 +26,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/cliente")
 public class ClienteController {
-	private final Logger logger = LoggerFactory.getLogger(ClienteController.class);
 	private final ClienteService clienteService;
 
 	public ClienteController(ClienteService clienteService) {
