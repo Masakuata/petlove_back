@@ -18,6 +18,7 @@ public class MultiDetailedPrecioProducto extends PublicProducto {
 		this.raza = producto.getRaza();
 		this.precio = producto.getPrecio();
 		this.cantidad = producto.getCantidad();
+		this.peso = producto.getPeso();
 	}
 
 	public MultiDetailedPrecioProducto(MultiPrecioProducto producto) {
@@ -27,5 +28,6 @@ public class MultiDetailedPrecioProducto extends PublicProducto {
 		this.raza = producto.raza;
 		this.precio = producto.precio;
 		this.cantidad = producto.cantidad;
+		this.peso = producto.peso;
 	}
 }

@@ -9,6 +9,7 @@ public class PublicProducto {
     public String raza = "";
     public float precio = -1;
     public int cantidad = 0;
+    public float peso = 0;
 
     public PublicProducto() {
     }
@@ -20,5 +21,6 @@ public class PublicProducto {
         this.raza = producto.getRaza();
         this.precio = producto.getPrecio();
         this.cantidad = producto.getCantidad();
+        this.peso = producto.getPeso();
     }
 }

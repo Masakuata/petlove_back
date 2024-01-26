@@ -84,15 +84,10 @@ public class VentaService {
 
 	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
 		Venta venta = this.newVentaToVenta(newVenta);
-		List<Long> productosId = newVenta.productos
-			.stream()
-			.map(productoVenta -> productoVenta.producto)
-			.toList();
-
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
-
 		venta = this.saveVentaWithProductos(venta);
+
 		this.abonoRepository.save(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
 		this.productoService.updateStockFromVenta(venta);
 		this.generateReport(venta);

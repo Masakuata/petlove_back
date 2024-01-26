@@ -18,5 +18,6 @@ public class MultiPrecioProducto extends PublicProducto {
 		this.raza = producto.getRaza();
 		this.precio = producto.getPrecio();
 		this.cantidad = producto.getCantidad();
+		this.peso = producto.getPeso();
 	}
 }

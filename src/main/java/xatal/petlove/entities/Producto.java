@@ -32,6 +32,9 @@ public class Producto {
 	@Column(name = "cantidad", nullable = false)
 	private int cantidad = 0;
 
+	@Column(name = "peso", nullable = false)
+	private float peso = 0F;
+
 	@Column(name = "status", nullable = false)
 	private boolean status = true;
 
@@ -101,6 +104,14 @@ public class Producto {
 
 	public void setCantidad(int cantidad) {
 		this.cantidad = cantidad;
+	}
+
+	public float getPeso() {
+		return peso;
+	}
+
+	public void setPeso(float peso) {
+		this.peso = peso;
 	}
 
 	public boolean isStatus() {

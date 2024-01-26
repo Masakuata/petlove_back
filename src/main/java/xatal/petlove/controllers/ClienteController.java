@@ -90,7 +90,7 @@ public class ClienteController {
 			return ResponseEntity.notFound().build();
 		}
 		cliente.id = clienteId;
-		Cliente savedCliente = this.clienteService.saveCliente(cliente);
+		Cliente savedCliente = this.clienteService.updateCliente(cliente);
 		if (savedCliente == null) {
 			return ResponseEntity.internalServerError().build();
 		}
@@ -132,6 +132,7 @@ public class ClienteController {
 
 	@DeleteMapping("/{cliente_id}/direccion/{direccion_id}")
 	public ResponseEntity<?> deleteDireccion(
+		@PathVariable("cliente_id") Long idCliente,
 		@PathVariable("direccion_id") Long idDireccion
 	) {
 		if (!this.clienteService.isDireccionRegistered(idDireccion)) {
@@ -140,7 +141,7 @@ public class ClienteController {
 		if (this.clienteService.isDireccionReferenced(idDireccion)) {
 			this.clienteService.deactivateDireccion(idDireccion);
 		}
-		this.clienteService.deleteDireccion(idDireccion);
+		this.clienteService.deleteDireccion(idCliente, idDireccion);
 		return ResponseEntity.ok().build();
 	}
 }

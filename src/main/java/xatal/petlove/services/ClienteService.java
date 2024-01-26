@@ -57,8 +57,13 @@ public class ClienteService {
 		return this.clienteRepository.save(cliente);
 	}
 
-	public Cliente saveCliente(PublicCliente cliente) {
-		return this.saveCliente(new Cliente(cliente));
+	public Cliente updateCliente(PublicCliente updatedCliente) {
+		Cliente cliente = new Cliente(updatedCliente);
+		this.clienteRepository.getById((long) updatedCliente.id).ifPresent(storedCliente -> {
+			cliente.setDirecciones(storedCliente.getDirecciones());
+			this.clienteRepository.save(cliente);
+		});
+		return cliente;
 	}
 
 	public Cliente saveCliente(NewCliente cliente) {
@@ -93,7 +98,7 @@ public class ClienteService {
 	}
 
 	public boolean updateDireccion(long idCliente, long idDireccion, String newDireccion) {
-		Optional<Direccion> optionalDireccion = this.direccionRepository.findById(idDireccion);
+		Optional<Direccion> optionalDireccion = this.direccionRepository.getById(idDireccion);
 		if (optionalDireccion.isPresent()) {
 			Direccion direccion = optionalDireccion.get();
 			direccion.setDireccion(newDireccion);
@@ -104,15 +109,24 @@ public class ClienteService {
 	}
 
 	public boolean isDireccionRegistered(long idDireccion) {
-		return this.direccionRepository.findById(idDireccion).isPresent();
+		return this.direccionRepository.getById(idDireccion).isPresent();
 	}
 
 	public boolean isDireccionReferenced(long idDireccion) {
 		return this.direccionRepository.isReferenced(idDireccion) > 0;
 	}
 
-	public void deleteDireccion(long idDireccion) {
-		this.direccionRepository.findById(idDireccion).ifPresent(this.direccionRepository::delete);
+	public void deleteDireccion(long idCliente, long idDireccion) {
+		this.clienteRepository.getById(idCliente).ifPresent(cliente ->
+			cliente.getDirecciones()
+				.stream()
+				.filter(direccion -> direccion.getId() == idDireccion)
+				.findFirst()
+				.ifPresent(direccion -> {
+					cliente.getDirecciones().remove(direccion);
+					this.direccionRepository.delete(direccion);
+					this.clienteRepository.save(cliente);
+				}));
 	}
 
 	public void deactivateDireccion(long idDireccion) {

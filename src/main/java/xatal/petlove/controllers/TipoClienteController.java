@@ -21,4 +21,6 @@ public class TipoClienteController {
 	public ResponseEntity getTiposCliente() {
 		return ResponseEntity.ok(this.productoService.getTiposCliente());
 	}
+
+
 }
