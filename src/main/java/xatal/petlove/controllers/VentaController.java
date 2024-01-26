@@ -110,9 +110,7 @@ public class VentaController {
 		if (this.ventaService.getCostoTotalByVenta(this.ventaService.newVentaToVenta(venta)) != venta.total) {
 			return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		}
-		return this.ventaService.saveNewVenta(venta)
-			.map(value -> new ResponseEntity<>(this.ventaService.ventaToPublic(value), HttpStatus.CREATED))
-			.orElseGet(() -> new ResponseEntity<>(HttpStatus.CONFLICT));
+		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id_venta}")

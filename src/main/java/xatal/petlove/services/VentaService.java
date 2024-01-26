@@ -82,7 +82,7 @@ public class VentaService {
 		return this.filterByProducto(ventas, producto);
 	}
 
-	public Optional<Venta> saveNewVenta(NewVenta newVenta) {
+	public Venta saveNewVenta(NewVenta newVenta) {
 		Venta venta = this.newVentaToVenta(newVenta);
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
@@ -91,7 +91,7 @@ public class VentaService {
 		this.abonoRepository.save(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
 		this.productoService.updateStockFromVenta(venta);
 		this.generateReport(venta);
-		return Optional.of(venta);
+		return venta;
 	}
 
 	public Venta saveVentaWithProductos(Venta venta) {
@@ -172,7 +172,7 @@ public class VentaService {
 		aux.setPagado(newVenta.pagado);
 		aux.setFecha(Util.dateFromString(newVenta.fecha));
 		aux.setProductos(newVenta.productos.stream().map(ProductoVenta::new).toList());
-		aux.setAbonado(newVenta.abonado);
+		aux.setAbonado(newVenta.abono);
 		aux.setTotal(newVenta.total);
 		aux.setVendedor(newVenta.vendedor);
 		aux.setDireccion(newVenta.direccion);
