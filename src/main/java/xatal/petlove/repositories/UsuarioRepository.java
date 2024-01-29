@@ -10,23 +10,25 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
-    @Query(value = "SELECT * FROM Sharedz.usuario WHERE status = true",
-            nativeQuery = true)
-    List<Usuario> getAll();
+	@Query(value = "SELECT * FROM Sharedz.usuario WHERE status = true",
+		nativeQuery = true)
+	List<Usuario> getAll();
 
-    Optional<Usuario> findByEmailAndPassword(String email, String password);
+	Optional<Usuario> findByEmailAndPassword(String email, String password);
 
-    Optional<Usuario> getUsuarioByEmailAndPassword(String email, String password);
+	Optional<Usuario> getUsuarioByEmailAndPassword(String email, String password);
 
-    Optional<Usuario> findOneByEmail(String email);
+	Optional<Usuario> findOneByEmail(String email);
 
-    Optional<Usuario> findUsuarioByUsername(String username);
+	Optional<Usuario> findUsuarioByUsername(String username);
 
-    Long deleteByEmail(String email);
+	Long deleteByEmail(String email);
 
-    Long countByEmail(String email);
+	Long countByEmail(String email);
 
-    Long countByUsername(String username);
+	Long countByUsername(String username);
 
-    Long countByEmailAndUsername(String email, String username);
+	@Query(value = "SELECT COUNT(*) FROM usuario WHERE email = :email AND username = :username",
+		nativeQuery = true)
+	Long countByEmailAndUsername(String email, String username);
 }
