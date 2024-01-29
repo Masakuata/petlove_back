@@ -45,6 +45,7 @@ public class Producto {
 		this.raza = newProducto.raza;
 		this.precio = newProducto.precio;
 		this.cantidad = newProducto.cantidad;
+		this.peso = newProducto.peso;
 	}
 
 	public Producto() {
