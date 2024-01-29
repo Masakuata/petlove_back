@@ -124,8 +124,8 @@ public class ClienteService {
 				.findFirst()
 				.ifPresent(direccion -> {
 					cliente.getDirecciones().remove(direccion);
-					this.direccionRepository.delete(direccion);
 					this.clienteRepository.save(cliente);
+					this.direccionRepository.deactivateDireccion(direccion.getId());
 				}));
 	}
 
