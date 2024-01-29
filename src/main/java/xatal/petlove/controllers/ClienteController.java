@@ -34,14 +34,14 @@ public class ClienteController {
 
 	@GetMapping()
 	public ResponseEntity<?> getClientes(
-		@RequestParam(name = "id_cliente", required = false, defaultValue = "") Optional<Integer> idCliente,
-		@RequestParam(name = "nombre", required = false, defaultValue = "") String nombreQuery,
+		@RequestParam(name = "id_cliente", required = false) Optional<Integer> idCliente,
+		@RequestParam(name = "nombre", required = false) Optional<String> nombreQuery,
 		@RequestParam(name = "cant", required = false, defaultValue = "10") int size,
 		@RequestParam(name = "pag", required = false, defaultValue = "0") int pag
 	) {
 		List<PublicCliente> clientes = this.clienteService.toPublicCliente(this.clienteService.search(
 			idCliente.orElse(null),
-			nombreQuery,
+			nombreQuery.orElse(null),
 			size,
 			pag
 		));
@@ -62,9 +62,6 @@ public class ClienteController {
 
 	@PostMapping()
 	public ResponseEntity<?> addCliente(@RequestBody NewCliente cliente) {
-		if (this.clienteService.isEmailUsed(cliente.email)) {
-			return new ResponseEntity(HttpStatus.CONFLICT);
-		}
 		return new ResponseEntity(this.clienteService.saveCliente(cliente), HttpStatus.CREATED);
 	}
 
