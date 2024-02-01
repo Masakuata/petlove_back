@@ -107,18 +107,16 @@ public class ClienteController {
 	) {
 		Optional<Direccion> optionalDireccion = this.clienteService.addDireccion(idCliente, direccion.get("direccion"));
 		return optionalDireccion
-			.map(value ->
-				new ResponseEntity(value, HttpStatus.CREATED))
+			.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
 			.orElseGet(() -> new ResponseEntity<>(HttpStatus.CONFLICT));
 	}
 
 	@PutMapping("/{cliente_id}/direccion/{direccion_id}")
 	public ResponseEntity<?> updateDireccion(
-		@PathVariable("cliente_id") Long idCliente,
 		@PathVariable("direccion_id") Long idDireccion,
 		@RequestBody Map<String, String> direccion
 	) {
-		if (!this.clienteService.updateDireccion(idCliente, idDireccion, direccion.get("direccion"))) {
+		if (!this.clienteService.updateDireccion(idDireccion, direccion.get("direccion"))) {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.ok().build();

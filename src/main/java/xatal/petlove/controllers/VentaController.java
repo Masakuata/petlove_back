@@ -17,11 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.reports.PDFVentaReports;
-import xatal.petlove.reports.VentasReports;
 import xatal.petlove.security.TokenUtils;
 import xatal.petlove.services.ProductoService;
-import xatal.petlove.services.UsuarioService;
 import xatal.petlove.services.VentaService;
 import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewAbono;
@@ -38,13 +37,13 @@ import java.util.Optional;
 @RequestMapping("/venta")
 public class VentaController {
 	private final VentaService ventaService;
-	private final UsuarioService usuarioService;
 	private final ProductoService productoService;
+	private final VentaMapper ventaMapper;
 
-	public VentaController(VentaService ventaService, UsuarioService usuarioService, VentasReports reportService, ProductoService productoService) {
+	public VentaController(VentaService ventaService, ProductoService productoService, VentaMapper ventaMapper) {
 		this.ventaService = ventaService;
-		this.usuarioService = usuarioService;
 		this.productoService = productoService;
+		this.ventaMapper = ventaMapper;
 	}
 
 	@GetMapping
@@ -53,7 +52,7 @@ public class VentaController {
 		if (ventas.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(this.ventaService.ventaToPublic(ventas));
+		return ResponseEntity.ok(this.ventaMapper.ventasToPublic(ventas));
 	}
 
 	@GetMapping("/buscar")
@@ -107,7 +106,7 @@ public class VentaController {
 			return new ResponseEntity<>(notInStock, HttpStatus.CONFLICT);
 		}
 		venta.vendedor = ((Integer) claims.get("id")).longValue();
-		if (this.ventaService.getCostoTotalByVenta(this.ventaService.newVentaToVenta(venta)) != venta.total) {
+		if (this.ventaService.getCostoTotalByVenta(this.ventaMapper.newVentaToVenta(venta)) != venta.total) {
 			return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		}
 		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);

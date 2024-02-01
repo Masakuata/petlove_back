@@ -97,7 +97,7 @@ public class ClienteService {
 		return Optional.empty();
 	}
 
-	public boolean updateDireccion(long idCliente, long idDireccion, String newDireccion) {
+	public boolean updateDireccion(long idDireccion, String newDireccion) {
 		Optional<Direccion> optionalDireccion = this.direccionRepository.getById(idDireccion);
 		if (optionalDireccion.isPresent()) {
 			Direccion direccion = optionalDireccion.get();

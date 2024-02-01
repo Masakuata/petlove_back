@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
@@ -18,6 +17,7 @@ import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
 import xatal.petlove.repositories.TipoClienteRepository;
+import xatal.petlove.services.specifications.ProductoSpecification;
 import xatal.petlove.structures.DetailedPrecio;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
@@ -70,10 +70,6 @@ public class ProductoService {
 		this.precioRepository.saveAll(precios);
 	}
 
-	public List<Producto> getAll() {
-		return this.productoRepository.getAll();
-	}
-
 	public List<MultiPrecioProducto> getWithPrecios() {
 		Map<Long, MultiPrecioProducto> multiPrecioMap = this.productoRepository.getAll()
 			.stream()
@@ -119,10 +115,11 @@ public class ProductoService {
 		Integer size,
 		Integer pag
 	) {
-		Specification<Producto> spec = Specification.where(null);
-		spec = this.addIdProductoSpec(idProducto, spec);
-		spec = this.addSpecNombreInProducto(nombre, spec);
-		spec = this.addActiveProducto(spec);
+		Specification<Producto> spec = Specification.allOf(
+			ProductoSpecification.searchId(idProducto),
+			ProductoSpecification.searchNombre(nombre),
+			ProductoSpecification.searchActive()
+		);
 		Pageable pageable = PageRequest.of(pag, size);
 		List<Producto> productos = this.productoRepository.findAll(spec, pageable).stream().toList();
 		if (tipoCliente != null) {
@@ -213,7 +210,7 @@ public class ProductoService {
 	}
 
 	public Map<Long, Integer> getStockByProductos(List<Long> idProductos) {
-		return this.productoRepository.findAll(this.productoInIdsSpecification(idProductos))
+		return this.productoRepository.findAll(ProductoSpecification.productoInIds(idProductos))
 			.stream()
 			.collect(Collectors.toMap(Producto::getId, Producto::getCantidad));
 	}
@@ -320,29 +317,5 @@ public class ProductoService {
 		return this.tipoClienteRepository.getAll()
 			.stream()
 			.collect(Collectors.toMap(TipoCliente::getId, tipoCliente -> tipoCliente));
-	}
-
-	private Specification<Producto> productoInIdsSpecification(List<Long> productosId) {
-		return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
-	}
-
-	private Specification<Producto> addIdProductoSpec(Integer id, Specification<Producto> spec) {
-		if (id != null) {
-			spec = spec.and(((root, query, builder) -> builder.equal(root.get("id"), id)));
-		}
-		return spec;
-	}
-
-	private Specification<Producto> addSpecNombreInProducto(String nombre, Specification<Producto> spec) {
-		if (nombre != null && !nombre.isEmpty()) {
-			spec = spec.and(((root, query, builder) ->
-				builder.like(builder.lower(root.get("nombre")),
-					"%" + nombre.toLowerCase() + "%")));
-		}
-		return spec;
-	}
-
-	private Specification<Producto> addActiveProducto(Specification<Producto> spec) {
-		return spec.and(((root, query, builder) -> builder.equal(root.get("status"), true)));
 	}
 }

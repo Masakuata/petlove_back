@@ -6,14 +6,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
-import xatal.petlove.entities.Direccion;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.repositories.AbonoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.VentaRepository;
+import xatal.petlove.services.specifications.VentaSpecification;
 import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewAbono;
 import xatal.petlove.structures.NewVenta;
@@ -39,11 +40,12 @@ public class VentaService {
 	private final ProductoService productoService;
 	private final UsuarioService usuarioService;
 	private final PDFVentaReports ventaReports;
+	private final VentaMapper ventaMapper;
 
 	public VentaService(
 		VentaRepository ventaRepository,
 		ProductoVentaRepository productoVentaRepository, AbonoRepository abonoRepository,
-		ClienteService clienteService, ProductoService productoService, UsuarioService usuarioService
+		ClienteService clienteService, ProductoService productoService, UsuarioService usuarioService, VentaMapper ventaMapper
 	) {
 		this.ventaRepository = ventaRepository;
 		this.productoVentaRepository = productoVentaRepository;
@@ -51,6 +53,7 @@ public class VentaService {
 		this.clienteService = clienteService;
 		this.productoService = productoService;
 		this.usuarioService = usuarioService;
+		this.ventaMapper = ventaMapper;
 		this.ventaReports = new PDFVentaReports(this.productoService);
 	}
 
@@ -69,21 +72,22 @@ public class VentaService {
 		Integer size,
 		Integer pag
 	) {
-		Specification<Venta> spec = Specification.where(null);
-		spec = this.addIdClienteSpecification(idCliente, spec);
-		spec = this.addNombreClienteSpecification(nombreCliente, spec);
-		spec = this.addYearSpecification(year, spec);
-		spec = this.addMonthSpecification(month, spec);
-		spec = this.addDaySpecification(day, spec);
-		spec = this.addPagadoSpecification(pagado, spec);
-		spec = this.orderByNewer(spec);
+		Specification<Venta> spec = Specification.allOf(
+			VentaSpecification.filterByIdCliente(idCliente),
+			VentaSpecification.filterByNombreCliente(nombreCliente),
+			VentaSpecification.filterByDay(day),
+			VentaSpecification.filterByMonth(month),
+			VentaSpecification.filterByYear(year),
+			VentaSpecification.filterPagado(pagado),
+			VentaSpecification.orderByNewer()
+		);
 		Pageable pageable = PageRequest.of(pag, size);
 		List<Venta> ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
 		return this.filterByProducto(ventas, producto);
 	}
 
 	public Venta saveNewVenta(NewVenta newVenta) {
-		Venta venta = this.newVentaToVenta(newVenta);
+		Venta venta = this.ventaMapper.newVentaToVenta(newVenta);
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
 		venta = this.saveVentaWithProductos(venta);
@@ -166,84 +170,6 @@ public class VentaService {
 		return this.ventaRepository.save(storedVenta);
 	}
 
-	public Venta newVentaToVenta(NewVenta newVenta) {
-		Venta aux = new Venta();
-		aux.setCliente(this.clienteService.getById(newVenta.cliente));
-		aux.setPagado(newVenta.pagado);
-		aux.setFecha(Util.dateFromString(newVenta.fecha));
-		aux.setProductos(newVenta.productos.stream().map(ProductoVenta::new).toList());
-		aux.setAbonado(newVenta.abono);
-		aux.setTotal(newVenta.total);
-		aux.setVendedor(newVenta.vendedor);
-		aux.setDireccion(newVenta.direccion);
-		return aux;
-	}
-
-	public Venta publicVentaToVenta(PublicVenta publicVenta) {
-		Venta aux = new Venta();
-		aux.setCliente(this.clienteService.getById(publicVenta.cliente));
-		aux.setPagado(publicVenta.pagado);
-		aux.setFecha(Util.dateFromString(publicVenta.fecha));
-		aux.setProductos(publicVenta.productos.stream().map(ProductoVenta::new).toList());
-		aux.setAbonado(publicVenta.abonado);
-		aux.setTotal(publicVenta.total);
-		aux.setVendedor(publicVenta.vendedor);
-		aux.setDireccion(
-			aux.getCliente().getDireccionByString(publicVenta.direccion)
-				.map(Direccion::getId)
-				.orElse(0L)
-		);
-		return aux;
-	}
-
-	public PublicVenta ventaToPublic(Venta venta) {
-		PublicVenta aux = new PublicVenta();
-		aux.id = venta.getId();
-		aux.cliente = venta.getCliente().getId();
-		aux.vendedor = venta.getVendedor();
-		aux.pagado = venta.isPagado();
-		aux.fecha = Util.dateToString(venta.getFecha());
-		aux.facturado = venta.isFacturado();
-		aux.abonado = venta.getAbonado();
-		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion())
-			.map(Direccion::getDireccion)
-			.orElse("");
-		aux.productos = venta.getProductos()
-			.stream()
-			.map(PublicProductoVenta::new)
-			.toList();
-		return aux;
-	}
-
-	public List<PublicVenta> ventaToPublic(List<Venta> ventas) {
-		return ventas
-			.stream()
-			.map(this::ventaToPublic)
-			.toList();
-	}
-
-	public FullVenta ventaToFull(Venta venta) {
-		FullVenta aux = new FullVenta();
-		aux.cliente = this.clienteService.toPublicCliente(venta.getCliente());
-		aux.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
-		aux.pagado = venta.isPagado();
-		aux.fecha = Util.dateToString(venta.getFecha());
-		aux.facturado = venta.isFacturado();
-		aux.abonado = venta.getAbonado();
-		aux.total = venta.getTotal();
-		aux.direccion = venta.getCliente().getDireccionById(venta.getDireccion())
-			.map(Direccion::getDireccion)
-			.orElse("");
-		List<Integer> idProductos = venta.getProductos()
-			.stream()
-			.map(productoVenta -> productoVenta.getId().intValue())
-			.toList();
-
-		aux.productos = this.productoService.searchByIdsAndTipoCliente(idProductos, venta.getCliente().getTipoCliente());
-		return aux;
-	}
-
 	public List<PublicProductoVenta> getUnavailableProducts(NewVenta newVenta) {
 		List<PublicProductoVenta> unavailable = new LinkedList<>();
 		List<Long> idProductos = newVenta.productos.stream().map(productoVenta -> productoVenta.producto).toList();
@@ -287,58 +213,6 @@ public class VentaService {
 		this.ventaRepository.deleteById(idVenta);
 	}
 
-	private Specification<Venta> addIdClienteSpecification(Integer id, Specification<Venta> spec) {
-		if (id != null) {
-			spec = spec.and(((root, query, builder) -> builder.equal(root.get("cliente").get("id"), id)));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addNombreClienteSpecification(String nombreCliente, Specification<Venta> spec) {
-		if (nombreCliente != null && !nombreCliente.isEmpty()) {
-			spec = spec.and((root, query, builder) ->
-				builder.like(builder.lower(root.get("cliente").get("nombre")),
-					"%" + nombreCliente.toLowerCase() + "%"));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addDaySpecification(Integer day, Specification<Venta> spec) {
-		if (day != null) {
-			spec = spec.and((root, query, builder) ->
-				builder.equal(builder.function("day", Integer.class, root.get("fecha")), day));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addMonthSpecification(Integer month, Specification<Venta> spec) {
-		if (month != null) {
-			spec = spec.and((root, query, builder) ->
-				builder.equal(builder.function("month", Integer.class, root.get("fecha")), month));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addYearSpecification(Integer year, Specification<Venta> spec) {
-		if (year != null) {
-			spec = spec.and((root, query, builder) ->
-				builder.equal(builder.function("year", Integer.class, root.get("fecha")), year));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> addPagadoSpecification(Boolean pagado, Specification<Venta> spec) {
-		if (pagado != null) {
-			spec = spec.and((root, query, builder) -> builder.equal(root.get("pagado"), pagado));
-		}
-		return spec;
-	}
-
-	private Specification<Venta> orderByNewer(Specification<Venta> spec) {
-		return spec
-			.and((root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction());
-	}
-
 	private List<Venta> filterByProducto(List<Venta> ventas, Integer producto) {
 		if (producto == null) {
 			return ventas;
@@ -378,7 +252,7 @@ public class VentaService {
 			return Optional.empty();
 		}
 		Venta venta = optionalVenta.get();
-		FullVenta fullVenta = this.ventaToFull(venta);
+		FullVenta fullVenta = this.ventaMapper.ventaToFullVenta(venta);
 		fullVenta.productos = this.getProductosByVentaReplaceCantidad(venta);
 		fullVenta.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
 		return Optional.of(fullVenta);
