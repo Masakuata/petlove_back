@@ -36,7 +36,7 @@ public class PDFVentaReports extends XReport {
 	private static final float TITLE_FONT_SIZE = 20F;
 	private static final float DEFAULT_FONT_SIZE = 10F;
 
-	private static final float LOGO_SQR_SIZE = 100F;
+	private static final float LOGO_SQR_SIZE = 50F;
 	private static final String[] VENTA_HEADERS = {
 		"ID VENTA", "CLIENTE", "PAGADO", "TOTAL", "ABONADO", "FECHA", "FACTURADO"
 	};
@@ -91,6 +91,7 @@ public class PDFVentaReports extends XReport {
 			document.add(this.getAsTitle("PetLove"));
 			document.add(this.getAsTitle("PRODUCTOS"));
 			document.add(this.buildProductosTable(this.getVentaProductos(venta)));
+			document.add(this.addTotal(venta));
 			document.close();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
@@ -140,7 +141,8 @@ public class PDFVentaReports extends XReport {
 		Image image = new Image(ImageDataFactory.create(PDFVentaReports.LOGO_PATH));
 		image.setHeight(LOGO_SQR_SIZE);
 		image.setWidth(LOGO_SQR_SIZE);
-		image.setFixedPosition(0F, PageSize.LETTER.getBottom());
+		image.setFixedPosition(PageSize.LETTER.getRight() - LOGO_SQR_SIZE - 30F,
+			PageSize.LETTER.getTop() - LOGO_SQR_SIZE - 40F);
 		return image;
 	}
 
@@ -251,6 +253,13 @@ public class PDFVentaReports extends XReport {
 			table.addCell(cantidad);
 			table.addCell(subtotal);
 		});
+	}
+
+	private Paragraph addTotal(Venta venta) {
+		Paragraph total = new Paragraph();
+		total.add("TOTAL VENTA:  " + venta.getTotal() + "\n");
+		total.add("TOTAL PESO: " + this.productoService.getPesoVenta(venta));
+		return total;
 	}
 
 	private List<Producto> getVentaProductos(Venta venta) {

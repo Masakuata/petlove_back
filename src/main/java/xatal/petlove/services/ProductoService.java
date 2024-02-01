@@ -318,4 +318,15 @@ public class ProductoService {
 			.stream()
 			.collect(Collectors.toMap(TipoCliente::getId, tipoCliente -> tipoCliente));
 	}
+
+	public float getPesoVenta(Venta venta) {
+		List<Long> ids = venta.getProductos()
+			.stream()
+			.map(ProductoVenta::getId)
+			.toList();
+		return this.productoRepository.findByIdIn(ids)
+			.stream()
+			.map(Producto::getPeso)
+			.reduce(0F, Float::sum);
+	}
 }
