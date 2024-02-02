@@ -9,6 +9,7 @@ import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewVenta;
+import xatal.petlove.structures.PublicCliente;
 import xatal.petlove.structures.PublicProductoVenta;
 import xatal.petlove.structures.PublicVenta;
 import xatal.petlove.util.Util;
@@ -79,7 +80,7 @@ public class VentaMapper {
 
 	public FullVenta ventaToFullVenta(Venta venta) {
 		FullVenta aux = new FullVenta();
-		aux.cliente = this.clienteService.toPublicCliente(venta.getCliente());
+		aux.cliente = new PublicCliente(venta.getCliente());
 		aux.vendedor = this.usuarioService.getById(venta.getVendedor()).getUsername();
 		aux.pagado = venta.isPagado();
 		aux.fecha = Util.dateToString(venta.getFecha());

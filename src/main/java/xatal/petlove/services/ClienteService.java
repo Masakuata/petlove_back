@@ -9,6 +9,7 @@ import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Direccion;
 import xatal.petlove.repositories.ClienteRepository;
 import xatal.petlove.repositories.DireccionRepository;
+import xatal.petlove.services.specifications.ClienteSpecification;
 import xatal.petlove.structures.NewCliente;
 import xatal.petlove.structures.PublicCliente;
 
@@ -44,10 +45,10 @@ public class ClienteService {
 		int size,
 		int pag
 	) {
-		Specification<Cliente> spec = Specification.where(null);
-		spec = this.addIdClienteSpec(id, spec);
-		spec = this.addNombreSpecification(nombre, spec);
-
+		Specification<Cliente> spec = Specification.allOf(
+			ClienteSpecification.filterById(id),
+			ClienteSpecification.filterByName(nombre)
+		);
 		Pageable pageable = PageRequest.of(pag, size);
 		return this.clienteRepository.findAll(spec, pageable).stream().toList();
 	}
@@ -68,10 +69,6 @@ public class ClienteService {
 
 	public Cliente saveCliente(NewCliente cliente) {
 		return this.saveCliente(new Cliente(cliente));
-	}
-
-	public PublicCliente toPublicCliente(Cliente cliente) {
-		return new PublicCliente(cliente);
 	}
 
 	public List<PublicCliente> toPublicCliente(List<Cliente> clientes) {
@@ -155,20 +152,5 @@ public class ClienteService {
 
 	public boolean isEmailUsed(String email) {
 		return email != null && !email.isEmpty() && this.clienteRepository.countByEmail(email) > 0;
-	}
-
-	private Specification<Cliente> addIdClienteSpec(Integer id, Specification<Cliente> spec) {
-		if (id != null) {
-			spec = spec.and(((root, query, builder) -> builder.equal(root.get("id"), id)));
-		}
-		return spec;
-	}
-
-	private Specification<Cliente> addNombreSpecification(String nombre, Specification<Cliente> spec) {
-		if (nombre != null && !nombre.isEmpty()) {
-			spec = spec.and(((root, query, builder) ->
-				builder.like(builder.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%")));
-		}
-		return spec;
 	}
 }

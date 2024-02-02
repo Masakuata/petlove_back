@@ -12,11 +12,11 @@ import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.StockOperation;
 import xatal.petlove.entities.TipoCliente;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.mappers.TipoClienteMapper;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
-import xatal.petlove.repositories.TipoClienteRepository;
 import xatal.petlove.services.specifications.ProductoSpecification;
 import xatal.petlove.structures.DetailedPrecio;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
@@ -35,15 +35,15 @@ import java.util.stream.Collectors;
 public class ProductoService {
 	private final ProductoRepository productoRepository;
 	private final ProductoVentaRepository productoVenta;
+	private final TipoClienteService tipoClienteService;
 	private final PrecioRepository precioRepository;
-	private final TipoClienteRepository tipoClienteRepository;
 	private final StockOperationRepository stockOperationRepository;
 
-	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, PrecioRepository precioRepository, TipoClienteRepository tipoClienteRepository, StockOperationRepository stockOperationRepository) {
+	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, TipoClienteService tipoClienteService, PrecioRepository precioRepository, StockOperationRepository stockOperationRepository) {
 		this.productoRepository = productoRepository;
 		this.productoVenta = productoVenta;
+		this.tipoClienteService = tipoClienteService;
 		this.precioRepository = precioRepository;
-		this.tipoClienteRepository = tipoClienteRepository;
 		this.stockOperationRepository = stockOperationRepository;
 	}
 
@@ -169,7 +169,8 @@ public class ProductoService {
 		if (!this.isIdRegistered(idProducto)) {
 			return false;
 		}
-		Map<Integer, Precio> savedPreciosMap = this.mapPrecioToTipoCliente(this.precioRepository.findByProducto((long) idProducto));
+		Map<Integer, Precio> savedPreciosMap = TipoClienteMapper.mapTipoClientePrecio(
+			this.precioRepository.findByProducto((long) idProducto));
 
 		this.updatePrecios(savedPreciosMap, newPrecios, idProducto);
 		this.precioRepository.saveAll(savedPreciosMap.values().stream().toList());
@@ -252,10 +253,6 @@ public class ProductoService {
 		this.productoRepository.deactivateProducto(idProducto);
 	}
 
-	public List<TipoCliente> getTiposCliente() {
-		return this.tipoClienteRepository.getAll();
-	}
-
 	private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {
 		return this.getProductoById(Math.toIntExact(productoVenta.getProducto()))
 			.map(producto -> {
@@ -283,12 +280,6 @@ public class ProductoService {
 			.toList();
 	}
 
-	private Map<Integer, Precio> mapPrecioToTipoCliente(List<Precio> precios) {
-		return precios
-			.stream()
-			.collect(Collectors.toMap(precio -> Math.toIntExact(precio.getCliente()), precio -> precio));
-	}
-
 	private void updatePrecios(Map<Integer, Precio> preciosMap, List<PublicPrecio> newPrecios, int idProducto) {
 		newPrecios.forEach(newPrecio -> {
 			if (preciosMap.containsKey(newPrecio.id)) {
@@ -300,7 +291,7 @@ public class ProductoService {
 	}
 
 	private List<DetailedPrecio> preciosToDetailed(List<PublicPrecio> publicPrecios) {
-		Map<Long, TipoCliente> tipoClienteMap = this.tipoClienteMap();
+		Map<Long, TipoCliente> tipoClienteMap = TipoClienteMapper.mapTipoCliente(this.tipoClienteService.getTiposCliente());
 		return publicPrecios
 			.stream()
 			.map(publicPrecio -> {
@@ -311,12 +302,6 @@ public class ProductoService {
 				return aux;
 			})
 			.toList();
-	}
-
-	private Map<Long, TipoCliente> tipoClienteMap() {
-		return this.tipoClienteRepository.getAll()
-			.stream()
-			.collect(Collectors.toMap(TipoCliente::getId, tipoCliente -> tipoCliente));
 	}
 
 	public float getPesoVenta(Venta venta) {
