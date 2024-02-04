@@ -3,6 +3,9 @@ package xatal.petlove.services.specifications;
 import org.springframework.data.jpa.domain.Specification;
 import xatal.petlove.entities.Venta;
 
+import java.util.List;
+import java.util.Objects;
+
 public abstract class VentaSpecification {
 	public static Specification<Venta> filterByIdCliente(Integer id) {
 		if (id != null) {
@@ -58,7 +61,20 @@ public abstract class VentaSpecification {
 		return Specification.where(null);
 	}
 
+	public static List<Venta> filterByProducto(List<Venta> ventas, Long producto) {
+		return ventas
+			.stream()
+			.filter(venta -> constainsProducto(venta, producto))
+			.toList();
+	}
+
 	public static Specification<Venta> orderByNewer() {
 		return (root, query, builder) -> query.orderBy(builder.desc(root.get("fecha"))).getRestriction();
+	}
+
+	private static boolean constainsProducto(Venta venta, Long producto) {
+		return venta.getProductos()
+			.stream()
+			.anyMatch(productoVenta -> Objects.equals(productoVenta.getId(), producto));
 	}
 }

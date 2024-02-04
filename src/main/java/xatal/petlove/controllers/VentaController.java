@@ -20,7 +20,9 @@ import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.security.TokenUtils;
+import xatal.petlove.services.AbonoService;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchVentaService;
 import xatal.petlove.services.VentaService;
 import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewAbono;
@@ -37,18 +39,22 @@ import java.util.Optional;
 @RequestMapping("/venta")
 public class VentaController {
 	private final VentaService ventaService;
+	private final SearchVentaService searchVentaService;
 	private final ProductoService productoService;
+	private final AbonoService abonoService;
 	private final VentaMapper ventaMapper;
 
-	public VentaController(VentaService ventaService, ProductoService productoService, VentaMapper ventaMapper) {
+	public VentaController(VentaService ventaService, SearchVentaService searchVentas, ProductoService productoService, AbonoService abonoService, VentaMapper ventaMapper) {
 		this.ventaService = ventaService;
+		this.searchVentaService = searchVentas;
 		this.productoService = productoService;
+		this.abonoService = abonoService;
 		this.ventaMapper = ventaMapper;
 	}
 
 	@GetMapping
 	public ResponseEntity<?> getVentas() {
-		List<Venta> ventas = this.ventaService.getAll();
+		List<Venta> ventas = this.searchVentaService.getAll();
 		if (ventas.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
@@ -69,7 +75,7 @@ public class VentaController {
 		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado,
 		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
 	) {
-		List<Venta> ventas = this.ventaService.searchVentas(
+		List<Venta> ventas = this.searchVentaService.searchVentas(
 			idCliente.orElse(null),
 			clienteNombre.orElse(null),
 			producto.orElse(null),
@@ -82,8 +88,6 @@ public class VentaController {
 			return ResponseEntity.noContent().build();
 		}
 		if (enviar.isPresent() && enviar.get()) {
-			Claims claims = TokenUtils.getTokenClaims(token);
-//			this.reportService.generateReportsFrom(ventas, claims.get("username").toString(), claims.getSubject());
 			PDFVentaReports reports = new PDFVentaReports(this.productoService);
 			reports.generateReportsFrom(ventas);
 			return new ResponseEntity<>(HttpStatus.CREATED);
@@ -156,7 +160,7 @@ public class VentaController {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
 		}
-		List<Abono> abonos = ventaService.getAbonosFromVentaId(idVenta);
+		List<Abono> abonos = this.abonoService.getAbonosFromVentaId(idVenta);
 		if (abonos.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -172,7 +176,7 @@ public class VentaController {
 			return ResponseEntity.notFound().build();
 		}
 		abono.venta = idVenta;
-		Optional<Abono> savedAbono = this.ventaService.saveNewAbono(abono);
+		Optional<Abono> savedAbono = this.abonoService.saveNewAbono(abono);
 		return savedAbono
 			.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
 			.orElseGet(() -> ResponseEntity.internalServerError().build());
@@ -184,12 +188,12 @@ public class VentaController {
 		@PathVariable("idAbono") Long idAbono,
 		@RequestBody PublicAbono abono
 	) {
-		if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
+		if (!this.ventaService.isIdRegistered(idVenta) || !this.abonoService.isAbonoRegistered(idAbono)) {
 			return ResponseEntity.notFound().build();
 		}
 		Abono savedAbono = new Abono(abono);
 		savedAbono.setId(idAbono);
-		return ResponseEntity.ok(this.ventaService.updateAbono(abono, idAbono));
+		return ResponseEntity.ok(this.abonoService.updateAbono(abono, idAbono));
 	}
 
 	@GetMapping("/{idVenta}/productos")
