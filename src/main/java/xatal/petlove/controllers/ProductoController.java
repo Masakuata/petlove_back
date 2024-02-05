@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
@@ -29,26 +30,28 @@ import java.util.Optional;
 @RequestMapping("/producto")
 public class ProductoController {
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 
-	public ProductoController(ProductoService productoService) {
+	public ProductoController(ProductoService productoService, SearchProductoService searchProductoService) {
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 	}
 
 	@PostMapping("/cargar")
-	public ResponseEntity cargarProductos(@RequestBody List<ProductoLoad> productos) {
+	public ResponseEntity<?> cargarProductos(@RequestBody List<ProductoLoad> productos) {
 		this.productoService.cargarProductos(productos);
 		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping()
-	public ResponseEntity getProductos(
+	public ResponseEntity<?> getProductos(
 		@RequestParam(name = "id_producto", required = false, defaultValue = "") Optional<Integer> idProducto,
 		@RequestParam(name = "nombre", required = false, defaultValue = "") Optional<String> nombreQuery,
 		@RequestParam(name = "tipo_cliente", required = false, defaultValue = "-1") Optional<Integer> tipoCliente,
 		@RequestParam(name = "size", required = false, defaultValue = "10") Integer size,
 		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag
 	) {
-		List<Producto> productos = this.productoService.search(
+		List<Producto> productos = this.searchProductoService.search(
 			idProducto.orElse(null),
 			nombreQuery.orElse(null),
 			tipoCliente.orElse(null),
@@ -62,7 +65,7 @@ public class ProductoController {
 	}
 
 	@GetMapping("/{id_producto}")
-	public ResponseEntity getFullProducto(@PathVariable("id_producto") long idProducto) {
+	public ResponseEntity<?> getFullProducto(@PathVariable("id_producto") long idProducto) {
 		Optional<MultiDetailedPrecioProducto> optionalProducto = this.productoService.getWithPreciosAndTipoClienteById(idProducto);
 		if (optionalProducto.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -71,19 +74,19 @@ public class ProductoController {
 	}
 
 	@PostMapping()
-	public ResponseEntity registerProducto(@RequestBody MultiPrecioProducto newProducto) {
+	public ResponseEntity<?> registerProducto(@RequestBody MultiPrecioProducto newProducto) {
 		if (this.productoService.isProductoRegistered(newProducto)) {
-			return new ResponseEntity(HttpStatus.CONFLICT);
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 		Producto savedProducto = this.productoService.saveProducto(newProducto);
 		if (savedProducto != null) {
-			return new ResponseEntity(savedProducto, HttpStatus.CREATED);
+			return new ResponseEntity<>(savedProducto, HttpStatus.CREATED);
 		}
-		return new ResponseEntity(HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 	}
 
 	@GetMapping("/precio")
-	public ResponseEntity getWithPrecios() {
+	public ResponseEntity<?> getWithPrecios() {
 		List<MultiPrecioProducto> productos = this.productoService.getWithPrecios();
 		if (productos.isEmpty()) {
 			return ResponseEntity.noContent().build();
@@ -92,7 +95,7 @@ public class ProductoController {
 	}
 
 	@PutMapping("/{id_producto}")
-	public ResponseEntity updateProducto(
+	public ResponseEntity<?> updateProducto(
 		@PathVariable("id_producto") long idProducto,
 		@RequestBody MultiPrecioProducto producto
 	) {
@@ -103,29 +106,29 @@ public class ProductoController {
 	}
 
 	@PostMapping("/{id_producto}/precio")
-	public ResponseEntity setPrecios(
+	public ResponseEntity<?> setPrecios(
 		@PathVariable("id_producto") int idProducto,
 		@RequestBody List<PublicPrecio> precios
 	) {
 		if (this.productoService.savePreciosById(idProducto, precios)) {
 			return ResponseEntity.ok().build();
 		}
-		return new ResponseEntity(HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 
 	@DeleteMapping("/{id_producto}")
-	public ResponseEntity deleteProducto(@PathVariable("id_producto") int idProducto) {
+	public ResponseEntity<?> deleteProducto(@PathVariable("id_producto") int idProducto) {
 		if (!this.productoService.isIdRegistered(idProducto)) {
-			return new ResponseEntity(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		this.productoService.deactivateProducto(idProducto);
 		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("/detalles")
-	public ResponseEntity getDetallesProductos(@RequestBody ProductoDetallesRequestBody payload) {
-		List<Producto> productos = this.productoService.searchByIdsAndTipoCliente(payload.productos, payload.tipoCliente);
+	public ResponseEntity<?> getDetallesProductos(@RequestBody ProductoDetallesRequestBody payload) {
+		List<Producto> productos = this.searchProductoService.searchByIdsAndTipoCliente(payload.productos, payload.tipoCliente);
 		if (productos.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}

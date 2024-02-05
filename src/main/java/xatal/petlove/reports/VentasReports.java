@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
@@ -22,9 +23,11 @@ public class VentasReports extends XReport {
 	private static final String VENTA_HEADER = "ID VENTA,CLIENTE,PAGADO,TOTAL,ABONADO,FECHA,FACTURADO\n";
 	private static final String PRODUCTO_HEADER = "NOMBRE,PRESENTACION,TIPO MASCOTA,RAZA,PRECIO\n";
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 
-	public VentasReports(ProductoService productoService) {
+	public VentasReports(ProductoService productoService, SearchProductoService searchProductoService) {
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 	}
 
 	public void generateReportsFrom(Object reportable) {
@@ -120,7 +123,7 @@ public class VentasReports extends XReport {
 		return venta.getProductos()
 			.stream()
 			.map(productoVenta ->
-				this.productoService.getByIdAndTipoCliente(
+				this.searchProductoService.searchByIdAndTipoCliente(
 					Math.toIntExact(productoVenta.getId()),
 					venta.getCliente().getTipoCliente())
 			)

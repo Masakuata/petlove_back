@@ -6,6 +6,7 @@ import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ClienteService;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.structures.FullVenta;
 import xatal.petlove.structures.NewVenta;
@@ -20,11 +21,14 @@ import java.util.List;
 public class VentaMapper {
 	private final ClienteService clienteService;
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 	private final UsuarioService usuarioService;
 
-	public VentaMapper(ClienteService clienteService, ProductoService productoService, UsuarioService usuarioService) {
+	public VentaMapper(ClienteService clienteService, ProductoService productoService,
+	                   SearchProductoService searchProductoService, UsuarioService usuarioService) {
 		this.clienteService = clienteService;
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 		this.usuarioService = usuarioService;
 	}
 
@@ -95,7 +99,7 @@ public class VentaMapper {
 			.map(productoVenta -> productoVenta.getId().intValue())
 			.toList();
 
-		aux.productos = this.productoService.searchByIdsAndTipoCliente(idProductos, venta.getCliente().getTipoCliente());
+		aux.productos = this.searchProductoService.searchByIdsAndTipoCliente(idProductos, venta.getCliente().getTipoCliente());
 		return aux;
 	}
 

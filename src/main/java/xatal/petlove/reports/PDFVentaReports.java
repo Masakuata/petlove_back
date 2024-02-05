@@ -16,6 +16,7 @@ import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
@@ -46,9 +47,11 @@ public class PDFVentaReports extends XReport {
 	};
 
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 
-	public PDFVentaReports(ProductoService productoService) {
+	public PDFVentaReports(ProductoService productoService, SearchProductoService searchProductoService) {
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 	}
 
 	public boolean generateReportAndSend(Venta venta) throws IOException {
@@ -265,8 +268,8 @@ public class PDFVentaReports extends XReport {
 	private List<Producto> getVentaProductos(Venta venta) {
 		List<Producto> list = new ArrayList<>();
 		venta.getProductos().forEach(productoVenta -> {
-			Optional<Producto> byIdAndTipoCliente = this.productoService.getByIdAndTipoCliente(
-				Math.toIntExact(productoVenta.getProducto()),
+			Optional<Producto> byIdAndTipoCliente = this.searchProductoService.searchByIdAndTipoCliente(
+				productoVenta.getProducto(),
 				venta.getCliente().getTipoCliente());
 			if (byIdAndTipoCliente.isPresent()) {
 				Producto producto = byIdAndTipoCliente.get();

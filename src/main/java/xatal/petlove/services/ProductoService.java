@@ -2,23 +2,20 @@ package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
 import org.antlr.v4.runtime.misc.Pair;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.StockOperation;
-import xatal.petlove.entities.TipoCliente;
 import xatal.petlove.entities.Venta;
+import xatal.petlove.mappers.PrecioMapper;
 import xatal.petlove.mappers.TipoClienteMapper;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
 import xatal.petlove.services.specifications.ProductoSpecification;
-import xatal.petlove.structures.DetailedPrecio;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoLoad;
@@ -35,15 +32,19 @@ import java.util.stream.Collectors;
 public class ProductoService {
 	private final ProductoRepository productoRepository;
 	private final ProductoVentaRepository productoVenta;
-	private final TipoClienteService tipoClienteService;
+	private final SearchProductoService searchProductoService;
 	private final PrecioRepository precioRepository;
+	private final PrecioMapper precioMapper;
 	private final StockOperationRepository stockOperationRepository;
 
-	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta, TipoClienteService tipoClienteService, PrecioRepository precioRepository, StockOperationRepository stockOperationRepository) {
+	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVenta,
+	                       SearchProductoService searchProductoService, PrecioRepository precioRepository,
+	                       PrecioMapper precioMapper, StockOperationRepository stockOperationRepository) {
 		this.productoRepository = productoRepository;
 		this.productoVenta = productoVenta;
-		this.tipoClienteService = tipoClienteService;
+		this.searchProductoService = searchProductoService;
 		this.precioRepository = precioRepository;
+		this.precioMapper = precioMapper;
 		this.stockOperationRepository = stockOperationRepository;
 	}
 
@@ -85,7 +86,7 @@ public class ProductoService {
 	}
 
 	public Optional<MultiPrecioProducto> getWithPreciosById(long idProducto) {
-		Optional<Producto> optionalProducto = this.productoRepository.findById(idProducto);
+		Optional<Producto> optionalProducto = this.searchProductoService.searchProductoById(idProducto);
 		if (optionalProducto.isEmpty()) {
 			return Optional.empty();
 		}
@@ -104,43 +105,11 @@ public class ProductoService {
 			return Optional.empty();
 		}
 		MultiDetailedPrecioProducto producto = new MultiDetailedPrecioProducto(optionalProducto.get());
-		producto.precios = this.preciosToDetailed(optionalProducto.get().precios);
+		producto.precios = this.precioMapper.publicToDetailed(optionalProducto.get().precios);
 		return Optional.of(producto);
 	}
 
-	public List<Producto> search(
-		Integer idProducto,
-		String nombre,
-		Integer tipoCliente,
-		Integer size,
-		Integer pag
-	) {
-		Specification<Producto> spec = Specification.allOf(
-			ProductoSpecification.searchId(idProducto),
-			ProductoSpecification.searchNombre(nombre),
-			ProductoSpecification.searchActive()
-		);
-		Pageable pageable = PageRequest.of(pag, size);
-		List<Producto> productos = this.productoRepository.findAll(spec, pageable).stream().toList();
-		if (tipoCliente != null) {
-			this.setProductosPrices(productos, tipoCliente.longValue());
-		}
-		return productos;
-	}
-
-	public List<Producto> searchByIdsAndTipoCliente(List<Integer> ids, int tipoCliente) {
-		List<Producto> productos = this.productoRepository.findByIdIn(ids.stream().map(Integer::longValue).toList());
-		this.setProductosPrices(productos, tipoCliente);
-		return productos;
-	}
-
-	public Optional<Producto> getByIdAndTipoCliente(int idProducto, int tipoCliente) {
-		Optional<Producto> producto = this.getProductoById(idProducto);
-		producto.ifPresent(currentProducto -> this.setProductPrice(currentProducto, tipoCliente));
-		return producto;
-	}
-
-	public void setProductPrice(Producto producto, int tipoCliente) {
+	public void setProductoPrecio(Producto producto, long tipoCliente) {
 		Specification<Precio> spec = Specification.where(((root, query, builder) ->
 			builder.and(
 				builder.equal(root.get("cliente"), tipoCliente),
@@ -161,6 +130,16 @@ public class ProductoService {
 		productos.forEach(producto -> {
 			if (precios.containsKey(producto.getId())) {
 				producto.setPrecio(precios.get(producto.getId()));
+			}
+		});
+	}
+
+	private void updatePrecios(Map<Integer, Precio> preciosMap, List<PublicPrecio> newPrecios, int idProducto) {
+		newPrecios.forEach(newPrecio -> {
+			if (preciosMap.containsKey(newPrecio.id)) {
+				preciosMap.get(newPrecio.id).setPrecio(newPrecio.precio);
+			} else {
+				preciosMap.put(newPrecio.id, new Precio(idProducto, newPrecio.id, newPrecio.precio));
 			}
 		});
 	}
@@ -254,54 +233,11 @@ public class ProductoService {
 	}
 
 	private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {
-		return this.getProductoById(Math.toIntExact(productoVenta.getProducto()))
+		return this.searchProductoService.searchProductoById(Math.toIntExact(productoVenta.getProducto()))
 			.map(producto -> {
 				producto.setCantidad(producto.getCantidad() - productoVenta.getCantidad());
 				return producto;
 			});
-	}
-
-	private Precio publicToPrecio(PublicPrecio publicPrecio, Long productoId) {
-		Precio precio = new Precio();
-		precio.setProducto(productoId);
-		precio.setCliente((long) publicPrecio.id);
-		precio.setPrecio(publicPrecio.precio);
-		return precio;
-	}
-
-	private Optional<Producto> getProductoById(int idProducto) {
-		return this.productoRepository.findById((long) idProducto);
-	}
-
-	private List<Long> getProductosId(List<Producto> productos) {
-		return productos
-			.stream()
-			.map(Producto::getId)
-			.toList();
-	}
-
-	private void updatePrecios(Map<Integer, Precio> preciosMap, List<PublicPrecio> newPrecios, int idProducto) {
-		newPrecios.forEach(newPrecio -> {
-			if (preciosMap.containsKey(newPrecio.id)) {
-				preciosMap.get(newPrecio.id).setPrecio(newPrecio.precio);
-			} else {
-				preciosMap.put(newPrecio.id, new Precio(idProducto, newPrecio.id, newPrecio.precio));
-			}
-		});
-	}
-
-	private List<DetailedPrecio> preciosToDetailed(List<PublicPrecio> publicPrecios) {
-		Map<Long, TipoCliente> tipoClienteMap = TipoClienteMapper.mapTipoCliente(this.tipoClienteService.getTiposCliente());
-		return publicPrecios
-			.stream()
-			.map(publicPrecio -> {
-				DetailedPrecio aux = new DetailedPrecio(publicPrecio);
-				if (tipoClienteMap.containsKey((long) aux.id)) {
-					aux.tipoCliente = tipoClienteMap.get((long) aux.id).getTipoCliente();
-				}
-				return aux;
-			})
-			.toList();
 	}
 
 	public float getPesoVenta(Venta venta) {

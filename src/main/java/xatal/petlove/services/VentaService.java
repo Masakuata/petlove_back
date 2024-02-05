@@ -31,6 +31,7 @@ public class VentaService {
 	private final ProductoVentaRepository productoVentaRepository;
 	private final ClienteService clienteService;
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 	private final UsuarioService usuarioService;
 	private final PDFVentaReports ventaReports;
 	private final VentaMapper ventaMapper;
@@ -38,16 +39,18 @@ public class VentaService {
 	public VentaService(
 		VentaRepository ventaRepository, AbonoService abonoService,
 		ProductoVentaRepository productoVentaRepository,
-		ClienteService clienteService, ProductoService productoService, UsuarioService usuarioService, VentaMapper ventaMapper
+		ClienteService clienteService, ProductoService productoService, SearchProductoService searchProductoService,
+		UsuarioService usuarioService, VentaMapper ventaMapper
 	) {
 		this.ventaRepository = ventaRepository;
 		this.abonoService = abonoService;
 		this.productoVentaRepository = productoVentaRepository;
 		this.clienteService = clienteService;
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 		this.usuarioService = usuarioService;
 		this.ventaMapper = ventaMapper;
-		this.ventaReports = new PDFVentaReports(this.productoService);
+		this.ventaReports = new PDFVentaReports(this.productoService, this.searchProductoService);
 	}
 
 	public Venta saveNewVenta(NewVenta newVenta) {
@@ -141,7 +144,7 @@ public class VentaService {
 			.stream()
 			.map(productoVenta -> productoVenta.getProducto().intValue())
 			.toList();
-		return this.productoService
+		return this.searchProductoService
 			.searchByIdsAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
 	}
 
