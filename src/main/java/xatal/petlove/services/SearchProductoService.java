@@ -15,10 +15,13 @@ import java.util.Optional;
 public class SearchProductoService {
 	private final ProductoRepository productoRepository;
 	private final ProductoService productoService;
+	private final PrecioProductoService precioProductoService;
 
-	public SearchProductoService(ProductoRepository productoRepository, ProductoService productoService) {
+	public SearchProductoService(ProductoRepository productoRepository, ProductoService productoService,
+	                             PrecioProductoService precioProductoService) {
 		this.productoRepository = productoRepository;
 		this.productoService = productoService;
+		this.precioProductoService = precioProductoService;
 	}
 
 	public List<Producto> search(
@@ -36,7 +39,7 @@ public class SearchProductoService {
 		Pageable pageable = PageRequest.of(pag, size);
 		List<Producto> productos = this.productoRepository.findAll(spec, pageable).stream().toList();
 		if (tipoCliente != null) {
-			this.productoService.setProductosPrices(productos, tipoCliente.longValue());
+			this.precioProductoService.setProductosPrices(productos, tipoCliente.longValue());
 		}
 		return productos;
 	}
@@ -47,7 +50,7 @@ public class SearchProductoService {
 
 	public List<Producto> searchByIdsAndTipoCliente(List<Integer> ids, int tipoCliente) {
 		List<Producto> productos = this.productoRepository.findByIdIn(ids.stream().map(Integer::longValue).toList());
-		this.productoService.setProductosPrices(productos, tipoCliente);
+		this.precioProductoService.setProductosPrices(productos, tipoCliente);
 		return productos;
 	}
 

@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Producto;
+import xatal.petlove.services.PrecioProductoService;
 import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
-import xatal.petlove.structures.ProductoLoad;
 import xatal.petlove.structures.PublicPrecio;
 
 import java.util.List;
@@ -31,16 +31,12 @@ import java.util.Optional;
 public class ProductoController {
 	private final ProductoService productoService;
 	private final SearchProductoService searchProductoService;
+	private final PrecioProductoService precioProductoService;
 
-	public ProductoController(ProductoService productoService, SearchProductoService searchProductoService) {
+	public ProductoController(ProductoService productoService, SearchProductoService searchProductoService, PrecioProductoService precioProductoService) {
 		this.productoService = productoService;
 		this.searchProductoService = searchProductoService;
-	}
-
-	@PostMapping("/cargar")
-	public ResponseEntity<?> cargarProductos(@RequestBody List<ProductoLoad> productos) {
-		this.productoService.cargarProductos(productos);
-		return ResponseEntity.ok().build();
+		this.precioProductoService = precioProductoService;
 	}
 
 	@GetMapping()
@@ -66,7 +62,7 @@ public class ProductoController {
 
 	@GetMapping("/{id_producto}")
 	public ResponseEntity<?> getFullProducto(@PathVariable("id_producto") long idProducto) {
-		Optional<MultiDetailedPrecioProducto> optionalProducto = this.productoService.getWithPreciosAndTipoClienteById(idProducto);
+		Optional<MultiDetailedPrecioProducto> optionalProducto = this.precioProductoService.getWithPreciosAndTipoClienteById(idProducto);
 		if (optionalProducto.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
@@ -87,7 +83,7 @@ public class ProductoController {
 
 	@GetMapping("/precio")
 	public ResponseEntity<?> getWithPrecios() {
-		List<MultiPrecioProducto> productos = this.productoService.getWithPrecios();
+		List<MultiPrecioProducto> productos = this.precioProductoService.getWithPrecios();
 		if (productos.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -110,7 +106,7 @@ public class ProductoController {
 		@PathVariable("id_producto") int idProducto,
 		@RequestBody List<PublicPrecio> precios
 	) {
-		if (this.productoService.savePreciosById(idProducto, precios)) {
+		if (this.precioProductoService.savePreciosById(idProducto, precios)) {
 			return ResponseEntity.ok().build();
 		}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
