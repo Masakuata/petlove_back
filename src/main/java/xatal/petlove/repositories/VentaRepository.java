@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VentaRepository extends CrudRepository<Venta, Long>, JpaSpecificationExecutor<Venta> {
-	@Query(value = "SELECT * FROM Sharedz.venta",
+	@Query(value = "SELECT * FROM venta",
 		nativeQuery = true)
 	List<Venta> getAll();
 
@@ -25,4 +25,8 @@ public interface VentaRepository extends CrudRepository<Venta, Long>, JpaSpecifi
 		"ON venta.id = AbonosVenta.venta",
 		nativeQuery = true)
 	List<PublicVenta> getPublicVentas();
+
+	@Query(value = "SELECT DISTINCT YEAR(fecha) FROM venta",
+		nativeQuery = true)
+	List<Integer> getDistinctYear();
 }
