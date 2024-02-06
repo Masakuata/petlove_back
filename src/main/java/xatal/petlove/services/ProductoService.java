@@ -40,6 +40,12 @@ public class ProductoService {
 		this.stockOperationRepository = stockOperationRepository;
 	}
 
+	public Optional<Producto> searchByIdAndTipoCliente(long idProducto, long tipoCliente) {
+		Optional<Producto> optionalProducto = this.searchProductoService.searchProductoById(idProducto);
+		optionalProducto.ifPresent(producto -> this.setProductoPrecio(producto, tipoCliente));
+		return optionalProducto;
+	}
+
 	public void setProductoPrecio(Producto producto, long tipoCliente) {
 		Specification<Precio> filters = Specification.allOf(
 			PrecioSpecification.filterByProductoId(producto.getId()),

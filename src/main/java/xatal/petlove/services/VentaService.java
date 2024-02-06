@@ -8,10 +8,13 @@ import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.reports.PDFVentaReports;
+import xatal.petlove.repositories.AbonoRepository;
 import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.VentaRepository;
 import xatal.petlove.structures.FullVenta;
+import xatal.petlove.structures.NewAbono;
 import xatal.petlove.structures.NewVenta;
+import xatal.petlove.structures.PublicAbono;
 import xatal.petlove.structures.PublicProductoVenta;
 import xatal.petlove.structures.PublicVenta;
 import xatal.petlove.util.Util;
@@ -27,30 +30,31 @@ import java.util.stream.Collectors;
 @Service
 public class VentaService {
 	private final VentaRepository ventaRepository;
-	private final AbonoService abonoService;
+	private final AbonoRepository abonoRepository;
 	private final ProductoVentaRepository productoVentaRepository;
 	private final ClienteService clienteService;
 	private final ProductoService productoService;
 	private final SearchProductoService searchProductoService;
+	private final SearchVentaService searchVentaService;
 	private final UsuarioService usuarioService;
 	private final PDFVentaReports ventaReports;
 	private final VentaMapper ventaMapper;
 
 	public VentaService(
-		VentaRepository ventaRepository, AbonoService abonoService,
-		ProductoVentaRepository productoVentaRepository,
+		VentaRepository ventaRepository, AbonoRepository abonoRepository, ProductoVentaRepository productoVentaRepository,
 		ClienteService clienteService, ProductoService productoService, SearchProductoService searchProductoService,
-		UsuarioService usuarioService, VentaMapper ventaMapper
+		SearchVentaService searchVentaService, UsuarioService usuarioService, VentaMapper ventaMapper
 	) {
 		this.ventaRepository = ventaRepository;
-		this.abonoService = abonoService;
+		this.abonoRepository = abonoRepository;
 		this.productoVentaRepository = productoVentaRepository;
 		this.clienteService = clienteService;
 		this.productoService = productoService;
 		this.searchProductoService = searchProductoService;
+		this.searchVentaService = searchVentaService;
 		this.usuarioService = usuarioService;
 		this.ventaMapper = ventaMapper;
-		this.ventaReports = new PDFVentaReports(this.productoService, this.searchProductoService);
+		this.ventaReports = new PDFVentaReports(this.productoService);
 	}
 
 	public Venta saveNewVenta(NewVenta newVenta) {
@@ -59,7 +63,7 @@ public class VentaService {
 		venta.setDireccion(newVenta.direccion);
 		venta = this.saveVentaWithProductos(venta);
 
-		this.abonoService.storeAbono(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
+		this.storeAbono(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
 		this.productoService.updateStockFromVenta(venta);
 		this.generateReport(venta);
 		return venta;
@@ -78,8 +82,7 @@ public class VentaService {
 	}
 
 	public Venta updateVenta(PublicVenta publicVenta) {
-		Optional<Venta> storedVenta = this.getById(publicVenta.id);
-		return storedVenta
+		return this.getById(publicVenta.id)
 			.map(venta -> this.updateVenta(publicVenta, venta))
 			.orElse(null);
 	}
@@ -121,10 +124,6 @@ public class VentaService {
 		return this.ventaRepository.countById(id) > 0;
 	}
 
-	public List<ProductoVenta> getProductoVentaByProducto(Long idProducto) {
-		return this.productoVentaRepository.findByProducto(idProducto);
-	}
-
 	@Transactional
 	public void deleteById(Long idVenta) {
 		Optional<Venta> optionalVenta = this.getById(idVenta);
@@ -134,7 +133,7 @@ public class VentaService {
 		Venta venta = optionalVenta.get();
 		venta.getProductos().forEach(productoVenta ->
 			this.productoService.returnStock(productoVenta.getProducto(), productoVenta.getCantidad()));
-		this.abonoService.deleteAbonosByVentaId(idVenta);
+		this.deleteAbonosByVentaId(idVenta);
 		this.productoVentaRepository.deleteAll(venta.getProductos());
 		this.ventaRepository.deleteById(idVenta);
 	}
@@ -183,7 +182,7 @@ public class VentaService {
 
 	public void setVentaPagado(Venta venta) {
 		float total = this.getCostoTotalByVenta(venta);
-		float abonos = this.abonoService.getTotalAbonosByVentaId(Math.toIntExact(venta.getId()));
+		float abonos = this.getTotalAbonosByVentaId(Math.toIntExact(venta.getId()));
 		venta.setAbonado(abonos);
 		venta.setTotal(total);
 		venta.setPagado(abonos >= total);
@@ -197,5 +196,55 @@ public class VentaService {
 				throw new RuntimeException(e);
 			}
 		}).start();
+	}
+
+	public Abono storeAbono(Abono abono) {
+		return this.abonoRepository.save(abono);
+	}
+
+	public Optional<Abono> saveNewAbono(NewAbono newAbono) {
+		Optional<Venta> optionalVenta = this.searchVentaService.getById(newAbono.venta);
+		if (optionalVenta.isEmpty()) {
+			return Optional.empty();
+		}
+		Venta venta = optionalVenta.get();
+		if (newAbono.finiquito) {
+			newAbono.cantidad = venta.getTotal() - venta.getAbonado();
+			venta.setPagado(true);
+		} else {
+			this.setVentaPagado(venta);
+		}
+		venta.setAbonado(venta.getAbonado() + newAbono.cantidad);
+		Abono savedAbono = this.abonoRepository.save(new Abono(newAbono));
+		this.storeVenta(venta);
+		return Optional.of(savedAbono);
+	}
+
+	public Abono updateAbono(PublicAbono publicAbono, long idAbono) {
+		this.abonoRepository.updateAbonoCantidad(idAbono, publicAbono.cantidad);
+		Optional<Venta> optionalVenta = this.searchVentaService.getById(publicAbono.venta);
+		optionalVenta.ifPresent(venta -> {
+			venta.setAbonado(this.abonoRepository.sumAbonosByVenta(venta.getId()));
+			this.storeVenta(venta);
+		});
+		Abono abono = new Abono(publicAbono);
+		abono.setId(idAbono);
+		return abono;
+	}
+
+	public List<Abono> getAbonosFromVentaId(long idVenta) {
+		return this.abonoRepository.findByVenta(idVenta);
+	}
+
+	public boolean isAbonoRegistered(long idAbono) {
+		return this.abonoRepository.countById(idAbono) > 0;
+	}
+
+	public float getTotalAbonosByVentaId(long idVenta) {
+		return this.abonoRepository.sumAbonosByVenta(idVenta);
+	}
+
+	public void deleteAbonosByVentaId(long idVenta) {
+		this.abonoRepository.deleteAbonosByVenta(idVenta);
 	}
 }

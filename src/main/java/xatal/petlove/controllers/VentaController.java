@@ -18,10 +18,7 @@ import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.VentaMapper;
-import xatal.petlove.reports.PDFVentaReports;
 import xatal.petlove.security.TokenUtils;
-import xatal.petlove.services.AbonoService;
-import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.SearchVentaService;
 import xatal.petlove.services.VentaService;
 import xatal.petlove.structures.FullVenta;
@@ -40,15 +37,11 @@ import java.util.Optional;
 public class VentaController {
 	private final VentaService ventaService;
 	private final SearchVentaService searchVentaService;
-	private final ProductoService productoService;
-	private final AbonoService abonoService;
 	private final VentaMapper ventaMapper;
 
-	public VentaController(VentaService ventaService, SearchVentaService searchVentas, ProductoService productoService, AbonoService abonoService, VentaMapper ventaMapper) {
+	public VentaController(VentaService ventaService, SearchVentaService searchVentas, VentaMapper ventaMapper) {
 		this.ventaService = ventaService;
 		this.searchVentaService = searchVentas;
-		this.productoService = productoService;
-		this.abonoService = abonoService;
 		this.ventaMapper = ventaMapper;
 	}
 
@@ -63,7 +56,6 @@ public class VentaController {
 
 	@GetMapping("/buscar")
 	public ResponseEntity<?> searchVentas(
-		@RequestHeader("Token") String token,
 		@RequestParam(name = "id_cliente", required = false) Optional<Integer> idCliente,
 		@RequestParam(name = "cliente", required = false) Optional<String> clienteNombre,
 		@RequestParam(name = "producto", required = false) Optional<Integer> producto,
@@ -72,8 +64,7 @@ public class VentaController {
 		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
 		@RequestParam(name = "size", required = false, defaultValue = "10") Integer sizePag,
 		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag,
-		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado,
-		@RequestParam(name = "enviar", required = false) Optional<Boolean> enviar
+		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado
 	) {
 		List<Venta> ventas = this.searchVentaService.searchVentas(
 			idCliente.orElse(null),
@@ -87,13 +78,7 @@ public class VentaController {
 		if (ventas.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
-		if (enviar.isPresent() && enviar.get()) {
-			PDFVentaReports reports = new PDFVentaReports(this.productoService);
-			reports.generateReportsFrom(ventas);
-			return new ResponseEntity<>(HttpStatus.CREATED);
-		} else {
-			return ResponseEntity.ok(ventas);
-		}
+		return ResponseEntity.ok(ventas);
 	}
 
 	@PostMapping
@@ -160,7 +145,7 @@ public class VentaController {
 		if (!this.ventaService.isIdRegistered(idVenta)) {
 			return ResponseEntity.notFound().build();
 		}
-		List<Abono> abonos = this.abonoService.getAbonosFromVentaId(idVenta);
+		List<Abono> abonos = this.ventaService.getAbonosFromVentaId(idVenta);
 		if (abonos.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
@@ -176,7 +161,7 @@ public class VentaController {
 			return ResponseEntity.notFound().build();
 		}
 		abono.venta = idVenta;
-		Optional<Abono> savedAbono = this.abonoService.saveNewAbono(abono);
+		Optional<Abono> savedAbono = this.ventaService.saveNewAbono(abono);
 		return savedAbono
 			.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
 			.orElseGet(() -> ResponseEntity.internalServerError().build());
@@ -188,12 +173,12 @@ public class VentaController {
 		@PathVariable("idAbono") Long idAbono,
 		@RequestBody PublicAbono abono
 	) {
-		if (!this.ventaService.isIdRegistered(idVenta) || !this.abonoService.isAbonoRegistered(idAbono)) {
+		if (!this.ventaService.isIdRegistered(idVenta) || !this.ventaService.isAbonoRegistered(idAbono)) {
 			return ResponseEntity.notFound().build();
 		}
 		Abono savedAbono = new Abono(abono);
 		savedAbono.setId(idAbono);
-		return ResponseEntity.ok(this.abonoService.updateAbono(abono, idAbono));
+		return ResponseEntity.ok(this.ventaService.updateAbono(abono, idAbono));
 	}
 
 	@GetMapping("/{idVenta}/productos")

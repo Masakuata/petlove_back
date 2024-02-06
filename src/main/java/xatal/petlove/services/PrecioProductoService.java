@@ -14,23 +14,18 @@ import xatal.petlove.structures.PublicPrecio;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PrecioProductoService {
 	private final ProductoRepository productoRepository;
 	private final PrecioRepository precioRepository;
-	private final SearchProductoService searchProductoService;
-	private final ProductoService productoService;
 	private final PrecioMapper precioMapper;
 
 	public PrecioProductoService(ProductoRepository productoRepository, PrecioRepository precioRepository,
-	                             SearchProductoService searchProductoService, ProductoService productoService, PrecioMapper precioMapper) {
+	                             PrecioMapper precioMapper) {
 		this.productoRepository = productoRepository;
 		this.precioRepository = precioRepository;
-		this.searchProductoService = searchProductoService;
-		this.productoService = productoService;
 		this.precioMapper = precioMapper;
 	}
 
@@ -48,28 +43,19 @@ public class PrecioProductoService {
 		return multiPrecioMap.values().stream().toList();
 	}
 
-	public Optional<MultiPrecioProducto> getWithPreciosById(long idProducto) {
-		Optional<Producto> optionalProducto = this.searchProductoService.searchProductoById(idProducto);
-		if (optionalProducto.isEmpty()) {
-			return Optional.empty();
-		}
-		List<PublicPrecio> precios = this.precioRepository.findByProducto(idProducto)
+	public MultiPrecioProducto getWithPrecios(Producto producto) {
+		MultiPrecioProducto multiProducto = new MultiPrecioProducto(producto);
+		multiProducto.precios = this.precioRepository.findByProducto(producto.getId())
 			.stream()
 			.map(PublicPrecio::new)
 			.toList();
-		MultiPrecioProducto producto = new MultiPrecioProducto(optionalProducto.get());
-		producto.precios = precios;
-		return Optional.of(producto);
+		return multiProducto;
 	}
 
-	public Optional<MultiDetailedPrecioProducto> getWithPreciosAndTipoClienteById(long idProducto) {
-		Optional<MultiPrecioProducto> optionalProducto = this.getWithPreciosById(idProducto);
-		if (optionalProducto.isEmpty()) {
-			return Optional.empty();
-		}
-		MultiDetailedPrecioProducto producto = new MultiDetailedPrecioProducto(optionalProducto.get());
-		producto.precios = this.precioMapper.publicToDetailed(optionalProducto.get().precios);
-		return Optional.of(producto);
+	public MultiDetailedPrecioProducto getWithPreciosAndTipoCliente(Producto producto) {
+		MultiDetailedPrecioProducto multiDetailedProducto = new MultiDetailedPrecioProducto(producto);
+		multiDetailedProducto.precios = this.precioMapper.publicToDetailed(this.getWithPrecios(producto).precios);
+		return multiDetailedProducto;
 	}
 
 	public void setProductosPrices(List<Producto> productos, long tipoCliente) {
@@ -96,12 +82,9 @@ public class PrecioProductoService {
 	}
 
 	public boolean savePreciosById(int idProducto, List<PublicPrecio> newPrecios) {
-		if (!this.productoService.isIdRegistered(idProducto)) {
-			return false;
-		}
 		Map<Integer, Precio> savedPreciosMap = TipoClienteMapper.mapTipoClientePrecio(
-			this.precioRepository.findByProducto((long) idProducto));
-
+			this.precioRepository.findByProducto((long) idProducto)
+		);
 		this.updatePrecios(savedPreciosMap, newPrecios, idProducto);
 		this.precioRepository.saveAll(savedPreciosMap.values().stream().toList());
 		return true;

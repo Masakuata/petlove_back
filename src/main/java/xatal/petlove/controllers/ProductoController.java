@@ -62,11 +62,13 @@ public class ProductoController {
 
 	@GetMapping("/{id_producto}")
 	public ResponseEntity<?> getFullProducto(@PathVariable("id_producto") long idProducto) {
-		Optional<MultiDetailedPrecioProducto> optionalProducto = this.precioProductoService.getWithPreciosAndTipoClienteById(idProducto);
-		if (optionalProducto.isEmpty()) {
+		Optional<Producto> productoOptional = this.searchProductoService.searchProductoById(idProducto);
+		if (productoOptional.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		return ResponseEntity.ok(optionalProducto.get());
+		MultiDetailedPrecioProducto detailedProducto =
+			this.precioProductoService.getWithPreciosAndTipoCliente(productoOptional.get());
+		return ResponseEntity.ok(detailedProducto);
 	}
 
 	@PostMapping()

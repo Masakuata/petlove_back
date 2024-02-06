@@ -123,7 +123,7 @@ public class VentasReports extends XReport {
 		return venta.getProductos()
 			.stream()
 			.map(productoVenta ->
-				this.searchProductoService.searchByIdAndTipoCliente(
+				this.productoService.searchByIdAndTipoCliente(
 					Math.toIntExact(productoVenta.getId()),
 					venta.getCliente().getTipoCliente())
 			)

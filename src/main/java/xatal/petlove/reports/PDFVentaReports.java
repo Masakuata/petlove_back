@@ -16,7 +16,6 @@ import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ProductoService;
-import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
@@ -47,11 +46,37 @@ public class PDFVentaReports extends XReport {
 	};
 
 	private final ProductoService productoService;
-	private final SearchProductoService searchProductoService;
 
-	public PDFVentaReports(ProductoService productoService, SearchProductoService searchProductoService) {
+	public PDFVentaReports(ProductoService productoService) {
 		this.productoService = productoService;
-		this.searchProductoService = searchProductoService;
+	}
+
+	public boolean generateReportAndSend(List<Venta> ventas, String email) throws IOException {
+		if (ventas.isEmpty()) {
+			return false;
+		}
+		if (email == null || email.isEmpty()) {
+			return false;
+		}
+		String path = this.generateReportFrom(ventas);
+		if (path == null || path.isEmpty()) {
+			return false;
+		}
+		Path pathObj = Path.of(path);
+		Attachment attachment = new Attachment(
+			"venta.pdf",
+			Files.readAllBytes(pathObj),
+			MIMEType.APPLICATION_PDF
+		);
+		this.sendEmailWithAttachment(
+			"Reporte de venta",
+			"Adjunto a este correo se encuentra la venta recien realizada",
+			null,
+			email,
+			attachment
+		);
+		Files.deleteIfExists(pathObj);
+		return true;
 	}
 
 	public boolean generateReportAndSend(Venta venta) throws IOException {
@@ -102,7 +127,7 @@ public class PDFVentaReports extends XReport {
 		return path;
 	}
 
-	public String generateReportsFrom(List<Venta> ventas) {
+	public String generateReportFrom(List<Venta> ventas) {
 		if (ventas.isEmpty()) {
 			return null;
 		}
@@ -111,6 +136,8 @@ public class PDFVentaReports extends XReport {
 			path = ventas.get(0).getId().toString() + ".pdf";
 			try (PdfWriter writer = new PdfWriter(path)) {
 				Document document = this.setupDocument(writer);
+				document.add(this.getLogo());
+				document.add(this.getAsTitle("PetLove"));
 				document.add(this.getAsTitle("VENTAS"));
 				document.add(this.buildVentasTable(ventas));
 				document.add(this.getAsTitle("PRODUCTOS"));
@@ -149,16 +176,6 @@ public class PDFVentaReports extends XReport {
 		return image;
 	}
 
-	private Paragraph getAsTitle(String left, String right) {
-		Paragraph leftParagraph = new Paragraph(left)
-			.setFontSize(TITLE_FONT_SIZE)
-			.setTextAlignment(TextAlignment.LEFT);
-		Paragraph rightParagraph = new Paragraph(right)
-			.setFontSize(TITLE_FONT_SIZE)
-			.setTextAlignment(TextAlignment.RIGHT);
-		return leftParagraph.add(rightParagraph);
-	}
-
 	private Table buildVentasTable(List<Venta> ventas) {
 		Table table = new Table(PDFVentaReports.VENTA_HEADERS.length);
 		table.setWidth(UnitValue.createPercentValue(100));
@@ -172,7 +189,7 @@ public class PDFVentaReports extends XReport {
 
 		ventas.forEach(venta ->
 			blocks.add(new Pair<>(
-				this.getAsTitle(venta.getCliente().getNombre(), Util.dateToString(venta.getFecha())),
+				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())),
 				this.buildProductosTable(this.getVentaProductos(venta))
 			)));
 		return blocks;
@@ -268,7 +285,7 @@ public class PDFVentaReports extends XReport {
 	private List<Producto> getVentaProductos(Venta venta) {
 		List<Producto> list = new ArrayList<>();
 		venta.getProductos().forEach(productoVenta -> {
-			Optional<Producto> byIdAndTipoCliente = this.searchProductoService.searchByIdAndTipoCliente(
+			Optional<Producto> byIdAndTipoCliente = this.productoService.searchByIdAndTipoCliente(
 				productoVenta.getProducto(),
 				venta.getCliente().getTipoCliente());
 			if (byIdAndTipoCliente.isPresent()) {

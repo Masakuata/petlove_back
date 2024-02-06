@@ -39,9 +39,17 @@ public class SearchVentaService {
 			VentaSpecification.filterPagado(pagado),
 			VentaSpecification.orderByNewer()
 		);
-		Pageable pageable = PageRequest.of(pag, size);
-		List<Venta> ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
-		return VentaSpecification.filterByProducto(ventas, Long.valueOf(producto));
+		List<Venta> ventas;
+		if (pag != null && size != null) {
+			Pageable pageable = PageRequest.of(pag, size);
+			ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
+		} else {
+			ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec).stream().toList());
+		}
+		if (producto != null) {
+			return VentaSpecification.filterByProducto(ventas, Long.valueOf(producto));
+		}
+		return ventas;
 	}
 
 	public List<Venta> getAll() {

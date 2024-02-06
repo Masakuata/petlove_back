@@ -14,13 +14,10 @@ import java.util.Optional;
 @Service
 public class SearchProductoService {
 	private final ProductoRepository productoRepository;
-	private final ProductoService productoService;
 	private final PrecioProductoService precioProductoService;
 
-	public SearchProductoService(ProductoRepository productoRepository, ProductoService productoService,
-	                             PrecioProductoService precioProductoService) {
+	public SearchProductoService(ProductoRepository productoRepository, PrecioProductoService precioProductoService) {
 		this.productoRepository = productoRepository;
-		this.productoService = productoService;
 		this.precioProductoService = precioProductoService;
 	}
 
@@ -54,9 +51,9 @@ public class SearchProductoService {
 		return productos;
 	}
 
-	public Optional<Producto> searchByIdAndTipoCliente(long idProducto, long tipoCliente) {
-		Optional<Producto> optionalProducto = this.searchProductoById(idProducto);
-		optionalProducto.ifPresent(producto -> this.productoService.setProductoPrecio(producto, tipoCliente));
-		return optionalProducto;
-	}
+//	public Optional<Producto> searchByIdAndTipoCliente(long idProducto, long tipoCliente) {
+//		Optional<Producto> optionalProducto = this.searchProductoById(idProducto);
+//		optionalProducto.ifPresent(producto -> this.productoService.setProductoPrecio(producto, tipoCliente));
+//		return optionalProducto;
+//	}
 }
