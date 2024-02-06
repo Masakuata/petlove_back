@@ -51,16 +51,16 @@ public class PDFVentaReports extends XReport {
 		this.productoService = productoService;
 	}
 
-	public boolean generateReportAndSend(List<Venta> ventas, String email) throws IOException {
+	public void generateReportAndSend(List<Venta> ventas, String email) throws IOException {
 		if (ventas.isEmpty()) {
-			return false;
+			return;
 		}
 		if (email == null || email.isEmpty()) {
-			return false;
+			return;
 		}
 		String path = this.generateReportFrom(ventas);
 		if (path == null || path.isEmpty()) {
-			return false;
+			return;
 		}
 		Path pathObj = Path.of(path);
 		Attachment attachment = new Attachment(
@@ -76,7 +76,6 @@ public class PDFVentaReports extends XReport {
 			attachment
 		);
 		Files.deleteIfExists(pathObj);
-		return true;
 	}
 
 	public boolean generateReportAndSend(Venta venta) throws IOException {

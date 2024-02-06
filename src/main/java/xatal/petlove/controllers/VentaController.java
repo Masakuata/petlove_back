@@ -193,4 +193,13 @@ public class VentaController {
 		}
 		return ResponseEntity.ok(productos);
 	}
+
+	@GetMapping("/anios")
+	public ResponseEntity<?> getAnios() {
+		List<Integer> years = this.ventaService.getAniosVentas();
+		if (years.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(years);
+	}
 }

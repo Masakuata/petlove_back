@@ -247,4 +247,8 @@ public class VentaService {
 	public void deleteAbonosByVentaId(long idVenta) {
 		this.abonoRepository.deleteAbonosByVenta(idVenta);
 	}
+
+	public List<Integer> getAniosVentas() {
+		return this.ventaRepository.getDistinctYear();
+	}
 }

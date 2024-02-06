@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import xatal.petlove.reports.ReportableList;
 
 import java.util.Date;
 import java.util.List;
@@ -45,7 +44,6 @@ public class Venta {
 	@Column(name = "direccion", nullable = false)
 	private long direccion;
 
-//	@ReportableList(headerName = "PRODUCTOS")
 	@OneToMany
 	private List<ProductoVenta> productos;
 
