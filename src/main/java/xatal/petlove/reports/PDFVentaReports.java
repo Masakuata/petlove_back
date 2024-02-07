@@ -51,26 +51,26 @@ public class PDFVentaReports extends XReport {
 		this.productoService = productoService;
 	}
 
-	public void generateReportAndSend(List<Venta> ventas, String email) throws IOException {
+	public void generateReportAndSend(List<Venta> ventas, String title, String email) throws IOException {
 		if (ventas.isEmpty()) {
 			return;
 		}
 		if (email == null || email.isEmpty()) {
 			return;
 		}
-		String path = this.generateReportFrom(ventas);
+		String path = this.generateReportFrom(ventas, title);
 		if (path == null || path.isEmpty()) {
 			return;
 		}
 		Path pathObj = Path.of(path);
 		Attachment attachment = new Attachment(
-			"venta.pdf",
+			title + ".pdf",
 			Files.readAllBytes(pathObj),
 			MIMEType.APPLICATION_PDF
 		);
 		this.sendEmailWithAttachment(
-			"Reporte de venta",
-			"Adjunto a este correo se encuentra la venta recien realizada",
+			"Reporte: \t" + title,
+			"",
 			null,
 			email,
 			attachment
@@ -78,14 +78,14 @@ public class PDFVentaReports extends XReport {
 		Files.deleteIfExists(pathObj);
 	}
 
-	public boolean generateReportAndSend(Venta venta) throws IOException {
+	public void generateReportAndSend(Venta venta) throws IOException {
 		String email = venta.getCliente().getEmail();
 		if (email == null || email.isEmpty()) {
-			return false;
+			return;
 		}
 		String path = this.generateReportFrom(venta);
 		if (path == null || path.isEmpty()) {
-			return false;
+			return;
 		}
 		Cliente cliente = venta.getCliente();
 		Path pathObj = Path.of(path);
@@ -102,7 +102,6 @@ public class PDFVentaReports extends XReport {
 			attachment
 		);
 		Files.deleteIfExists(pathObj);
-		return true;
 	}
 
 	public String generateReportFrom(Venta venta) {
@@ -111,14 +110,14 @@ public class PDFVentaReports extends XReport {
 		}
 		String path;
 		try {
-			path = venta.getId().toString() + ".pdf";
+			path = "file.pdf";
 			PdfWriter writer = new PdfWriter(path);
 			Document document = this.setupDocument(writer);
 			document.add(this.getLogo());
 			document.add(this.getAsTitle("PetLove"));
 			document.add(this.getAsTitle("PRODUCTOS"));
 			document.add(this.buildProductosTable(this.getVentaProductos(venta)));
-			document.add(this.addTotal(venta));
+			this.addTotal(venta).forEach(document::add);
 			document.close();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
@@ -126,17 +125,18 @@ public class PDFVentaReports extends XReport {
 		return path;
 	}
 
-	public String generateReportFrom(List<Venta> ventas) {
+	public String generateReportFrom(List<Venta> ventas, String title) {
 		if (ventas.isEmpty()) {
 			return null;
 		}
 		String path;
 		try {
-			path = ventas.get(0).getId().toString() + ".pdf";
+			path = "file.pdf";
 			try (PdfWriter writer = new PdfWriter(path)) {
 				Document document = this.setupDocument(writer);
 				document.add(this.getLogo());
 				document.add(this.getAsTitle("PetLove"));
+				document.add(this.getAsTitle("Reporte de ventas\t" + title));
 				document.add(this.getAsTitle("VENTAS"));
 				document.add(this.buildVentasTable(ventas));
 				document.add(this.getAsTitle("PRODUCTOS"));
@@ -144,7 +144,6 @@ public class PDFVentaReports extends XReport {
 					document.add(block.a);
 					document.add(block.b);
 				});
-
 				document.close();
 			}
 		} catch (IOException e) {
@@ -186,11 +185,14 @@ public class PDFVentaReports extends XReport {
 	private List<Pair<Paragraph, Table>> getProductosTables(List<Venta> ventas) {
 		List<Pair<Paragraph, Table>> blocks = new LinkedList<>();
 
-		ventas.forEach(venta ->
-			blocks.add(new Pair<>(
-				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())),
-				this.buildProductosTable(this.getVentaProductos(venta))
-			)));
+		ventas.forEach(venta -> {
+			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
+			this.addTotal(venta).forEach(productosTable::addCell);
+			Paragraph title =
+				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha()));
+
+			blocks.add(new Pair<>(title, productosTable));
+		});
 		return blocks;
 	}
 
@@ -274,11 +276,12 @@ public class PDFVentaReports extends XReport {
 		});
 	}
 
-	private Paragraph addTotal(Venta venta) {
-		Paragraph total = new Paragraph();
-		total.add("TOTAL VENTA:  " + venta.getTotal() + "\n");
-		total.add("TOTAL PESO: " + this.productoService.getPesoVenta(venta));
-		return total;
+	private List<Cell> addTotal(Venta venta) {
+		Cell label = new Cell();
+		Cell value = new Cell();
+		label.add(new Paragraph("TOTAL VENTA"));
+		value.add(new Paragraph(String.valueOf(venta.getTotal())));
+		return List.of(label, value);
 	}
 
 	private List<Producto> getVentaProductos(Venta venta) {

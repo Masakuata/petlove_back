@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Venta;
-import xatal.petlove.reports.PDFVentaReports;
-import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.ReporteService;
 import xatal.petlove.services.SearchVentaService;
-import xatal.petlove.util.Logger;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,16 +19,17 @@ import java.util.Optional;
 @RequestMapping("/reporte")
 public class ReporteController {
 	private final SearchVentaService searchVentaService;
-	private final ProductoService productoService;
+	private final ReporteService reporteService;
 
-	public ReporteController(SearchVentaService searchVentaService, ProductoService productoService) {
+	public ReporteController(SearchVentaService searchVentaService, ReporteService reporteService) {
 		this.searchVentaService = searchVentaService;
-		this.productoService = productoService;
+		this.reporteService = reporteService;
 	}
 
 	@GetMapping
 	public ResponseEntity<?> ventasReporte(
-		@RequestParam(name = "id_cliente", required = false) Optional<Integer> idCliente,
+		@RequestParam(name = "nombre_cliente", required = false) Optional<String> cliente,
+		@RequestParam(name = "cliente", required = false) Optional<Integer> idCliente,
 		@RequestParam(name = "anio", required = false) Optional<Integer> anio,
 		@RequestParam(name = "mes", required = false) Optional<Integer> mes,
 		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
@@ -52,13 +50,14 @@ public class ReporteController {
 		if (ventas.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
-		PDFVentaReports reports = new PDFVentaReports(this.productoService);
-		try {
-			reports.generateReportAndSend(ventas, correo);
-		} catch (IOException e) {
-			Logger.sendException(e);
-			return ResponseEntity.internalServerError().build();
-		}
+		String title = this.reporteService.makeReportTitle(
+			cliente.orElse(null),
+			anio.orElse(null),
+			mes.orElse(null),
+			dia.orElse(null),
+			pagado.orElse(null)
+		);
+		this.reporteService.generateReporteFrom(ventas, title, correo);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 }
