@@ -24,12 +24,14 @@ public class OperationInterceptor implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 		throws ServletException, IOException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		Operation operation = new Operation(
-			this.getOrigin(httpRequest),
-			httpRequest.getMethod(),
-			httpRequest.getRequestURL().toString()
-		);
-		this.operationRepository.save(operation);
+		if (httpRequest.getMethod() != "GET") {
+			Operation operation = new Operation(
+				this.getOrigin(httpRequest),
+				httpRequest.getMethod(),
+				httpRequest.getRequestURL().toString()
+			);
+			this.operationRepository.save(operation);
+		}
 		filterChain.doFilter(request, response);
 	}
 
