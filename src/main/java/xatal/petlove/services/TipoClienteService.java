@@ -17,4 +17,10 @@ public class TipoClienteService {
 	public List<TipoCliente> getTiposCliente() {
 		return this.tipoClienteRepository.getAll();
 	}
+
+	public TipoCliente newTipoCliente(String nombre) {
+		TipoCliente tipoCliente = new TipoCliente();
+		tipoCliente.setTipoCliente(nombre);
+		return this.tipoClienteRepository.save(tipoCliente);
+	}
 }
