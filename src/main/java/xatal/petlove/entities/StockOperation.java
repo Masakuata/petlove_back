@@ -19,6 +19,9 @@ public class StockOperation {
 	@Column(name = "cantidad")
 	private int cantidad;
 
+	public StockOperation() {
+	}
+
 	public StockOperation(long producto, int cantidad) {
 		this.producto = producto;
 		this.cantidad = cantidad;

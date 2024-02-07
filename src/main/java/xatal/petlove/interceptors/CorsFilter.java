@@ -1,4 +1,4 @@
-package xatal.petlove.configuration;
+package xatal.petlove.interceptors;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
