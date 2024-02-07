@@ -20,4 +20,14 @@ public abstract class ClienteSpecification {
 		}
 		return Specification.where(null);
 	}
+
+	public static Specification<Cliente> filterByStatus(Boolean status) {
+		if (status != null) {
+			return (root, query, builder) -> builder.equal(
+				root.get("status"),
+				status
+			);
+		}
+		return Specification.where(null);
+	}
 }

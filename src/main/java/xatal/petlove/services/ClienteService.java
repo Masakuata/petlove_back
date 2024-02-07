@@ -47,7 +47,8 @@ public class ClienteService {
 	) {
 		Specification<Cliente> spec = Specification.allOf(
 			ClienteSpecification.filterById(id),
-			ClienteSpecification.filterByName(nombre)
+			ClienteSpecification.filterByName(nombre),
+			ClienteSpecification.filterByStatus(true)
 		);
 		Pageable pageable = PageRequest.of(pag, size);
 		return this.clienteRepository.findAll(spec, pageable).stream().toList();
@@ -142,12 +143,17 @@ public class ClienteService {
 	}
 
 	@Transactional
-	public void removeById(int id) {
-		this.clienteRepository.deleteById((long) id);
+	public void removeById(long id) {
+		this.clienteRepository.deleteById(id);
 	}
 
-	public boolean isIdRegistered(int id) {
-		return this.clienteRepository.countById((long) id) > 0;
+	@Transactional
+	public void deactivateCliente(long id) {
+		this.clienteRepository.deactivateById(id);
+	}
+
+	public boolean isIdRegistered(long id) {
+		return this.clienteRepository.countById(id) > 0;
 	}
 
 	public boolean isEmailUsed(String email) {

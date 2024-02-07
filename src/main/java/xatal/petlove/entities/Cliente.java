@@ -39,6 +39,9 @@ public class Cliente {
 	@Column(name = "telefono", nullable = false)
 	private String telefono;
 
+	@Column(name = "status", nullable = false)
+	private boolean status = true;
+
 	public Cliente() {
 	}
 
@@ -137,5 +140,13 @@ public class Cliente {
 			.stream()
 			.filter(direccion -> direccion.getId() == id)
 			.findFirst();
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 }

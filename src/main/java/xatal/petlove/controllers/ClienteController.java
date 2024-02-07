@@ -92,11 +92,11 @@ public class ClienteController {
 	}
 
 	@DeleteMapping("/{cliente_id}")
-	public ResponseEntity<?> deleteCliente(@PathVariable("cliente_id") int clienteId) {
+	public ResponseEntity<?> deleteCliente(@PathVariable("cliente_id") long clienteId) {
 		if (!this.clienteService.isIdRegistered(clienteId)) {
 			return ResponseEntity.notFound().build();
 		}
-		this.clienteService.removeById(clienteId);
+		this.clienteService.deactivateCliente(clienteId);
 		return ResponseEntity.ok().build();
 	}
 
