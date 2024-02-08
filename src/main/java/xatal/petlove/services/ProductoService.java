@@ -10,6 +10,7 @@ import xatal.petlove.entities.StockOperation;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
+import xatal.petlove.repositories.ProductoVentaRepository;
 import xatal.petlove.repositories.StockOperationRepository;
 import xatal.petlove.services.specifications.PrecioSpecification;
 import xatal.petlove.services.specifications.ProductoSpecification;
@@ -25,15 +26,17 @@ import java.util.stream.Collectors;
 @Service
 public class ProductoService {
 	private final ProductoRepository productoRepository;
+	private final ProductoVentaRepository productoVentaRepository;
 	private final PrecioProductoService precioProductoService;
 	private final SearchProductoService searchProductoService;
 	private final PrecioRepository precioRepository;
 	private final StockOperationRepository stockOperationRepository;
 
-	public ProductoService(ProductoRepository productoRepository, PrecioProductoService precioProductoService,
-	                       SearchProductoService searchProductoService, PrecioRepository precioRepository,
-	                       StockOperationRepository stockOperationRepository) {
+	public ProductoService(ProductoRepository productoRepository, ProductoVentaRepository productoVentaRepository,
+	                       PrecioProductoService precioProductoService, SearchProductoService searchProductoService,
+	                       PrecioRepository precioRepository, StockOperationRepository stockOperationRepository) {
 		this.productoRepository = productoRepository;
+		this.productoVentaRepository = productoVentaRepository;
 		this.precioProductoService = precioProductoService;
 		this.searchProductoService = searchProductoService;
 		this.precioRepository = precioRepository;
@@ -110,9 +113,18 @@ public class ProductoService {
 		return this.productoRepository.countById(idProducto) > 0;
 	}
 
+	public boolean isReferenced(long idProducto) {
+		return this.productoVentaRepository.countByProducto(idProducto) > 0;
+	}
+
 	@Transactional
-	public void deactivateProducto(int idProducto) {
+	public void deactivateProducto(long idProducto) {
 		this.productoRepository.deactivateProducto(idProducto);
+	}
+
+	@Transactional
+	public void deleteProducto(long idProducto) {
+		this.productoRepository.deleteById(idProducto);
 	}
 
 	private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {
@@ -121,16 +133,5 @@ public class ProductoService {
 				producto.setCantidad(producto.getCantidad() - productoVenta.getCantidad());
 				return producto;
 			});
-	}
-
-	public float getPesoVenta(Venta venta) {
-		List<Long> ids = venta.getProductos()
-			.stream()
-			.map(ProductoVenta::getId)
-			.toList();
-		return this.productoRepository.findByIdIn(ids)
-			.stream()
-			.map(Producto::getPeso)
-			.reduce(0F, Float::sum);
 	}
 }

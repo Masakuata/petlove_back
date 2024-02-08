@@ -34,5 +34,5 @@ public interface ProductoRepository extends CrudRepository<Producto, Long>, JpaS
 	@Modifying
 	@Query(value = "UPDATE producto SET status = 0 WHERE id = :idProducto",
 		nativeQuery = true)
-	void deactivateProducto(int idProducto);
+	void deactivateProducto(long idProducto);
 }

@@ -289,10 +289,12 @@ public class PDFVentaReports extends XReport {
 		venta.getProductos().forEach(productoVenta -> {
 			Optional<Producto> byIdAndTipoCliente = this.productoService.searchByIdAndTipoCliente(
 				productoVenta.getProducto(),
-				venta.getCliente().getTipoCliente());
+				venta.getCliente().getTipoCliente()
+			);
 			if (byIdAndTipoCliente.isPresent()) {
 				Producto producto = byIdAndTipoCliente.get();
 				producto.setCantidad(productoVenta.getCantidad());
+				producto.setPrecio(productoVenta.getPrecio());
 				list.add(producto);
 			}
 		});

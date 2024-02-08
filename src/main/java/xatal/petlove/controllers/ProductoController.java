@@ -120,7 +120,11 @@ public class ProductoController {
 		if (!this.productoService.isIdRegistered(idProducto)) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		this.productoService.deactivateProducto(idProducto);
+		if (this.productoService.isReferenced(idProducto)) {
+			this.productoService.deactivateProducto(idProducto);
+		} else {
+			this.productoService.deleteProducto(idProducto);
+		}
 		return ResponseEntity.ok().build();
 	}
 
