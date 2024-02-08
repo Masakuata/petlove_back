@@ -45,6 +45,7 @@ public class ReporteController {
 			dia.orElse(null),
 			pagado.orElse(null),
 			null,
+			null,
 			null
 		);
 		if (ventas.isEmpty()) {

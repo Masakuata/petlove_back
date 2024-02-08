@@ -27,6 +27,7 @@ public class SearchVentaService {
 		Integer month,
 		Integer day,
 		Boolean pagado,
+		Float abono,
 		Integer size,
 		Integer pag
 	) {
@@ -37,6 +38,7 @@ public class SearchVentaService {
 			VentaSpecification.filterByMonth(month),
 			VentaSpecification.filterByYear(year),
 			VentaSpecification.filterPagado(pagado),
+			VentaSpecification.filterAbonado(abono),
 			VentaSpecification.orderByNewer()
 		);
 		List<Venta> ventas;

@@ -61,6 +61,16 @@ public abstract class VentaSpecification {
 		return Specification.where(null);
 	}
 
+	public static Specification<Venta> filterAbonado(Float abonado) {
+		if (abonado != null) {
+			return (root, query, builder) -> builder.lessThanOrEqualTo(
+				root.get("abonado"),
+				abonado
+			);
+		}
+		return Specification.where(null);
+	}
+
 	public static List<Venta> filterByProducto(List<Venta> ventas, Long producto) {
 		return ventas
 			.stream()

@@ -188,6 +188,7 @@ public class PDFVentaReports extends XReport {
 		ventas.forEach(venta -> {
 			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
 			this.addTotal(venta).forEach(productosTable::addCell);
+			productosTable.complete();
 			Paragraph title =
 				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha()));
 

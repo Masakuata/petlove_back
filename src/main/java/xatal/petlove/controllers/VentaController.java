@@ -64,7 +64,8 @@ public class VentaController {
 		@RequestParam(name = "dia", required = false) Optional<Integer> dia,
 		@RequestParam(name = "size", required = false, defaultValue = "10") Integer sizePag,
 		@RequestParam(name = "pag", required = false, defaultValue = "0") Integer pag,
-		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado
+		@RequestParam(name = "pagado", required = false) Optional<Boolean> pagado,
+		@RequestParam(name = "abono", required = false) Optional<Float> abono
 	) {
 		List<Venta> ventas = this.searchVentaService.searchVentas(
 			idCliente.orElse(null),
@@ -74,6 +75,7 @@ public class VentaController {
 			mes.orElse(null),
 			dia.orElse(null),
 			pagado.orElse(null),
+			abono.orElse(null),
 			sizePag, pag);
 		if (ventas.isEmpty()) {
 			return ResponseEntity.noContent().build();
