@@ -111,7 +111,7 @@ public class VentaMapper {
 		return venta
 			.getProductos()
 			.stream()
-			.map(productoVenta -> Math.toIntExact(productoVenta.getId()))
+			.map(productoVenta -> Math.toIntExact(productoVenta.getProducto()))
 			.toList();
 	}
 }

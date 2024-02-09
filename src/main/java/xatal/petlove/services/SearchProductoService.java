@@ -50,8 +50,4 @@ public class SearchProductoService {
 		this.precioProductoService.setProductosPrices(productos, tipoCliente);
 		return productos;
 	}
-
-	public List<Producto> searchByIds(List<Long> ids) {
-		return this.productoRepository.findByIdIn(ids);
-	}
 }
