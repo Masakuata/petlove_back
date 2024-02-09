@@ -17,6 +17,7 @@ import xatal.petlove.entities.Producto;
 import xatal.petlove.services.PrecioProductoService;
 import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.SearchProductoService;
+import xatal.petlove.structures.DetailedPrecio;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.ProductoDetallesRequestBody;
@@ -135,6 +136,15 @@ public class ProductoController {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.ok(productos);
+	}
+
+	@GetMapping("/{id_producto}/precios")
+	public ResponseEntity<?> getPreciosProducto(@PathVariable("id_producto") long idProducto) {
+		List<DetailedPrecio> detailedPrecios = this.precioProductoService.getDetailedPrecios(idProducto);
+		if (detailedPrecios == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(detailedPrecios);
 	}
 
 	@PutMapping("/{id_producto}/stock")

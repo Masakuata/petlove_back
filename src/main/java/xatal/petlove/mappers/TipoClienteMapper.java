@@ -15,10 +15,10 @@ public abstract class TipoClienteMapper {
 				Collectors.toMap(TipoCliente::getId, tipoCliente -> tipoCliente));
 	}
 
-	public static Map<Integer, Precio> mapTipoClientePrecio(List<Precio> precios) {
+	public static Map<Long, Precio> mapTipoClientePrecio(List<Precio> precios) {
 		return precios
 			.stream()
 			.collect(
-				Collectors.toMap(precio -> Math.toIntExact(precio.getCliente()), precio -> precio));
+				Collectors.toMap(Precio::getCliente, precio -> precio));
 	}
 }

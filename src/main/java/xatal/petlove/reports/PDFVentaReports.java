@@ -14,8 +14,10 @@ import com.itextpdf.layout.properties.UnitValue;
 import org.antlr.v4.runtime.misc.Pair;
 import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
+import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ProductoService;
+import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
@@ -46,9 +48,11 @@ public class PDFVentaReports extends XReport {
 	};
 
 	private final ProductoService productoService;
+	private final SearchProductoService searchProductoService;
 
-	public PDFVentaReports(ProductoService productoService) {
+	public PDFVentaReports(ProductoService productoService, SearchProductoService searchProductoService) {
 		this.productoService = productoService;
+		this.searchProductoService = searchProductoService;
 	}
 
 	public void generateReportAndSend(List<Venta> ventas, String title, String email) throws IOException {
@@ -286,6 +290,12 @@ public class PDFVentaReports extends XReport {
 
 	private List<Producto> getVentaProductos(Venta venta) {
 		List<Producto> list = new ArrayList<>();
+		List<Long> idProductos = venta.getProductos()
+			.stream()
+			.map(ProductoVenta::getId)
+			.toList();
+		List<Producto> productos = this.searchProductoService.searchByIds(idProductos);
+
 		venta.getProductos().forEach(productoVenta -> {
 			Optional<Producto> byIdAndTipoCliente = this.productoService.searchByIdAndTipoCliente(
 				productoVenta.getProducto(),

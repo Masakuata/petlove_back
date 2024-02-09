@@ -54,7 +54,7 @@ public class VentaService {
 		this.searchVentaService = searchVentaService;
 		this.usuarioService = usuarioService;
 		this.ventaMapper = ventaMapper;
-		this.ventaReports = new PDFVentaReports(this.productoService);
+		this.ventaReports = new PDFVentaReports(this.productoService, this.searchProductoService);
 	}
 
 	public Venta saveNewVenta(NewVenta newVenta) {

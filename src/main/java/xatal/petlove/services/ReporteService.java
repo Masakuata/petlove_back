@@ -12,8 +12,8 @@ import java.util.List;
 public class ReporteService {
 	private final PDFVentaReports pdfVentaReports;
 
-	public ReporteService(ProductoService productoService) {
-		this.pdfVentaReports = new PDFVentaReports(productoService);
+	public ReporteService(ProductoService productoService, SearchProductoService searchProductoService) {
+		this.pdfVentaReports = new PDFVentaReports(productoService, searchProductoService);
 	}
 
 	public void generateReporteFrom(List<Venta> ventas, String reportTitle, String correo) {

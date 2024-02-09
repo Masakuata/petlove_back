@@ -8,6 +8,7 @@ import xatal.petlove.mappers.PrecioMapper;
 import xatal.petlove.mappers.TipoClienteMapper;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
+import xatal.petlove.structures.DetailedPrecio;
 import xatal.petlove.structures.MultiDetailedPrecioProducto;
 import xatal.petlove.structures.MultiPrecioProducto;
 import xatal.petlove.structures.PublicPrecio;
@@ -58,6 +59,10 @@ public class PrecioProductoService {
 		return multiDetailedProducto;
 	}
 
+	public List<DetailedPrecio> getDetailedPrecios(long idProducto) {
+		return this.precioMapper.precioToDetailed(this.precioRepository.findByProducto(idProducto));
+	}
+
 	public void setProductosPrices(List<Producto> productos, long tipoCliente) {
 		List<Long> idProductos = productos.stream().map(Producto::getId).toList();
 		Map<Long, Float> precios = this.precioRepository.findByProductoInAndCliente(idProductos, tipoCliente)
@@ -71,18 +76,18 @@ public class PrecioProductoService {
 		});
 	}
 
-	private void updatePrecios(Map<Integer, Precio> preciosMap, List<PublicPrecio> newPrecios, int idProducto) {
+	private void updatePrecios(Map<Long, Precio> preciosMap, List<PublicPrecio> newPrecios, int idProducto) {
 		newPrecios.forEach(newPrecio -> {
-			if (preciosMap.containsKey(newPrecio.id)) {
-				preciosMap.get(newPrecio.id).setPrecio(newPrecio.precio);
+			if (preciosMap.containsKey((long) newPrecio.id)) {
+				preciosMap.get((long) newPrecio.id).setPrecio(newPrecio.precio);
 			} else {
-				preciosMap.put(newPrecio.id, new Precio(idProducto, newPrecio.id, newPrecio.precio));
+				preciosMap.put((long) newPrecio.id, new Precio(idProducto, newPrecio.id, newPrecio.precio));
 			}
 		});
 	}
 
 	public boolean savePreciosById(int idProducto, List<PublicPrecio> newPrecios) {
-		Map<Integer, Precio> savedPreciosMap = TipoClienteMapper.mapTipoClientePrecio(
+		Map<Long, Precio> savedPreciosMap = TipoClienteMapper.mapTipoClientePrecio(
 			this.precioRepository.findByProducto((long) idProducto)
 		);
 		this.updatePrecios(savedPreciosMap, newPrecios, idProducto);

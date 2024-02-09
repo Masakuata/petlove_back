@@ -1,6 +1,7 @@
 package xatal.petlove.mappers;
 
 import org.springframework.stereotype.Component;
+import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.TipoCliente;
 import xatal.petlove.services.TipoClienteService;
 import xatal.petlove.structures.DetailedPrecio;
@@ -23,6 +24,20 @@ public class PrecioMapper {
 			.stream()
 			.map(publicPrecio -> {
 				DetailedPrecio aux = new DetailedPrecio(publicPrecio);
+				if (tipoClienteMap.containsKey((long) aux.id)) {
+					aux.tipoCliente = tipoClienteMap.get((long) aux.id).getTipoCliente();
+				}
+				return aux;
+			})
+			.toList();
+	}
+
+	public List<DetailedPrecio> precioToDetailed(List<Precio> precios) {
+		Map<Long, TipoCliente> tipoClienteMap = TipoClienteMapper.mapTipoCliente(this.tipoClienteService.getTiposCliente());
+		return precios
+			.stream()
+			.map(precio -> {
+				DetailedPrecio aux = new DetailedPrecio(precio);
 				if (tipoClienteMap.containsKey((long) aux.id)) {
 					aux.tipoCliente = tipoClienteMap.get((long) aux.id).getTipoCliente();
 				}
