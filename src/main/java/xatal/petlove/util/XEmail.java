@@ -26,13 +26,17 @@ public class XEmail {
 
 	private final List<Attachment> attachments = new LinkedList<>();
 
+	private static final String CEMAIL = System.getenv("EMAIL");
+
+	private static final String CPASSWORD = System.getenv("EMAIL_PASSWORD");
+
 	public XEmail() {
 		this.mailer = MailerBuilder
 			.withSMTPServer(
 				"smtp.gmail.com",
 				587,
-				System.getenv("EMAIL"),
-				System.getenv("EMAIL_PASSWORD")
+				XEmail.CEMAIL,
+				XEmail.CPASSWORD
 			)
 			.withTransportStrategy(TransportStrategy.SMTP_TLS)
 			.buildMailer();
