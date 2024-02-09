@@ -43,7 +43,8 @@ public class VentaService {
 	public VentaService(
 		VentaRepository ventaRepository, AbonoRepository abonoRepository, ProductoVentaRepository productoVentaRepository,
 		ClienteService clienteService, ProductoService productoService, SearchProductoService searchProductoService,
-		SearchVentaService searchVentaService, UsuarioService usuarioService, VentaMapper ventaMapper
+		SearchVentaService searchVentaService, UsuarioService usuarioService, PDFVentaReports ventaReports,
+		VentaMapper ventaMapper
 	) {
 		this.ventaRepository = ventaRepository;
 		this.abonoRepository = abonoRepository;
@@ -53,8 +54,8 @@ public class VentaService {
 		this.searchProductoService = searchProductoService;
 		this.searchVentaService = searchVentaService;
 		this.usuarioService = usuarioService;
+		this.ventaReports = ventaReports;
 		this.ventaMapper = ventaMapper;
-		this.ventaReports = new PDFVentaReports(this.productoService, this.searchProductoService);
 	}
 
 	public Venta saveNewVenta(NewVenta newVenta) {

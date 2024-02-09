@@ -5,7 +5,6 @@ import xatal.petlove.entities.Direccion;
 import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.services.ClienteService;
-import xatal.petlove.services.ProductoService;
 import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.structures.FullVenta;
@@ -20,14 +19,12 @@ import java.util.List;
 @Component
 public class VentaMapper {
 	private final ClienteService clienteService;
-	private final ProductoService productoService;
 	private final SearchProductoService searchProductoService;
 	private final UsuarioService usuarioService;
 
-	public VentaMapper(ClienteService clienteService, ProductoService productoService,
-	                   SearchProductoService searchProductoService, UsuarioService usuarioService) {
+	public VentaMapper(ClienteService clienteService, SearchProductoService searchProductoService,
+	                   UsuarioService usuarioService) {
 		this.clienteService = clienteService;
-		this.productoService = productoService;
 		this.searchProductoService = searchProductoService;
 		this.usuarioService = usuarioService;
 	}
@@ -107,6 +104,14 @@ public class VentaMapper {
 		return ventas
 			.stream()
 			.map(this::ventaToPublicVenta)
+			.toList();
+	}
+
+	public List<Integer> getIdProductos(Venta venta) {
+		return venta
+			.getProductos()
+			.stream()
+			.map(productoVenta -> Math.toIntExact(productoVenta.getId()))
 			.toList();
 	}
 }

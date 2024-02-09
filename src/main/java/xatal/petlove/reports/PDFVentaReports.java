@@ -12,11 +12,12 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.stereotype.Component;
 import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
-import xatal.petlove.entities.ProductoVenta;
 import xatal.petlove.entities.Venta;
-import xatal.petlove.services.ProductoService;
+import xatal.petlove.mappers.ProductoMapper;
+import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
@@ -26,13 +27,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static java.util.Arrays.stream;
 
+@Component
 public class PDFVentaReports extends XReport {
 	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
 	private static final float TITLE_FONT_SIZE = 20F;
@@ -47,12 +48,12 @@ public class PDFVentaReports extends XReport {
 		"NOMBRE", "PRESENTACION", "TIPO MASCOTA", "PRECIO", "CANTIDAD", "SUBTOTAL"
 	};
 
-	private final ProductoService productoService;
 	private final SearchProductoService searchProductoService;
+	private final VentaMapper ventaMapper;
 
-	public PDFVentaReports(ProductoService productoService, SearchProductoService searchProductoService) {
-		this.productoService = productoService;
+	public PDFVentaReports(SearchProductoService searchProductoService, VentaMapper ventaMapper) {
 		this.searchProductoService = searchProductoService;
+		this.ventaMapper = ventaMapper;
 	}
 
 	public void generateReportAndSend(List<Venta> ventas, String title, String email) throws IOException {
@@ -289,25 +290,18 @@ public class PDFVentaReports extends XReport {
 	}
 
 	private List<Producto> getVentaProductos(Venta venta) {
-		List<Producto> list = new ArrayList<>();
-		List<Long> idProductos = venta.getProductos()
-			.stream()
-			.map(ProductoVenta::getId)
-			.toList();
-		List<Producto> productos = this.searchProductoService.searchByIds(idProductos);
+		Map<Long, Producto> productosMap = ProductoMapper.mapIdProducto(
+			this.searchProductoService.searchByIdsAndTipoCliente(
+				this.ventaMapper.getIdProductos(venta),
+				venta.getCliente().getTipoCliente()
+			)
+		);
 
 		venta.getProductos().forEach(productoVenta -> {
-			Optional<Producto> byIdAndTipoCliente = this.productoService.searchByIdAndTipoCliente(
-				productoVenta.getProducto(),
-				venta.getCliente().getTipoCliente()
-			);
-			if (byIdAndTipoCliente.isPresent()) {
-				Producto producto = byIdAndTipoCliente.get();
-				producto.setCantidad(productoVenta.getCantidad());
-				producto.setPrecio(productoVenta.getPrecio());
-				list.add(producto);
+			if (productosMap.containsKey(productoVenta.getId())) {
+				productosMap.get(productoVenta.getId()).setCantidad(productoVenta.getCantidad());
 			}
 		});
-		return list;
+		return productosMap.values().stream().toList();
 	}
 }
