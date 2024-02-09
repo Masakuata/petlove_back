@@ -285,7 +285,7 @@ public class PDFVentaReports extends XReport {
 		Cell label = new Cell();
 		Cell value = new Cell();
 		label.add(new Paragraph("TOTAL VENTA"));
-		value.add(new Paragraph(String.valueOf(venta.getTotal())));
+		value.add(new Paragraph("$" + venta.getTotal()));
 		return List.of(label, value);
 	}
 
