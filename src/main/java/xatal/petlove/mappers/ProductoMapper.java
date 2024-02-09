@@ -1,6 +1,7 @@
 package xatal.petlove.mappers;
 
 import xatal.petlove.entities.Producto;
+import xatal.petlove.structures.MultiPrecioProducto;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,12 @@ public abstract class ProductoMapper {
 		return productos
 			.stream()
 			.collect(Collectors.toMap(Producto::getId, producto -> producto));
+	}
+
+	public static Map<Long, MultiPrecioProducto> mapIdMultiPrecioProducto(List<Producto> productos) {
+		return productos
+			.stream()
+			.collect(Collectors.toMap(Producto::getId, MultiPrecioProducto::new));
 	}
 
 }

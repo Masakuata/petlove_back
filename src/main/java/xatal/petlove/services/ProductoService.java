@@ -52,7 +52,7 @@ public class ProductoService {
 	public void setProductoPrecio(Producto producto, long tipoCliente) {
 		Specification<Precio> filters = Specification.allOf(
 			PrecioSpecification.filterByProductoId(producto.getId()),
-			PrecioSpecification.findByTipoCliente(tipoCliente)
+			PrecioSpecification.filterByTipoCliente(tipoCliente)
 		);
 		this.precioRepository.findAll(filters)
 			.stream()
@@ -90,7 +90,7 @@ public class ProductoService {
 	}
 
 	public Map<Long, Integer> getStockByProductos(List<Long> idProductos) {
-		return this.productoRepository.findAll(ProductoSpecification.productoInIds(idProductos))
+		return this.productoRepository.findAll(ProductoSpecification.filterByProductIds(idProductos))
 			.stream()
 			.collect(Collectors.toMap(Producto::getId, Producto::getCantidad));
 	}
@@ -128,7 +128,7 @@ public class ProductoService {
 	}
 
 	private Optional<Producto> updateProductoQuantity(ProductoVenta productoVenta) {
-		return this.searchProductoService.searchProductoById(Math.toIntExact(productoVenta.getProducto()))
+		return this.searchProductoService.searchProductoById(productoVenta.getProducto())
 			.map(producto -> {
 				producto.setCantidad(producto.getCantidad() - productoVenta.getCantidad());
 				return producto;

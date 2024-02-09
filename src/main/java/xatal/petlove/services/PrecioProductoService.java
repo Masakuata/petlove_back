@@ -1,10 +1,10 @@
 package xatal.petlove.services;
 
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Precio;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.mappers.PrecioMapper;
+import xatal.petlove.mappers.ProductoMapper;
 import xatal.petlove.mappers.TipoClienteMapper;
 import xatal.petlove.repositories.PrecioRepository;
 import xatal.petlove.repositories.ProductoRepository;
@@ -15,7 +15,6 @@ import xatal.petlove.structures.PublicPrecio;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class PrecioProductoService {
@@ -31,10 +30,8 @@ public class PrecioProductoService {
 	}
 
 	public List<MultiPrecioProducto> getWithPrecios() {
-		Map<Long, MultiPrecioProducto> multiPrecioMap = this.productoRepository.getAll()
-			.stream()
-			.map(producto -> new Pair<>(producto.getId(), new MultiPrecioProducto(producto)))
-			.collect(Collectors.toMap(pair -> pair.a, pair -> pair.b));
+		Map<Long, MultiPrecioProducto> multiPrecioMap =
+			ProductoMapper.mapIdMultiPrecioProducto(this.productoRepository.getAll());
 
 		this.precioRepository.getAll().forEach(precio -> {
 			if (multiPrecioMap.containsKey(precio.getProducto())) {
@@ -65,13 +62,12 @@ public class PrecioProductoService {
 
 	public void setProductosPrices(List<Producto> productos, long tipoCliente) {
 		List<Long> idProductos = productos.stream().map(Producto::getId).toList();
-		Map<Long, Float> precios = this.precioRepository.findByProductoInAndCliente(idProductos, tipoCliente)
-			.stream()
-			.collect(Collectors.toMap(Precio::getProducto, Precio::getPrecio));
+		Map<Long, Precio> mapProductoPrecio =
+			this.precioMapper.mapProductoPrecio(this.precioRepository.findByProductoInAndCliente(idProductos, tipoCliente));
 
 		productos.forEach(producto -> {
-			if (precios.containsKey(producto.getId())) {
-				producto.setPrecio(precios.get(producto.getId()));
+			if (mapProductoPrecio.containsKey(producto.getId())) {
+				producto.setPrecio(mapProductoPrecio.get(producto.getId()).getPrecio());
 			}
 		});
 	}

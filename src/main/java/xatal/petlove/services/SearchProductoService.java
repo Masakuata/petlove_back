@@ -54,10 +54,4 @@ public class SearchProductoService {
 	public List<Producto> searchByIds(List<Long> ids) {
 		return this.productoRepository.findByIdIn(ids);
 	}
-
-//	public Optional<Producto> searchByIdAndTipoCliente(long idProducto, long tipoCliente) {
-//		Optional<Producto> optionalProducto = this.searchProductoById(idProducto);
-//		optionalProducto.ifPresent(producto -> this.productoService.setProductoPrecio(producto, tipoCliente));
-//		return optionalProducto;
-//	}
 }

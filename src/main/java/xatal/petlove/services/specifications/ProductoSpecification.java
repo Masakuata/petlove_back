@@ -6,7 +6,7 @@ import xatal.petlove.entities.Producto;
 import java.util.List;
 
 public abstract class ProductoSpecification {
-	public static Specification<Producto> productoInIds(List<Long> productosId) {
+	public static Specification<Producto> filterByProductIds(List<Long> productosId) {
 		return (root, query, builder) -> builder.in(root.get("id")).value(productosId);
 	}
 

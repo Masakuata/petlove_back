@@ -9,6 +9,7 @@ import xatal.petlove.structures.PublicPrecio;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class PrecioMapper {
@@ -44,5 +45,11 @@ public class PrecioMapper {
 				return aux;
 			})
 			.toList();
+	}
+
+	public Map<Long, Precio> mapProductoPrecio(List<Precio> precios) {
+		return precios
+			.stream()
+			.collect(Collectors.toMap(Precio::getProducto, precio -> precio));
 	}
 }
