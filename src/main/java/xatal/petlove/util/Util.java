@@ -1,5 +1,6 @@
 package xatal.petlove.util;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -8,6 +9,7 @@ import java.util.Locale;
 
 public abstract class Util {
     public static final String DATE_FORMAT = "dd-MM-yyyy";
+    private static final DecimalFormat FORMATTER = new DecimalFormat("#,##0.00");
 
     public static boolean containsAnyCase(String s1, String s2) {
         return s1.toLowerCase().contains(s2.toLowerCase());
@@ -55,5 +57,13 @@ public abstract class Util {
 
     public static boolean isFechaDefault(String fecha) {
         return !Util.isNotDefaultFecha(fecha);
+    }
+
+    public static String formatMoney(String money) {
+        return "$" + Util.FORMATTER.format(money);
+    }
+
+    public static String formatMoney(float money) {
+        return "$" + Util.FORMATTER.format(money);
     }
 }

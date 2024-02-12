@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,11 @@ import static java.util.Arrays.stream;
 
 @Component
 public class PDFVentaReports extends XReport {
+	private static final DecimalFormat FORMATTER = new DecimalFormat("#,###0.00");
 	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
 	private static final float TITLE_FONT_SIZE = 20F;
 	private static final float DEFAULT_FONT_SIZE = 10F;
-
+	private static final float SMALLER_FONT_SIZE = 8F;
 	private static final float LOGO_SQR_SIZE = 50F;
 	private static final String[] VENTA_HEADERS = {
 		"ID VENTA", "CLIENTE", "PAGADO", "TOTAL", "ABONADO", "FECHA", "FACTURADO"
@@ -145,6 +147,7 @@ public class PDFVentaReports extends XReport {
 				document.add(this.getAsTitle("Reporte de ventas\t" + title));
 				document.add(this.getAsTitle("VENTAS"));
 				document.add(this.buildVentasTable(ventas));
+				document.add(this.totalVentasResume(ventas));
 				document.add(new AreaBreak());
 				document.add(this.getAsTitle("PRODUCTOS"));
 				this.getProductosTables(ventas).forEach(block -> {
@@ -222,6 +225,8 @@ public class PDFVentaReports extends XReport {
 			Cell cell = new Cell();
 			Paragraph text = new Paragraph(ventaHeader);
 			text.setTextAlignment(TextAlignment.CENTER);
+			text.setFontSize(SMALLER_FONT_SIZE);
+			text.setBold();
 			cell.add(text);
 			table.addHeaderCell(cell);
 		});
@@ -239,10 +244,10 @@ public class PDFVentaReports extends XReport {
 			pagado.add(new Paragraph(venta.isPagado() ? "SI" : "NO"));
 
 			Cell total = new Cell();
-			total.add(new Paragraph("$" + venta.getTotal()));
+			total.add(new Paragraph(Util.formatMoney(venta.getTotal()))).setTextAlignment(TextAlignment.RIGHT);
 
 			Cell abonado = new Cell();
-			abonado.add(new Paragraph("$" + venta.getAbonado()));
+			abonado.add(new Paragraph(Util.formatMoney(venta.getAbonado())).setTextAlignment(TextAlignment.RIGHT));
 
 			Cell fecha = new Cell();
 			fecha.add(new Paragraph(Util.dateToString(venta.getFecha())));
@@ -272,13 +277,13 @@ public class PDFVentaReports extends XReport {
 			mascota.add(new Paragraph(producto.getTipoMascota()));
 
 			Cell precio = new Cell();
-			precio.add(new Paragraph("$" + producto.getPrecio()));
+			precio.add(new Paragraph(Util.formatMoney(producto.getPrecio())).setTextAlignment(TextAlignment.RIGHT));
 
 			Cell cantidad = new Cell();
 			cantidad.add(new Paragraph(String.valueOf(producto.getCantidad())));
 
 			Cell subtotal = new Cell();
-			subtotal.add(new Paragraph("$" + producto.getCantidad() * producto.getPrecio()));
+			subtotal.add(new Paragraph(Util.formatMoney(producto.getCantidad() * producto.getPrecio())).setTextAlignment(TextAlignment.RIGHT));
 
 			table.addCell(nombre);
 			table.addCell(presentacion);
@@ -293,8 +298,23 @@ public class PDFVentaReports extends XReport {
 		Cell label = new Cell();
 		Cell value = new Cell();
 		label.add(new Paragraph("TOTAL VENTA"));
-		value.add(new Paragraph("$" + venta.getTotal()));
+		value.add(new Paragraph(Util.formatMoney(venta.getTotal())).setTextAlignment(TextAlignment.RIGHT));
 		return List.of(label, value);
+	}
+
+	private Paragraph totalVentasResume(List<Venta> ventas) {
+		float total = ventas
+			.stream()
+			.map(Venta::getTotal)
+			.reduce(0F, Float::sum);
+		float abonado = ventas
+			.stream()
+			.map(Venta::getAbonado)
+			.reduce(0F, Float::sum);
+		return this.getAsTitle("TOTAL VENTAS: " + Util.formatMoney(total) + "\n")
+			.add(this.getAsTitle("TOTAL ABONADO: " + Util.formatMoney(abonado) + "\n"))
+			.add(this.getAsTitle("TOTAL POR LIQUIDAR: " + Util.formatMoney(total - abonado)))
+			.setTextAlignment(TextAlignment.RIGHT);
 	}
 
 	private List<Producto> getVentaProductos(Venta venta) {
