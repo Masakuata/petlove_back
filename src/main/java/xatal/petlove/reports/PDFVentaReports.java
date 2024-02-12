@@ -5,6 +5,7 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
@@ -144,6 +145,7 @@ public class PDFVentaReports extends XReport {
 				document.add(this.getAsTitle("Reporte de ventas\t" + title));
 				document.add(this.getAsTitle("VENTAS"));
 				document.add(this.buildVentasTable(ventas));
+				document.add(new AreaBreak());
 				document.add(this.getAsTitle("PRODUCTOS"));
 				this.getProductosTables(ventas).forEach(block -> {
 					document.add(block.a);
@@ -167,7 +169,11 @@ public class PDFVentaReports extends XReport {
 
 	private Paragraph getAsTitle(String title) {
 		return new Paragraph(title)
-			.setFontSize(TITLE_FONT_SIZE);
+			.setFontSize(TITLE_FONT_SIZE).setKeepTogether(true);
+	}
+
+	private Paragraph emptyNewLine() {
+		return new Paragraph().setFontSize(DEFAULT_FONT_SIZE).setKeepTogether(true);
 	}
 
 	private Image getLogo() throws MalformedURLException {
@@ -192,9 +198,11 @@ public class PDFVentaReports extends XReport {
 
 		ventas.forEach(venta -> {
 			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
+			productosTable.setKeepTogether(true);
 			this.addTotal(venta).forEach(productosTable::addCell);
-			Paragraph title =
-				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha()));
+			Paragraph title = this.emptyNewLine().add(
+				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())));
+			title.setKeepWithNext(true);
 
 			blocks.add(new Pair<>(title, productosTable));
 		});
