@@ -1,6 +1,7 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
@@ -58,7 +59,7 @@ public class VentaService {
 		this.ventaMapper = ventaMapper;
 	}
 
-	public Venta saveNewVenta(NewVenta newVenta) {
+	public Pair<Venta, byte[]> saveNewVenta(NewVenta newVenta) {
 		Venta venta = this.ventaMapper.newVentaToVenta(newVenta);
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
@@ -66,8 +67,8 @@ public class VentaService {
 
 		this.storeAbono(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
 		this.productoService.updateStockFromVenta(venta);
-		this.generateReport(venta);
-		return venta;
+		byte[] bytes = this.generateReport(venta, this.usuarioService.getById(venta.getVendedor()).getEmail());
+		return new Pair<>(venta, bytes);
 	}
 
 	public Venta saveVentaWithProductos(Venta venta) {
@@ -140,12 +141,12 @@ public class VentaService {
 	}
 
 	private List<Producto> getProductosByVenta(Venta venta) {
-		List<Integer> productosId = venta.getProductos()
+		List<Integer> idProductos = venta.getProductos()
 			.stream()
 			.map(productoVenta -> productoVenta.getProducto().intValue())
 			.toList();
 		return this.searchProductoService
-			.searchByIdsAndTipoCliente(productosId, venta.getCliente().getTipoCliente());
+			.searchByIdsAndTipoCliente(idProductos, venta.getCliente().getTipoCliente());
 	}
 
 	public List<Producto> getProductosByVentaReplaceCantidad(Venta venta) {
@@ -189,14 +190,12 @@ public class VentaService {
 		venta.setPagado(abonos >= total);
 	}
 
-	private void generateReport(Venta venta) {
-		new Thread(() -> {
-			try {
-				this.ventaReports.generateReportAndSend(venta);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}).start();
+	private byte[] generateReport(Venta venta, String targetEmail) {
+		try {
+			return this.ventaReports.generateReportAndSend(venta, targetEmail);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public Abono storeAbono(Abono abono) {

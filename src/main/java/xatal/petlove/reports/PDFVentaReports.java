@@ -1,20 +1,15 @@
 package xatal.petlove.reports;
 
-import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.geom.PageSize;
-import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Component;
-import xatal.petlove.entities.Cliente;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.ProductoMapper;
@@ -25,10 +20,8 @@ import xatal.petlove.structures.MIMEType;
 import xatal.petlove.util.Util;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +30,8 @@ import static java.util.Arrays.stream;
 
 @Component
 public class PDFVentaReports extends XReport {
-	private static final DecimalFormat FORMATTER = new DecimalFormat("#,###0.00");
 	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
-	private static final float TITLE_FONT_SIZE = 20F;
-	private static final float DEFAULT_FONT_SIZE = 10F;
 	private static final float SMALLER_FONT_SIZE = 8F;
-	private static final float LOGO_SQR_SIZE = 50F;
 	private static final String[] VENTA_HEADERS = {
 		"ID VENTA", "CLIENTE", "PAGADO", "TOTAL", "ABONADO", "FECHA", "FACTURADO"
 	};
@@ -86,30 +75,30 @@ public class PDFVentaReports extends XReport {
 		Files.deleteIfExists(pathObj);
 	}
 
-	public void generateReportAndSend(Venta venta) throws IOException {
-		String email = venta.getCliente().getEmail();
-		if (email == null || email.isEmpty()) {
-			return;
+	public byte[] generateReportAndSend(Venta venta, String target) throws IOException {
+		if (target != null && target.isEmpty()) {
+			return null;
 		}
 		String path = this.generateReportFrom(venta);
 		if (path == null || path.isEmpty()) {
-			return;
+			return null;
 		}
-		Cliente cliente = venta.getCliente();
 		Path pathObj = Path.of(path);
+		byte[] pdfBytes = Files.readAllBytes(pathObj);
 		Attachment attachment = new Attachment(
 			"venta.pdf",
-			Files.readAllBytes(pathObj),
+			pdfBytes,
 			MIMEType.APPLICATION_PDF
 		);
 		this.sendEmailWithAttachment(
 			"Reporte de venta",
 			"Adjunto a este correo se encuentra la venta recien realizada",
-			cliente.getNombre(),
-			cliente.getEmail(),
+			"",
+			target,
 			attachment
 		);
-		Files.deleteIfExists(pathObj);
+//		Files.deleteIfExists(pathObj);
+		return pdfBytes;
 	}
 
 	public String generateReportFrom(Venta venta) {
@@ -120,13 +109,15 @@ public class PDFVentaReports extends XReport {
 		try {
 			path = "file.pdf";
 			PdfWriter writer = new PdfWriter(path);
-			Document document = this.setupDocument(writer);
-			document.add(this.getLogo());
-			document.add(this.getAsTitle("PetLove"));
-			document.add(this.getAsTitle("PRODUCTOS"));
-			document.add(this.buildProductosTable(this.getVentaProductos(venta)));
+			Document document = PDFDocument.setupNewTicket(writer);
+			document.add(PDFDocument.getLogo());
+			document.add(PDFDocument.getAsTitle("PetLove"));
+			document.add(PDFDocument.getAsTitle("PRODUCTOS"));
+			this.buildProductosList(this.getVentaProductos(venta)).forEach(document::add);
 			this.addTotal(venta).forEach(document::add);
 			document.close();
+			writer.flush();
+			writer.close();
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -140,52 +131,24 @@ public class PDFVentaReports extends XReport {
 		String path;
 		try {
 			path = "file.pdf";
-			try (PdfWriter writer = new PdfWriter(path)) {
-				Document document = this.setupDocument(writer);
-				document.add(this.getLogo());
-				document.add(this.getAsTitle("PetLove"));
-				document.add(this.getAsTitle("Reporte de ventas\t" + title));
-				document.add(this.getAsTitle("VENTAS"));
+			try (Document document = PDFDocument.setupNewDocument(new PdfWriter(path))) {
+				document.add(PDFDocument.getLogo());
+				document.add(PDFDocument.getAsTitle("PetLove"));
+				document.add(PDFDocument.getAsTitle("Reporte de ventas\t" + title));
+				document.add(PDFDocument.getAsTitle("VENTAS"));
 				document.add(this.buildVentasTable(ventas));
 				document.add(this.totalVentasResume(ventas));
 				document.add(new AreaBreak());
-				document.add(this.getAsTitle("PRODUCTOS"));
+				document.add(PDFDocument.getAsTitle("PRODUCTOS"));
 				this.getProductosTables(ventas).forEach(block -> {
 					document.add(block.a);
 					document.add(block.b);
 				});
-				document.close();
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		return path;
-	}
-
-	private Document setupDocument(PdfWriter writer) {
-		PdfDocument pdf = new PdfDocument(writer);
-		pdf.setDefaultPageSize(PageSize.LETTER);
-		Document document = new Document(pdf);
-		document.setFontSize(DEFAULT_FONT_SIZE);
-		return document;
-	}
-
-	private Paragraph getAsTitle(String title) {
-		return new Paragraph(title)
-			.setFontSize(TITLE_FONT_SIZE).setKeepTogether(true);
-	}
-
-	private Paragraph emptyNewLine() {
-		return new Paragraph().setFontSize(DEFAULT_FONT_SIZE).setKeepTogether(true);
-	}
-
-	private Image getLogo() throws MalformedURLException {
-		Image image = new Image(ImageDataFactory.create(PDFVentaReports.LOGO_PATH));
-		image.setHeight(LOGO_SQR_SIZE);
-		image.setWidth(LOGO_SQR_SIZE);
-		image.setFixedPosition(PageSize.LETTER.getRight() - LOGO_SQR_SIZE - 30F,
-			PageSize.LETTER.getTop() - LOGO_SQR_SIZE - 40F);
-		return image;
 	}
 
 	private Table buildVentasTable(List<Venta> ventas) {
@@ -203,13 +166,25 @@ public class PDFVentaReports extends XReport {
 			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
 			productosTable.setKeepTogether(true);
 			this.addTotal(venta).forEach(productosTable::addCell);
-			Paragraph title = this.emptyNewLine().add(
-				this.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())));
+			Paragraph title = PDFDocument.emptyNewLine().add(
+				PDFDocument.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())));
 			title.setKeepWithNext(true);
 
 			blocks.add(new Pair<>(title, productosTable));
 		});
 		return blocks;
+	}
+
+	private List<Paragraph> buildProductosList(List<Producto> productos) {
+		List<Paragraph> lines = new LinkedList<>();
+		productos.forEach(producto -> {
+			lines.add(new Paragraph(producto.getNombre()).setTextAlignment(TextAlignment.LEFT));
+			lines.add(new Paragraph(Util.formatMoney(producto.getPrecio())).setTextAlignment(TextAlignment.RIGHT));
+			lines.add(new Paragraph(String.valueOf(producto.getCantidad())));
+			lines.add(new Paragraph(Util.formatMoney(producto.getPrecio() * producto.getCantidad()))
+				.setTextAlignment(TextAlignment.RIGHT));
+		});
+		return lines;
 	}
 
 	private Table buildProductosTable(List<Producto> productos) {
@@ -311,9 +286,9 @@ public class PDFVentaReports extends XReport {
 			.stream()
 			.map(Venta::getAbonado)
 			.reduce(0F, Float::sum);
-		return this.getAsTitle("TOTAL VENTAS: " + Util.formatMoney(total) + "\n")
-			.add(this.getAsTitle("TOTAL ABONADO: " + Util.formatMoney(abonado) + "\n"))
-			.add(this.getAsTitle("TOTAL POR LIQUIDAR: " + Util.formatMoney(total - abonado)))
+		return PDFDocument.getAsTitle("TOTAL VENTAS: " + Util.formatMoney(total) + "\n")
+			.add(PDFDocument.getAsTitle("TOTAL ABONADO: " + Util.formatMoney(abonado) + "\n"))
+			.add(PDFDocument.getAsTitle("TOTAL POR LIQUIDAR: " + Util.formatMoney(total - abonado)))
 			.setTextAlignment(TextAlignment.RIGHT);
 	}
 

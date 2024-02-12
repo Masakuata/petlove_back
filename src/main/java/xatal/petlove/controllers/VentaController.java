@@ -1,7 +1,11 @@
 package xatal.petlove.controllers;
 
 import io.jsonwebtoken.Claims;
+import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -100,7 +104,20 @@ public class VentaController {
 		if (this.ventaService.getCostoTotalByVenta(this.ventaMapper.newVentaToVenta(venta)) != venta.total) {
 			return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		}
-		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);
+		Pair<Venta, byte[]> ventaPair = this.ventaService.saveNewVenta(venta);
+		return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_PDF)
+			.contentLength(ventaPair.b.length)
+			.header(
+				HttpHeaders.CONTENT_DISPOSITION,
+				ContentDisposition
+					.attachment()
+					.filename("ticket.pdf")
+					.build()
+					.toString()
+			)
+			.body(ventaPair.b);
+//		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id_venta}")
