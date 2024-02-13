@@ -29,6 +29,8 @@ public class CustomInterceptor implements Filter {
 				httpResponse.sendError(HttpStatus.NOT_ACCEPTABLE.value(), "Token is invalid");
 			} else if (!this.usernameMatchesToken(httpRequest)) {
 				httpResponse.sendError(HttpStatus.NOT_ACCEPTABLE.value(), "Token does not match path username");
+			} else {
+				chain.doFilter(request, response);
 			}
 		} else {
 			chain.doFilter(request, response);
