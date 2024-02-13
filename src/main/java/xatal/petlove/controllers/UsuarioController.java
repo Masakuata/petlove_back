@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import xatal.petlove.entities.Usuario;
-import xatal.petlove.security.TokenUtils;
 import xatal.petlove.services.UsuarioService;
 import xatal.petlove.structures.Login;
 import xatal.petlove.structures.PublicUsuario;
+import xatal.petlove.util.TokenUtils;
 
 import java.util.HashMap;
 import java.util.List;

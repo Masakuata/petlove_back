@@ -21,7 +21,6 @@ import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.VentaMapper;
-import xatal.petlove.security.TokenUtils;
 import xatal.petlove.services.SearchVentaService;
 import xatal.petlove.services.VentaService;
 import xatal.petlove.structures.FullVenta;
@@ -30,6 +29,7 @@ import xatal.petlove.structures.NewVenta;
 import xatal.petlove.structures.PublicAbono;
 import xatal.petlove.structures.PublicProductoVenta;
 import xatal.petlove.structures.PublicVenta;
+import xatal.petlove.util.TokenUtils;
 
 import java.util.List;
 import java.util.Optional;

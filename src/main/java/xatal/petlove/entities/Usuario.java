@@ -5,8 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import xatal.petlove.security.TokenUtils;
 import xatal.petlove.structures.Login;
+import xatal.petlove.util.TokenUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

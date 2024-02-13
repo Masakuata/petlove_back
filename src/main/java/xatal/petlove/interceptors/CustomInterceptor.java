@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import xatal.petlove.security.TokenUtils;
+import xatal.petlove.util.TokenUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
