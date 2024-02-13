@@ -1,7 +1,6 @@
 package xatal.petlove.controllers;
 
 import io.jsonwebtoken.Claims;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -104,20 +103,7 @@ public class VentaController {
 		if (this.ventaService.getCostoTotalByVenta(this.ventaMapper.newVentaToVenta(venta)) != venta.total) {
 			return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		}
-		Pair<Venta, byte[]> ventaPair = this.ventaService.saveNewVenta(venta);
-		return ResponseEntity.ok()
-			.contentType(MediaType.APPLICATION_PDF)
-			.contentLength(ventaPair.b.length)
-			.header(
-				HttpHeaders.CONTENT_DISPOSITION,
-				ContentDisposition
-					.attachment()
-					.filename("ticket.pdf")
-					.build()
-					.toString()
-			)
-			.body(ventaPair.b);
-//		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);
+		return new ResponseEntity<>(this.ventaService.saveNewVenta(venta), HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id_venta}")
@@ -220,5 +206,27 @@ public class VentaController {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.ok(years);
+	}
+
+	@GetMapping("/{id_venta}/ticket")
+	public ResponseEntity<?> getTicket(
+		@PathVariable("id_venta") long idVenta
+	) {
+		byte[] bytes = this.ventaService.generateReport(idVenta, 46);
+		if (bytes == null) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_PDF)
+			.contentLength(bytes.length)
+			.header(
+				HttpHeaders.CONTENT_DISPOSITION,
+				ContentDisposition
+					.attachment()
+					.filename("ticket.pdf")
+					.build()
+					.toString()
+			)
+			.body(bytes);
 	}
 }

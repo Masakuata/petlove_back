@@ -1,11 +1,11 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Service;
 import xatal.petlove.entities.Abono;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.ProductoVenta;
+import xatal.petlove.entities.Usuario;
 import xatal.petlove.entities.Venta;
 import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.reports.PDFVentaReports;
@@ -59,7 +59,7 @@ public class VentaService {
 		this.ventaMapper = ventaMapper;
 	}
 
-	public Pair<Venta, byte[]> saveNewVenta(NewVenta newVenta) {
+	public Venta saveNewVenta(NewVenta newVenta) {
 		Venta venta = this.ventaMapper.newVentaToVenta(newVenta);
 		venta.setPagado(venta.getAbonado() >= venta.getTotal());
 		venta.setDireccion(newVenta.direccion);
@@ -67,8 +67,16 @@ public class VentaService {
 
 		this.storeAbono(new Abono(venta.getId().intValue(), venta.getAbonado(), new Date()));
 		this.productoService.updateStockFromVenta(venta);
-		byte[] bytes = this.generateReport(venta, this.usuarioService.getById(venta.getVendedor()).getEmail());
-		return new Pair<>(venta, bytes);
+		return venta;
+	}
+
+	public byte[] generateReport(long idVenta, long idUsuario) {
+		Optional<Venta> optionalVenta = this.ventaRepository.findById(idVenta);
+		Usuario usuario = this.usuarioService.getById(idUsuario);
+		return optionalVenta
+			.map(venta ->
+				this.generateReport(venta, usuario.getEmail()))
+			.orElse(null);
 	}
 
 	public Venta saveVentaWithProductos(Venta venta) {
