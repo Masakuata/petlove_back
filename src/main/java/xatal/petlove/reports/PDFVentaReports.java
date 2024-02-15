@@ -2,6 +2,7 @@ package xatal.petlove.reports;
 
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
@@ -17,9 +18,12 @@ import xatal.petlove.mappers.VentaMapper;
 import xatal.petlove.services.SearchProductoService;
 import xatal.petlove.structures.Attachment;
 import xatal.petlove.structures.MIMEType;
+import xatal.petlove.util.Logger;
 import xatal.petlove.util.Util;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -79,7 +83,7 @@ public class PDFVentaReports extends XReport {
 		if (target != null && target.isEmpty()) {
 			return null;
 		}
-		String path = this.generateReportFrom(venta);
+		String path = this.createTicket(venta);
 		if (path == null || path.isEmpty()) {
 			return null;
 		}
@@ -101,25 +105,20 @@ public class PDFVentaReports extends XReport {
 		return pdfBytes;
 	}
 
-	public String generateReportFrom(Venta venta) {
+	public String createTicket(Venta venta) {
 		if (venta == null) {
 			return null;
 		}
-		String path;
-		try {
-			path = "file.pdf";
-			PdfWriter writer = new PdfWriter(path);
-			Document document = PDFDocument.setupNewTicket(writer);
+		String path = "file.pdf";
+		try (Document document = PDFDocument.setupNewTicket(new PdfWriter(path))) {
 			document.add(PDFDocument.getLogo());
 			document.add(PDFDocument.getAsTitle("PetLove"));
 			document.add(PDFDocument.getAsTitle("PRODUCTOS"));
-			this.buildProductosList(this.getVentaProductos(venta)).forEach(document::add);
+			document.add(this.ticketProductos(this.getVentaProductos(venta)));
 			this.addTotal(venta).forEach(document::add);
-			document.close();
-			writer.flush();
-			writer.close();
 		} catch (IOException ex) {
-			throw new RuntimeException(ex);
+			Logger.sendException(ex);
+			return null;
 		}
 		return path;
 	}
@@ -128,26 +127,27 @@ public class PDFVentaReports extends XReport {
 		if (ventas.isEmpty()) {
 			return null;
 		}
-		String path;
-		try {
-			path = "file.pdf";
-			try (Document document = PDFDocument.setupNewDocument(new PdfWriter(path))) {
-				document.add(PDFDocument.getLogo());
-				document.add(PDFDocument.getAsTitle("PetLove"));
-				document.add(PDFDocument.getAsTitle("Reporte de ventas\t" + title));
-				document.add(PDFDocument.getAsTitle("VENTAS"));
-				document.add(this.buildVentasTable(ventas));
-				document.add(this.totalVentasResume(ventas));
-				document.add(new AreaBreak());
-				document.add(PDFDocument.getAsTitle("PRODUCTOS"));
-				this.getProductosTables(ventas).forEach(block -> {
-					document.add(block.a);
-					document.add(block.b);
-				});
-			}
-		} catch (IOException e) {
+		String path = "file.pdf";
+		try (Document document = PDFDocument.setupNewDocument(new PdfWriter(path))) {
+			document.add(PDFDocument.getLogo());
+			document.add(PDFDocument.getAsTitle("PetLove"));
+			document.add(PDFDocument.getAsTitle("Reporte de ventas\t" + title));
+			document.add(PDFDocument.getAsTitle("VENTAS"));
+			document.add(this.buildVentasTable(ventas));
+			document.add(this.totalVentasResume(ventas));
+			document.add(new AreaBreak());
+			document.add(PDFDocument.getAsTitle("PRODUCTOS"));
+			this.getProductosTables(ventas).forEach(block -> {
+				document.add(block.a);
+				document.add(block.b);
+			});
+		} catch (FileNotFoundException e) {
+			Logger.sendException(e);
+			return null;
+		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
+
 		return path;
 	}
 
@@ -175,16 +175,29 @@ public class PDFVentaReports extends XReport {
 		return blocks;
 	}
 
-	private List<Paragraph> buildProductosList(List<Producto> productos) {
-		List<Paragraph> lines = new LinkedList<>();
+	private Table ticketProductos(List<Producto> productos) {
+		Table table = new Table(3);
+		table.setFontSize(PDFDocument.DEFAULT_FONT_SIZE);
 		productos.forEach(producto -> {
-			lines.add(new Paragraph(producto.getNombre()).setTextAlignment(TextAlignment.LEFT));
-			lines.add(new Paragraph(Util.formatMoney(producto.getPrecio())).setTextAlignment(TextAlignment.RIGHT));
-			lines.add(new Paragraph(String.valueOf(producto.getCantidad())));
-			lines.add(new Paragraph(Util.formatMoney(producto.getPrecio() * producto.getCantidad()))
-				.setTextAlignment(TextAlignment.RIGHT));
+			Cell nombre = new Cell().setBorder(Border.NO_BORDER);
+			Cell presentacion = new Cell(0, 2).setBorder(Border.NO_BORDER);
+			Cell precio = new Cell().setBorder(Border.NO_BORDER);
+			Cell cantidad = new Cell().setBorder(Border.NO_BORDER);
+			Cell subtotal = new Cell().setBorder(Border.NO_BORDER);
+
+			nombre.add(new Paragraph(producto.getNombre())).setTextAlignment(TextAlignment.LEFT);
+			presentacion.add(new Paragraph(producto.getPresentacion())).setTextAlignment(TextAlignment.CENTER);
+			precio.add(new Paragraph(Util.formatMoney(producto.getPrecio()))).setTextAlignment(TextAlignment.RIGHT);
+			cantidad.add(new Paragraph(String.valueOf(producto.getCantidad()))).setTextAlignment(TextAlignment.CENTER);
+			subtotal.add(new Paragraph(Util.formatMoney(producto.getCantidad() * producto.getPrecio())))
+				.setTextAlignment(TextAlignment.RIGHT);
+			table.addCell(nombre);
+			table.addCell(presentacion);
+			table.addCell(precio);
+			table.addCell(cantidad);
+			table.addCell(subtotal);
 		});
-		return lines;
+		return table;
 	}
 
 	private Table buildProductosTable(List<Producto> productos) {
@@ -301,8 +314,8 @@ public class PDFVentaReports extends XReport {
 		);
 
 		venta.getProductos().forEach(productoVenta -> {
-			if (productosMap.containsKey(productoVenta.getId())) {
-				productosMap.get(productoVenta.getId()).setCantidad(productoVenta.getCantidad());
+			if (productosMap.containsKey(productoVenta.getProducto())) {
+				productosMap.get(productoVenta.getProducto()).setCantidad(productoVenta.getCantidad());
 			}
 		});
 		return productosMap.values().stream().toList();

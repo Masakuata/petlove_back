@@ -12,12 +12,12 @@ import com.itextpdf.layout.element.Paragraph;
 import java.net.MalformedURLException;
 
 public abstract class PDFDocument {
-	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
-	private static float LOGO_SQR_SIZE = 50F;
-	private static float LOGO_H_OFFSET = 30F;
-	private static float LOGO_V_OFFSET = 40F;
-	private static float DEFAULT_FONT_SIZE = 10F;
-	private static float TITLE_FONT_SIZE = 20F;
+	public static final String LOGO_PATH = "src/main/resources/pet-icon.png";
+	public static float LOGO_SQR_SIZE = 50F;
+	public static float LOGO_H_OFFSET = 30F;
+	public static float LOGO_V_OFFSET = 40F;
+	public static float DEFAULT_FONT_SIZE = 10F;
+	public static float TITLE_FONT_SIZE = 20F;
 
 	public static Document setupNewDocument(PdfWriter writer) {
 		PdfDocument pdf = new PdfDocument(writer);
