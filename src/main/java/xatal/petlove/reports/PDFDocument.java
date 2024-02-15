@@ -28,7 +28,7 @@ public abstract class PDFDocument {
 	}
 
 	public static Document setupNewTicket(PdfWriter writer) {
-		DEFAULT_FONT_SIZE = 4F;
+		DEFAULT_FONT_SIZE = 8F;
 		TITLE_FONT_SIZE = 8F;
 		LOGO_SQR_SIZE = 10F;
 		LOGO_H_OFFSET = 6F;

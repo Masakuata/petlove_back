@@ -1,14 +1,21 @@
 package xatal.petlove.reports;
 
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.layout.LayoutArea;
+import com.itextpdf.layout.layout.LayoutContext;
+import com.itextpdf.layout.layout.LayoutResult;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.renderer.IRenderer;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Component;
 import xatal.petlove.entities.Producto;
@@ -34,7 +41,6 @@ import static java.util.Arrays.stream;
 
 @Component
 public class PDFVentaReports extends XReport {
-	private static final String LOGO_PATH = "src/main/resources/pet-icon.png";
 	private static final float SMALLER_FONT_SIZE = 8F;
 	private static final String[] VENTA_HEADERS = {
 		"ID VENTA", "CLIENTE", "PAGADO", "TOTAL", "ABONADO", "FECHA", "FACTURADO"
@@ -111,11 +117,23 @@ public class PDFVentaReports extends XReport {
 		}
 		String path = "file.pdf";
 		try (Document document = PDFDocument.setupNewTicket(new PdfWriter(path))) {
-			document.add(PDFDocument.getLogo());
-			document.add(PDFDocument.getAsTitle("PetLove"));
-			document.add(PDFDocument.getAsTitle("PRODUCTOS"));
-			document.add(this.ticketProductos(this.getVentaProductos(venta)));
-			this.addTotal(venta).forEach(document::add);
+			Table main = new Table(1);
+			main.addCell(new Cell().add(new Paragraph("PetLove")).setBorder(Border.NO_BORDER));
+			main.addCell(new Cell().add(new Paragraph(Util.dateToString(venta.getFecha()))).setBorder(Border.NO_BORDER));
+
+			venta.getCliente().getDireccionById(venta.getDireccion()).ifPresent(direccion -> {
+				main.addCell(new Cell().add(new Paragraph(direccion.getDireccion())).setBorder(Border.NO_BORDER));
+			});
+
+			document.add(main);
+
+			Table productTable = this.ticketProductos(this.getVentaProductos(venta));
+			this.addTotal(venta, productTable.getNumberOfColumns()).forEach(productTable::addCell);
+			document.add(productTable);
+
+
+			document.getPdfDocument().setDefaultPageSize(
+				new PageSize(360, this.getTablesHeight(List.of(main, productTable), document.getRenderer())));
 		} catch (IOException ex) {
 			Logger.sendException(ex);
 			return null;
@@ -165,7 +183,7 @@ public class PDFVentaReports extends XReport {
 		ventas.forEach(venta -> {
 			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
 			productosTable.setKeepTogether(true);
-			this.addTotal(venta).forEach(productosTable::addCell);
+			this.addTotal(venta, productosTable.getNumberOfColumns()).forEach(productosTable::addCell);
 			Paragraph title = PDFDocument.emptyNewLine().add(
 				PDFDocument.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())));
 			title.setKeepWithNext(true);
@@ -176,14 +194,20 @@ public class PDFVentaReports extends XReport {
 	}
 
 	private Table ticketProductos(List<Producto> productos) {
-		Table table = new Table(3);
+		Table table = new Table(5);
+		table.setWidth(UnitValue.createPercentValue(100F));
 		table.setFontSize(PDFDocument.DEFAULT_FONT_SIZE);
 		productos.forEach(producto -> {
 			Cell nombre = new Cell().setBorder(Border.NO_BORDER);
-			Cell presentacion = new Cell(0, 2).setBorder(Border.NO_BORDER);
+			nombre.setBorderBottom(new SolidBorder(1F));
+			Cell presentacion = new Cell().setBorder(Border.NO_BORDER);
+			presentacion.setBorderBottom(new SolidBorder(1F));
 			Cell precio = new Cell().setBorder(Border.NO_BORDER);
+			precio.setBorderBottom(new SolidBorder(1F));
 			Cell cantidad = new Cell().setBorder(Border.NO_BORDER);
+			cantidad.setBorderBottom(new SolidBorder(1F));
 			Cell subtotal = new Cell().setBorder(Border.NO_BORDER);
+			subtotal.setBorderBottom(new SolidBorder(1F));
 
 			nombre.add(new Paragraph(producto.getNombre())).setTextAlignment(TextAlignment.LEFT);
 			presentacion.add(new Paragraph(producto.getPresentacion())).setTextAlignment(TextAlignment.CENTER);
@@ -282,9 +306,9 @@ public class PDFVentaReports extends XReport {
 		});
 	}
 
-	private List<Cell> addTotal(Venta venta) {
-		Cell label = new Cell();
-		Cell value = new Cell();
+	private List<Cell> addTotal(Venta venta, int cellsWidth) {
+		Cell label = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(1F));
+		Cell value = new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(1F));
 		label.add(new Paragraph("TOTAL VENTA"));
 		value.add(new Paragraph(Util.formatMoney(venta.getTotal())).setTextAlignment(TextAlignment.RIGHT));
 		return List.of(label, value);
@@ -303,6 +327,17 @@ public class PDFVentaReports extends XReport {
 			.add(PDFDocument.getAsTitle("TOTAL ABONADO: " + Util.formatMoney(abonado) + "\n"))
 			.add(PDFDocument.getAsTitle("TOTAL POR LIQUIDAR: " + Util.formatMoney(total - abonado)))
 			.setTextAlignment(TextAlignment.RIGHT);
+	}
+
+	private float getTablesHeight(List<Table> tables, IRenderer parent) {
+		return tables
+			.stream()
+			.map(table -> {
+				LayoutResult result = table.createRendererSubTree().setParent(parent).layout(
+					new LayoutContext(new LayoutArea(1, new Rectangle(0, 0, 400, 1e4f))));
+				return result.getOccupiedArea().getBBox().getHeight();
+			})
+			.reduce(0F, Float::sum);
 	}
 
 	private List<Producto> getVentaProductos(Venta venta) {
