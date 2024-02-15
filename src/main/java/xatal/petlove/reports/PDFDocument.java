@@ -30,14 +30,18 @@ public abstract class PDFDocument {
 		return document;
 	}
 
-	public static Document setupNewTicket(PdfWriter writer) {
+	public static Document setupNewTicket(PdfWriter writer, float height) {
 		DEFAULT_FONT_SIZE = 8F;
 		TITLE_FONT_SIZE = 8F;
 		LOGO_SQR_SIZE = 10F;
 		LOGO_H_OFFSET = 6F;
 		LOGO_V_OFFSET = 8F;
 		PdfDocument pdf = new PdfDocument(writer);
-		return new Document(pdf, new PageSize(new Rectangle(360F, 1400F)));
+		return new Document(pdf, new PageSize(new Rectangle(360F, height)));
+	}
+
+	public static Document setupNewTicket(PdfWriter writer) {
+		return setupNewTicket(writer, 1440F);
 	}
 
 	public static Paragraph getAsTitle(String text) {
@@ -59,6 +63,14 @@ public abstract class PDFDocument {
 		image.setFixedPosition(PageSize.LETTER.getRight() - LOGO_SQR_SIZE - LOGO_H_OFFSET,
 			PageSize.LETTER.getTop() - LOGO_SQR_SIZE - LOGO_V_OFFSET);
 		return image;
+	}
+
+	public static Cell getNoBorderCell(String text) {
+		return new Cell().add(new Paragraph(text)).setBorder(Border.NO_BORDER);
+	}
+
+	public static Cell getTopBorderCell(String text) {
+		return new Cell().add(new Paragraph(text)).setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(1F));
 	}
 
 	public static Cell getBottomBorderCell(String text) {
