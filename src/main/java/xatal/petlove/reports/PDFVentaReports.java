@@ -85,7 +85,11 @@ public class PDFVentaReports extends XReport {
 		Files.deleteIfExists(pathObj);
 	}
 
-	public byte[] generateReportAndSend(Venta venta, String target) throws IOException {
+	public byte[] generateReport(Venta venta, String target) throws IOException {
+		return this.generateReportAndSend(venta, target, false);
+	}
+
+	public byte[] generateReportAndSend(Venta venta, String target, boolean send) throws IOException {
 		if (target != null && target.isEmpty()) {
 			return null;
 		}
@@ -95,18 +99,20 @@ public class PDFVentaReports extends XReport {
 		}
 		Path pathObj = Path.of(path);
 		byte[] pdfBytes = Files.readAllBytes(pathObj);
-		Attachment attachment = new Attachment(
-			"venta.pdf",
-			pdfBytes,
-			MIMEType.APPLICATION_PDF
-		);
-		this.sendEmailWithAttachment(
-			"Reporte de venta",
-			"Adjunto a este correo se encuentra la venta recien realizada",
-			"",
-			target,
-			attachment
-		);
+		if (send) {
+			Attachment attachment = new Attachment(
+				"venta.pdf",
+				pdfBytes,
+				MIMEType.APPLICATION_PDF
+			);
+			this.sendEmailWithAttachment(
+				"Reporte de venta",
+				"Adjunto a este correo se encuentra la venta recien realizada",
+				"",
+				target,
+				attachment
+			);
+		}
 //		Files.deleteIfExists(pathObj);
 		return pdfBytes;
 	}
@@ -118,12 +124,11 @@ public class PDFVentaReports extends XReport {
 		String path = "file.pdf";
 		try (Document document = PDFDocument.setupNewTicket(new PdfWriter(path))) {
 			Table main = new Table(1);
-			main.addCell(new Cell().add(new Paragraph("PetLove")).setBorder(Border.NO_BORDER));
-			main.addCell(new Cell().add(new Paragraph(Util.dateToString(venta.getFecha()))).setBorder(Border.NO_BORDER));
+			main.addCell(PDFDocument.getBottomBorderCell("PetLove"));
+			main.addCell(PDFDocument.getBottomBorderCell(Util.dateToString(venta.getFecha())));
 
-			venta.getCliente().getDireccionById(venta.getDireccion()).ifPresent(direccion -> {
-				main.addCell(new Cell().add(new Paragraph(direccion.getDireccion())).setBorder(Border.NO_BORDER));
-			});
+			venta.getCliente().getDireccionById(venta.getDireccion()).ifPresent(direccion ->
+				main.addCell(PDFDocument.getBottomBorderCell(direccion.getDireccion())));
 
 			document.add(main);
 
@@ -198,22 +203,14 @@ public class PDFVentaReports extends XReport {
 		table.setWidth(UnitValue.createPercentValue(100F));
 		table.setFontSize(PDFDocument.DEFAULT_FONT_SIZE);
 		productos.forEach(producto -> {
-			Cell nombre = new Cell().setBorder(Border.NO_BORDER);
-			nombre.setBorderBottom(new SolidBorder(1F));
-			Cell presentacion = new Cell().setBorder(Border.NO_BORDER);
-			presentacion.setBorderBottom(new SolidBorder(1F));
-			Cell precio = new Cell().setBorder(Border.NO_BORDER);
-			precio.setBorderBottom(new SolidBorder(1F));
-			Cell cantidad = new Cell().setBorder(Border.NO_BORDER);
-			cantidad.setBorderBottom(new SolidBorder(1F));
-			Cell subtotal = new Cell().setBorder(Border.NO_BORDER);
-			subtotal.setBorderBottom(new SolidBorder(1F));
-
-			nombre.add(new Paragraph(producto.getNombre())).setTextAlignment(TextAlignment.LEFT);
-			presentacion.add(new Paragraph(producto.getPresentacion())).setTextAlignment(TextAlignment.CENTER);
-			precio.add(new Paragraph(Util.formatMoney(producto.getPrecio()))).setTextAlignment(TextAlignment.RIGHT);
-			cantidad.add(new Paragraph(String.valueOf(producto.getCantidad()))).setTextAlignment(TextAlignment.CENTER);
-			subtotal.add(new Paragraph(Util.formatMoney(producto.getCantidad() * producto.getPrecio())))
+			Cell nombre = PDFDocument.getBottomBorderCell(producto.getNombre())
+				.setTextAlignment(TextAlignment.LEFT);
+			Cell presentacion = PDFDocument.getBottomBorderCell(producto.getPresentacion())
+				.setTextAlignment(TextAlignment.LEFT);
+			Cell precio = PDFDocument.getBottomBorderCell(Util.formatMoney(producto.getPrecio()))
+				.setTextAlignment(TextAlignment.RIGHT);
+			Cell cantidad = PDFDocument.getBottomBorderCell(String.valueOf(producto.getCantidad()));
+			Cell subtotal = PDFDocument.getBottomBorderCell(Util.formatMoney(producto.getCantidad() * producto.getPrecio()))
 				.setTextAlignment(TextAlignment.RIGHT);
 			table.addCell(nombre);
 			table.addCell(presentacion);
@@ -308,9 +305,9 @@ public class PDFVentaReports extends XReport {
 
 	private List<Cell> addTotal(Venta venta, int cellsWidth) {
 		Cell label = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(1F));
-		Cell value = new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(1F));
+		Cell value = PDFDocument.getBottomBorderCell(Util.formatMoney(venta.getTotal()))
+			.setTextAlignment(TextAlignment.RIGHT);
 		label.add(new Paragraph("TOTAL VENTA"));
-		value.add(new Paragraph(Util.formatMoney(venta.getTotal())).setTextAlignment(TextAlignment.RIGHT));
 		return List.of(label, value);
 	}
 

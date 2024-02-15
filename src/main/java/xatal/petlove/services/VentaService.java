@@ -200,7 +200,7 @@ public class VentaService {
 
 	private byte[] generateReport(Venta venta, String targetEmail) {
 		try {
-			return this.ventaReports.generateReportAndSend(venta, targetEmail);
+			return this.ventaReports.generateReport(venta, targetEmail);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

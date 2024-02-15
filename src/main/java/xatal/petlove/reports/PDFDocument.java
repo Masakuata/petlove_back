@@ -6,6 +6,9 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 
@@ -56,5 +59,9 @@ public abstract class PDFDocument {
 		image.setFixedPosition(PageSize.LETTER.getRight() - LOGO_SQR_SIZE - LOGO_H_OFFSET,
 			PageSize.LETTER.getTop() - LOGO_SQR_SIZE - LOGO_V_OFFSET);
 		return image;
+	}
+
+	public static Cell getBottomBorderCell(String text) {
+		return new Cell().add(new Paragraph(text)).setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(1F));
 	}
 }
