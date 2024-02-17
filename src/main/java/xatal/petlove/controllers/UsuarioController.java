@@ -35,7 +35,7 @@ public class UsuarioController {
     }
 
     @GetMapping()
-    public ResponseEntity getUsuarios() {
+    public ResponseEntity<?> getUsuarios() {
         List<PublicUsuario> usuarios = this.usuarioService.getAllPublic();
         if (usuarios.isEmpty()) {
             return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
@@ -44,12 +44,12 @@ public class UsuarioController {
     }
 
     @PostMapping()
-    public ResponseEntity addUsuario(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> addUsuario(@RequestBody Usuario usuario) {
         if (!Usuario.isValid(usuario)) {
-            return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
-        if (!this.usuarioService.isUserAvailable(usuario)) {
-            return new ResponseEntity(HttpStatus.CONFLICT);
+        if (!this.usuarioService.isEmailUsed(usuario.getEmail())) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         usuario.encodePassword();
         usuario = this.usuarioService.saveUsuario(usuario);
@@ -58,11 +58,9 @@ public class UsuarioController {
             response.put("email", usuario.getEmail());
             response.put("username", usuario.getUsername());
             response.put("token", usuario.getToken());
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(response);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
-        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/login")
