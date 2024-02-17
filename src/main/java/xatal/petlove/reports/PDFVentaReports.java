@@ -89,7 +89,7 @@ public class PDFVentaReports extends XReport {
 	}
 
 	public byte[] generateReportAndSend(Venta venta, String target, boolean send) throws IOException {
-		if (target != null && target.isEmpty()) {
+		if (target == null || target.isEmpty()) {
 			return null;
 		}
 		String path = this.createTicket(venta);
@@ -112,7 +112,7 @@ public class PDFVentaReports extends XReport {
 				attachment
 			);
 		}
-//		Files.deleteIfExists(pathObj);
+		Files.deleteIfExists(pathObj);
 		return pdfBytes;
 	}
 
@@ -128,13 +128,11 @@ public class PDFVentaReports extends XReport {
 			main.addCell(PDFDocument.getNoBorderCell("PetLove"));
 			main.addCell(PDFDocument.getNoBorderCell(Util.dateToString(venta.getFecha()))
 				.setTextAlignment(TextAlignment.RIGHT));
+			main.addCell(PDFDocument.getNoBorderCell(venta.getCliente().getNombre()));
 
 			venta.getCliente().getDireccionById(venta.getDireccion()).ifPresent(direccion ->
-				main.addCell(
-					new Cell(0, 2)
-						.add(new Paragraph(direccion.getDireccion()))
-						.setBorder(Border.NO_BORDER))
-			);
+				main.addCell(PDFDocument.getNoBorderCell(direccion.getDireccion())
+					.setTextAlignment(TextAlignment.RIGHT)));
 			document.add(main);
 
 			Table productTable = this.ticketProductos(this.getVentaProductos(venta));
@@ -142,8 +140,7 @@ public class PDFVentaReports extends XReport {
 			document.add(productTable);
 
 			float tablesHeight = this.getTablesHeight(List.of(main, productTable), document.getRenderer());
-			tablesHeight += document.getTopMargin() + document.getBottomMargin();
-			finalDocument = PDFDocument.setupNewTicket(new PdfWriter(path), tablesHeight);
+			finalDocument = PDFDocument.setupNewTicket(new PdfWriter(path), tablesHeight * 2);
 			finalDocument.add(main);
 			finalDocument.add(productTable);
 		} catch (IOException ex) {
@@ -326,7 +323,8 @@ public class PDFVentaReports extends XReport {
 		Cell abonado = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER);
 		Cell abonadoValue = PDFDocument.getNoBorderCell(Util.formatMoney(venta.getAbonado())).setTextAlignment(TextAlignment.RIGHT);
 		Cell restante = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(1F));
-		Cell restanteValue = PDFDocument.getTopBorderCell(Util.formatMoney(venta.getTotal() - venta.getAbonado()));
+		Cell restanteValue = PDFDocument.getTopBorderCell(Util.formatMoney(venta.getTotal() - venta.getAbonado()))
+			.setTextAlignment(TextAlignment.RIGHT);
 		abonado.add(new Paragraph("ABONADO"));
 		total.add(new Paragraph("TOTAL VENTA"));
 		restante.add(new Paragraph("RESTANTE"));
