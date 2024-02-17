@@ -1,5 +1,6 @@
 package xatal.petlove.services;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +20,7 @@ public class SearchVentaService {
 		this.ventaRepository = ventaRepository;
 	}
 
+	@Cacheable("searchVentas")
 	public List<Venta> searchVentas(
 		Integer idCliente,
 		String nombreCliente,
@@ -54,6 +56,7 @@ public class SearchVentaService {
 		return ventas;
 	}
 
+	@Cacheable("getVentas")
 	public List<Venta> getAll() {
 		return this.ventaRepository.getAll();
 	}
