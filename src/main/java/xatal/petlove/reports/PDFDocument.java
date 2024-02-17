@@ -20,7 +20,7 @@ public abstract class PDFDocument {
 	public static float LOGO_H_OFFSET = 30F;
 	public static float LOGO_V_OFFSET = 40F;
 	public static float DEFAULT_FONT_SIZE = 10F;
-	public static float TITLE_FONT_SIZE = 20F;
+	public static float TITLE_FONT_SIZE = 17F;
 
 	public static Document setupNewDocument(PdfWriter writer) {
 		PDFDocument.setDocumentSizes();

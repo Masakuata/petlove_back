@@ -15,7 +15,6 @@ import com.itextpdf.layout.layout.LayoutResult;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.renderer.IRenderer;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.stereotype.Component;
 import xatal.petlove.entities.Producto;
 import xatal.petlove.entities.Venta;
@@ -166,10 +165,7 @@ public class PDFVentaReports extends XReport {
 			document.add(this.totalVentasResume(ventas));
 			document.add(new AreaBreak());
 			document.add(PDFDocument.getAsTitle("PRODUCTOS"));
-			this.getProductosTables(ventas).forEach(block -> {
-				document.add(block.a);
-				document.add(block.b);
-			});
+			this.getProductosTables(ventas).forEach(document::add);
 		} catch (FileNotFoundException e) {
 			Logger.sendException(e);
 			return null;
@@ -188,20 +184,30 @@ public class PDFVentaReports extends XReport {
 		return table;
 	}
 
-	private List<Pair<Paragraph, Table>> getProductosTables(List<Venta> ventas) {
-		List<Pair<Paragraph, Table>> blocks = new LinkedList<>();
+	private List<Table> getProductosTables(List<Venta> ventas) {
+		List<Table> tables = new LinkedList<>();
 
 		ventas.forEach(venta -> {
+			Table titleTable = new Table(2).setWidth(UnitValue.createPercentValue(100F));
+			titleTable.addCell(PDFDocument.getNoBorderCell(venta.getCliente().getNombre())
+				.setTextAlignment(TextAlignment.LEFT).setFontSize(PDFDocument.TITLE_FONT_SIZE));
+			titleTable.addCell(PDFDocument.getBottomBorderCell(Util.dateToString(venta.getFecha()))
+				.setTextAlignment(TextAlignment.RIGHT).setFontSize(PDFDocument.TITLE_FONT_SIZE)
+				.setWidth(UnitValue.createPercentValue(20F)));
+			titleTable.setKeepWithNext(true);
+
 			Table productosTable = this.buildProductosTable(this.getVentaProductos(venta));
 			productosTable.setKeepTogether(true);
+
 			this.addTotal(venta, productosTable.getNumberOfColumns()).forEach(productosTable::addCell);
 			Paragraph title = PDFDocument.emptyNewLine().add(
 				PDFDocument.getAsTitle(venta.getCliente().getNombre() + ": " + Util.dateToString(venta.getFecha())));
 			title.setKeepWithNext(true);
 
-			blocks.add(new Pair<>(title, productosTable));
+			tables.add(titleTable);
+			tables.add(productosTable);
 		});
-		return blocks;
+		return tables;
 	}
 
 	private Table ticketProductos(List<Producto> productos) {
