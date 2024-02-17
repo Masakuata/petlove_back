@@ -23,6 +23,7 @@ public abstract class PDFDocument {
 	public static float TITLE_FONT_SIZE = 20F;
 
 	public static Document setupNewDocument(PdfWriter writer) {
+		PDFDocument.setDocumentSizes();
 		PdfDocument pdf = new PdfDocument(writer);
 		pdf.setDefaultPageSize(PageSize.LETTER);
 		Document document = new Document(pdf);
@@ -31,13 +32,25 @@ public abstract class PDFDocument {
 	}
 
 	public static Document setupNewTicket(PdfWriter writer, float height) {
+		PDFDocument.setTicketSizes();
+		PdfDocument pdf = new PdfDocument(writer);
+		return new Document(pdf, new PageSize(new Rectangle(360F, height)));
+	}
+
+	private static void setDocumentSizes() {
+		DEFAULT_FONT_SIZE = 10F;
+		TITLE_FONT_SIZE = 20F;
+		LOGO_SQR_SIZE = 50F;
+		LOGO_H_OFFSET = 30F;
+		LOGO_V_OFFSET = 40F;
+	}
+
+	private static void setTicketSizes() {
 		DEFAULT_FONT_SIZE = 8F;
 		TITLE_FONT_SIZE = 8F;
 		LOGO_SQR_SIZE = 10F;
 		LOGO_H_OFFSET = 6F;
 		LOGO_V_OFFSET = 8F;
-		PdfDocument pdf = new PdfDocument(writer);
-		return new Document(pdf, new PageSize(new Rectangle(360F, height)));
 	}
 
 	public static Document setupNewTicket(PdfWriter writer) {
