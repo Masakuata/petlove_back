@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.util.Date;
+
 @Entity
 public class Operation {
 
@@ -23,6 +25,9 @@ public class Operation {
 	@Column(name = "target", nullable = false)
 	private String target = "";
 
+	@Column(name = "date", nullable = false)
+	private Date date = new Date();
+
 	public Operation() {
 	}
 
@@ -30,6 +35,7 @@ public class Operation {
 		this.origin = origin;
 		this.action = action;
 		this.target = target;
+		this.date = new Date();
 	}
 
 	public Long getId() {
@@ -62,5 +68,13 @@ public class Operation {
 
 	public void setTarget(String target) {
 		this.target = target;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 }
