@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import xatal.petlove.util.Util;
 
 import java.util.Date;
 
@@ -26,7 +27,7 @@ public class Operation {
 	private String target = "";
 
 	@Column(name = "date", nullable = false)
-	private Date date = new Date();
+	private String date = Util.dateToString(new Date());
 
 	public Operation() {
 	}
@@ -35,7 +36,7 @@ public class Operation {
 		this.origin = origin;
 		this.action = action;
 		this.target = target;
-		this.date = new Date();
+		this.date = Util.dateToString(new Date());
 	}
 
 	public Long getId() {
@@ -70,11 +71,11 @@ public class Operation {
 		this.target = target;
 	}
 
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(String date) {
 		this.date = date;
 	}
 }
