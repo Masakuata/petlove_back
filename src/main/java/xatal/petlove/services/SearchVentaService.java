@@ -20,7 +20,7 @@ public class SearchVentaService {
 		this.ventaRepository = ventaRepository;
 	}
 
-	@Cacheable("searchVentas")
+	//	@Cacheable("searchVentas")
 	public List<Venta> searchVentas(
 		Integer idCliente,
 		String nombreCliente,
