@@ -71,11 +71,9 @@ public class VentaService {
 	}
 
 	public byte[] generateReport(long idVenta, long idUsuario) {
-		Optional<Venta> optionalVenta = this.ventaRepository.findById(idVenta);
 		Usuario usuario = this.usuarioService.getById(idUsuario);
-		return optionalVenta
-			.map(venta ->
-				this.generateReport(venta, usuario.getEmail()))
+		return this.ventaRepository.findById(idVenta)
+			.map(venta -> this.generateReport(venta, usuario.getEmail()))
 			.orElse(null);
 	}
 

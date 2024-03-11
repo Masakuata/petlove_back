@@ -9,6 +9,7 @@ import xatal.petlove.entities.Venta;
 import xatal.petlove.repositories.VentaRepository;
 import xatal.petlove.services.specifications.VentaSpecification;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +21,6 @@ public class SearchVentaService {
 		this.ventaRepository = ventaRepository;
 	}
 
-	//	@Cacheable("searchVentas")
 	public List<Venta> searchVentas(
 		Integer idCliente,
 		String nombreCliente,
@@ -46,9 +46,9 @@ public class SearchVentaService {
 		List<Venta> ventas;
 		if (pag != null && size != null) {
 			Pageable pageable = PageRequest.of(pag, size);
-			ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
+			ventas = new ArrayList<>(this.ventaRepository.findAll(spec, pageable).stream().toList());
 		} else {
-			ventas = new java.util.ArrayList<>(this.ventaRepository.findAll(spec).stream().toList());
+			ventas = new ArrayList<>(this.ventaRepository.findAll(spec).stream().toList());
 		}
 		if (producto != null) {
 			return VentaSpecification.filterByProducto(ventas, Long.valueOf(producto));

@@ -57,10 +57,7 @@ public class ProductoService {
 		this.precioRepository.findAll(filters)
 			.stream()
 			.findFirst()
-			.ifPresent(
-				precio ->
-					producto.setPrecio(precio.getPrecio())
-			);
+			.ifPresent(precio -> producto.setPrecio(precio.getPrecio()));
 	}
 
 	public void updateStockFromVenta(Venta venta) {

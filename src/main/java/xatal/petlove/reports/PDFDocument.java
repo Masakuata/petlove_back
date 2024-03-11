@@ -34,7 +34,7 @@ public abstract class PDFDocument {
 	public static Document setupNewTicket(PdfWriter writer, float height) {
 		PDFDocument.setTicketSizes();
 		PdfDocument pdf = new PdfDocument(writer);
-		return new Document(pdf, new PageSize(new Rectangle(360F, height)));
+		return new Document(pdf, new PageSize(new Rectangle(480F, height)));
 	}
 
 	private static void setDocumentSizes() {
