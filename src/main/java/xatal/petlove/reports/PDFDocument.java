@@ -46,8 +46,8 @@ public abstract class PDFDocument {
 	}
 
 	private static void setTicketSizes() {
-		DEFAULT_FONT_SIZE = 8F;
-		TITLE_FONT_SIZE = 8F;
+		DEFAULT_FONT_SIZE = 30F;
+		TITLE_FONT_SIZE = 30F;
 		LOGO_SQR_SIZE = 10F;
 		LOGO_H_OFFSET = 6F;
 		LOGO_V_OFFSET = 8F;
@@ -79,7 +79,11 @@ public abstract class PDFDocument {
 	}
 
 	public static Cell getNoBorderCell(String text) {
-		return new Cell().add(new Paragraph(text)).setBorder(Border.NO_BORDER);
+		return getNoBorderCell(text, 1, 1);
+	}
+
+	public static Cell getNoBorderCell(String text, int rowspan, int colspan) {
+		return new Cell(rowspan, colspan).add(new Paragraph(text)).setBorder(Border.NO_BORDER);
 	}
 
 	public static Cell getTopBorderCell(String text) {

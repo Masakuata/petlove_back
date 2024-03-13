@@ -123,23 +123,26 @@ public class PDFVentaReports extends XReport {
 		Document finalDocument;
 		try (Document document = PDFDocument.setupNewTicket(new PdfWriter(path))) {
 			Table main = new Table(2);
+			main.setFontSize(PDFDocument.TITLE_FONT_SIZE);
 			main.setWidth(UnitValue.createPercentValue(100F));
-			main.addCell(PDFDocument.getNoBorderCell("PetLove"));
+			main.addCell(
+				PDFDocument.getNoBorderCell("FOMENTO ECONOMICO HEMBRA MACHO", 1, 2)
+					.setTextAlignment(TextAlignment.CENTER));
+			main.addCell(PDFDocument.getNoBorderCell("FEH211116NK4"));
 			main.addCell(PDFDocument.getNoBorderCell(Util.dateToString(venta.getFecha()))
 				.setTextAlignment(TextAlignment.RIGHT));
-			main.addCell(PDFDocument.getNoBorderCell(venta.getCliente().getNombre()));
-
+			main.addCell(PDFDocument.getNoBorderCell(venta.getCliente().getNombre(), 1, 2));
 			venta.getCliente().getDireccionById(venta.getDireccion()).ifPresent(direccion ->
-				main.addCell(PDFDocument.getNoBorderCell(direccion.getDireccion())
-					.setTextAlignment(TextAlignment.RIGHT)));
+				main.addCell(PDFDocument.getNoBorderCell(direccion.getDireccion(), 1, 2)));
 			document.add(main);
 
 			Table productTable = this.ticketProductos(this.getVentaProductos(venta));
 			this.addTotal(venta, productTable.getNumberOfColumns()).forEach(productTable::addCell);
 			document.add(productTable);
 
-			float tablesHeight = this.getTablesHeight(List.of(main, productTable), document.getRenderer());
-			finalDocument = PDFDocument.setupNewTicket(new PdfWriter(path), tablesHeight * 2);
+			float elementsHeight = this.getTablesHeight(List.of(main, productTable), document.getRenderer());
+			finalDocument = PDFDocument.setupNewTicket(new PdfWriter(path), elementsHeight);
+			finalDocument.setMargins(0, 0, 0, 0);
 			finalDocument.add(main);
 			finalDocument.add(productTable);
 		} catch (IOException ex) {
@@ -211,29 +214,19 @@ public class PDFVentaReports extends XReport {
 	}
 
 	private Table ticketProductos(List<Producto> productos) {
-		Table table = new Table(5);
+		Table table = new Table(3);
 		table.setWidth(UnitValue.createPercentValue(100F));
 		table.setFontSize(PDFDocument.DEFAULT_FONT_SIZE);
 		table.setTextAlignment(TextAlignment.CENTER);
-		table.addCell(PDFDocument.getBottomBorderCell("PRODUCTO").setTextAlignment(TextAlignment.LEFT));
-		table.addCell(PDFDocument.getBottomBorderCell("PRESENTACION"));
-		table.addCell(PDFDocument.getBottomBorderCell("CANTIDAD"));
-		table.addCell(PDFDocument.getBottomBorderCell("PRECIO UNITARIO").setTextAlignment(TextAlignment.RIGHT));
-		table.addCell(PDFDocument.getBottomBorderCell("SUBTOTAL"));
 		productos.forEach(producto -> {
-			Cell nombre = PDFDocument.getNoBorderCell(producto.getNombre())
+			Cell nombre = PDFDocument.getBottomBorderCell(
+					"[" + producto.getCantidad() + "] " + producto.getNombre() + "\n" + producto.getPresentacion())
 				.setTextAlignment(TextAlignment.LEFT);
-			Cell presentacion = PDFDocument.getNoBorderCell(producto.getPresentacion());
-//				.setTextAlignment(TextAlignment.LEFT);
-			Cell cantidad = PDFDocument.getNoBorderCell(String.valueOf(producto.getCantidad()));
-//				.setTextAlignment(TextAlignment.RIGHT);
-			Cell precio = PDFDocument.getNoBorderCell(Util.formatMoney(producto.getPrecio()))
+			Cell precio = PDFDocument.getBottomBorderCell(Util.formatMoney(producto.getPrecio()))
 				.setTextAlignment(TextAlignment.RIGHT);
-			Cell subtotal = PDFDocument.getNoBorderCell(Util.formatMoney(producto.getCantidad() * producto.getPrecio()))
+			Cell subtotal = PDFDocument.getBottomBorderCell(Util.formatMoney(producto.getCantidad() * producto.getPrecio()))
 				.setTextAlignment(TextAlignment.RIGHT);
 			table.addCell(nombre);
-			table.addCell(presentacion);
-			table.addCell(cantidad);
 			table.addCell(precio);
 			table.addCell(subtotal);
 		});
