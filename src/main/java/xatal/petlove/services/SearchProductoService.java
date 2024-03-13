@@ -1,6 +1,5 @@
 package xatal.petlove.services;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,7 +21,7 @@ public class SearchProductoService {
 		this.precioProductoService = precioProductoService;
 	}
 
-	@Cacheable("searchProducto")
+	//	@Cacheable("searchProducto")
 	public List<Producto> search(
 		Integer idProducto,
 		String nombre,
