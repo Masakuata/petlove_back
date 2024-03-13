@@ -1,7 +1,6 @@
 package xatal.petlove.services;
 
 import jakarta.transaction.Transactional;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,7 +39,7 @@ public class ClienteService {
 			.collect(Collectors.toList());
 	}
 
-	@Cacheable("searchClients")
+	//	@Cacheable("searchClients")
 	public List<Cliente> search(
 		Integer id,
 		String nombre,
