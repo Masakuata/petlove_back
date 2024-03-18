@@ -31,4 +31,8 @@ public abstract class ProductoSpecification {
 	public static Specification<Producto> searchActive() {
 		return (root, query, builder) -> builder.isTrue(root.get("status"));
 	}
+
+	public static Specification<Producto> orderByName() {
+		return (root, query, builder) -> query.orderBy(builder.asc(root.get("nombre"))).getRestriction();
+	}
 }

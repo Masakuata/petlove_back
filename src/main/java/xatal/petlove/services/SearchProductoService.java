@@ -32,7 +32,8 @@ public class SearchProductoService {
 		Specification<Producto> spec = Specification.allOf(
 			ProductoSpecification.searchId(idProducto),
 			ProductoSpecification.searchNombre(nombre),
-			ProductoSpecification.searchActive()
+			ProductoSpecification.searchActive(),
+			ProductoSpecification.orderByName()
 		);
 		Pageable pageable = PageRequest.of(pag, size);
 		List<Producto> productos = this.productoRepository.findAll(spec, pageable).stream().toList();
