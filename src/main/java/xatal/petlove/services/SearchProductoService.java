@@ -21,7 +21,6 @@ public class SearchProductoService {
 		this.precioProductoService = precioProductoService;
 	}
 
-	//	@Cacheable("searchProducto")
 	public List<Producto> search(
 		Integer idProducto,
 		String nombre,

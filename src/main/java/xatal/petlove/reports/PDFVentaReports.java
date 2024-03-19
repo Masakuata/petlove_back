@@ -194,7 +194,7 @@ public class PDFVentaReports extends XReport {
 			Table titleTable = new Table(2).setWidth(UnitValue.createPercentValue(100F));
 			titleTable.addCell(PDFDocument.getNoBorderCell(venta.getCliente().getNombre())
 				.setTextAlignment(TextAlignment.LEFT).setFontSize(PDFDocument.TITLE_FONT_SIZE));
-			titleTable.addCell(PDFDocument.getBottomBorderCell(Util.dateToString(venta.getFecha()))
+			titleTable.addCell(PDFDocument.getNoBorderCell(Util.dateToString(venta.getFecha()))
 				.setTextAlignment(TextAlignment.RIGHT).setFontSize(PDFDocument.TITLE_FONT_SIZE)
 				.setWidth(UnitValue.createPercentValue(20F)));
 			titleTable.setKeepWithNext(true);
@@ -317,11 +317,13 @@ public class PDFVentaReports extends XReport {
 
 	private List<Cell> addTotal(Venta venta, int cellsWidth) {
 		Cell total = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(1F));
+		total.setTextAlignment(TextAlignment.RIGHT);
 		Cell totalValue = PDFDocument.getTopBorderCell(Util.formatMoney(venta.getTotal()))
 			.setTextAlignment(TextAlignment.RIGHT);
-		Cell abonado = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER);
+		Cell abonado = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
 		Cell abonadoValue = PDFDocument.getNoBorderCell(Util.formatMoney(venta.getAbonado())).setTextAlignment(TextAlignment.RIGHT);
 		Cell restante = new Cell(0, cellsWidth - 1).setBorder(Border.NO_BORDER).setBorderTop(new SolidBorder(1F));
+		restante.setTextAlignment(TextAlignment.RIGHT);
 		Cell restanteValue = PDFDocument.getTopBorderCell(Util.formatMoney(venta.getTotal() - venta.getAbonado()))
 			.setTextAlignment(TextAlignment.RIGHT);
 		abonado.add(new Paragraph("ABONADO"));

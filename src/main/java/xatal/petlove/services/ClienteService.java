@@ -16,7 +16,6 @@ import xatal.petlove.structures.PublicCliente;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ClienteService {
@@ -36,10 +35,9 @@ public class ClienteService {
 		return this.getAll()
 			.stream()
 			.map(PublicCliente::new)
-			.collect(Collectors.toList());
+			.toList();
 	}
 
-	//	@Cacheable("searchClients")
 	public List<Cliente> search(
 		Integer id,
 		String nombre,
